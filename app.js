@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -13,31 +12,26 @@ var app = express();
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.use(express.logger('dev'));
+app.use(express.query());
 app.use(express.bodyParser());
 app.use(express.methodOverride());
-app.use(app.router);
+//app.use(app.router);
 
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.locals({
-    title: 'Node-Neo4j Template'    // default title
-});
-
 // Routes
+//Entity
+app.post('/entity', routes.entity.create);
+app.get('/entity/:id', routes.entity.show);
+app.put('/entity/:id', routes.entity.edit);
+app.del('/entity/:id', routes.entity.del);
 
-app.get('/', routes.site.index);
+app.get('/entity/:id/:relation', routes.entity.show);
 
-app.get('/users', routes.users.list);
-app.post('/users', routes.users.create);
-app.get('/users/:id', routes.users.show);
-app.post('/users/:id', routes.users.edit);
-app.del('/users/:id', routes.users.del);
-
-app.post('/users/:id/follow', routes.users.follow);
-app.post('/users/:id/unfollow', routes.users.unfollow);
+// END
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
