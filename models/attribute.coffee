@@ -1,44 +1,50 @@
-#entity.coffee
-#entity model logic.
-
-neo4j = require 'neo4j'
-db = new neo4j.GraphDatabase(process.env.NEO4J_URL || 'http://localhost:7474')
+#attribute.coffee
+#attribute model logic.
+_und = require 'underscore'
+Neo = require './neo'
+Meta = require './meta'
 
 #contants
-
 INDEX_NAME = 'node'
 INDEX_KEY = 'type'
 INDEX_VAL = 'attribute'
-
 REL_RESOURCE = '_resource'
 
+AttributeSchema = {
+    name: 'Name of attribute',
+    type: '',
+    tags: [''],
+    version: 0,
+    private: false,
+}
+
 #Private constructor
-class Attribute
+module.exports = class Attribute extends Neo
     constructor: (@_node) ->
-    
-#Public
-#Instance Method
-Attribute::save = (callback) ->
-    @_node.save (err) -> callback err
+        super @_node
+###
+Static Method
+###
+Attribute.deserialize = (data) ->
+    _und.defaults data, AttributeSchema
+    return data
+ 
+Attribute.create = (reqBody, cb) ->
+    index = {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: INDEX_KEY,
+        INDEX_VAL: INDEX_VAL
+    }
+    Neo.create Attribute, reqBody, index, cb
 
-Attribute::del = (callback) ->
-    @_node.del (err) -> callback err, true
+Attribute.get = (id, cb) ->
+    Neo.get Attribute, id, cb
+ 
+Attribute.getOrCreate = (reqBody, cb) ->
+    if reqBody['id']
+        return Attribute.get reqBody['id'], cb
+    else
+        return Attribute.create reqBody, cb
 
-#Static Method
-Attribute.create = (data, callback) ->
-    node = db.createNode data
-    entity = new Attribute(node)
-    node.save (err) ->
-        return callback(err) if err
-        node.index INDEX_NAME,
-            INDEX_KEY,
-            INDEX_VAL,
-            (err) ->
-                return callback(err) if err
-                callback(null, entity)
-
-Attribute.get = (id, callback) ->
-    db.getNodeById id,
-        (err, node) ->
-            return callback(err) if error
-            callback(null, entity)
+Attribute.put = (nodeId, reqBody, cb) ->
+    Neo.put Attribute, nodeId, reqBody, cb

@@ -1,54 +1,49 @@
-#entity.coffee
+#attribute.coffee
 #Routes to CRUD entities
 
-Entity = require('../models/entity')
+Attribute = require('../models/attribute')
 
-#POST /entity
+# POST /attribute
 exports.create = (req, res, next) ->
-    data = {
-        name: req.body['name']
-    }
-    Entity.create data, (err, entity) ->
-        return next(err) if err
-        res.json(entity)
+    await Attribute.create req.body, defer(err, attr)
+    return next(err) if err
+    res.json attr.serialize()
 
-# GET /entity/?q=
-# ...
+# GET /attribute/?q=
+exports.search = (req, res, next) ->
 
-# GET /entity/:id
+# GET /attribute/:id
 exports.show = (req, res, next) ->
-    Entity.get req.params.id,
-                (err, entity) ->
-                    return next(err) if err
-                    res.json(entity)
+    await Attribute.get req.params.id, defer(err, attr)
+    return next err if err
+    res.json(attr.serialize())
 
-# PUT /entity/:id
+# PUT /attribute/:id
 exports.edit = (req, res, next) ->
-    Entity.get req.params.id,
-                (err, entity) ->
-                    #update params here...
-                    return next(err) if err
-                    res.json(entity)
+    await Attribute.put req.params.id, req.body, defer(err, attr)
+    return next(err) if err
+    res.json attr.serialize()
 
-#DELETE /entity/:id
+# DELETE /attribute/:id
 exports.del = (req, res, next) ->
-    Entity.get req.params.id,
-               (err, entity) ->
-                    return next(err) if err
-                    entity.del (err) ->
-                        return next(err) if err
-                        res.json({})
+    await Attribute.get req.params.id, defer(err, entity)
+    return next(err) if err
 
-# POST /entity/:id/:relation
+    await entity.del defer(err)
+
+    return next(err) if err
+    res.json({})
+
+# POST /attribute/:id/:relation
 ###
-    Connect another entity to current one using [relation]
+    Connect another attribute to current one using [relation]
     DATA : {
         action: add/rm
-        other: entityId,
+        other: attributeId,
     }
 ###
 
-# GET /entity/:id/:relation
+# GET /attribute/:id/:relation
 ###
-    List all entity related to this entity through [relation]
+    List all attribute related to this attribute through [relation]
 ###
