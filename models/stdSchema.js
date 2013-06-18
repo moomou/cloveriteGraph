@@ -6,7 +6,7 @@
 
   _und = require('underscore');
 
-  Constants = {
+  exports.Constants = Constants = {
     INDEX_NAME: 'node',
     INDEX_KEY: 'type',
     INDEX_VAL: 'entity',
@@ -25,7 +25,7 @@
   */
 
 
-  ErrorResponse = (function() {
+  exports.ErrorResponse = ErrorResponse = (function() {
     function ErrorResponse(msg, fix) {
       this.msg = msg;
       this.fix = fix;

@@ -1,6 +1,6 @@
 _und = require 'underscore'
-neo4j = require 'neo4j'
-db = neo: new neo4j.GraphDatabase(process.env.NEO4J_URL || 'http://localhost:7474')
+Setup = require './setup'
+db = Setup.db
 
 module.exports = class Neo
     constructor: (@_node) ->

@@ -1,7 +1,10 @@
 #attribute.coffee
 #Routes to CRUD entities
-
+Neo = require('../models/neo')
+Entity = require('../models/entity')
 Attribute = require('../models/attribute')
+Constants = require('../models/stdSchema')
+Response = require('../models/stdSchema')
 
 # POST /attribute
 exports.create = (req, res, next) ->
@@ -47,3 +50,13 @@ exports.del = (req, res, next) ->
 ###
     List all attribute related to this attribute through [relation]
 ###
+
+#GET /entity/:id/attribute
+exports.listEntity = (req, res, next) ->
+    await Entity.get req.params.id, defer(errE, entity)
+    await
+        entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
+            defer(err, nodes)
+
+    res.json((new Attribute node).serialize() for node in nodes)
+

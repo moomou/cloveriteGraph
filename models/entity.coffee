@@ -1,7 +1,10 @@
 #entity.coffee
 _und = require 'underscore'
+
+Setup = require './setup'
 Neo = require './neo'
 Meta = require './meta'
+redis = Setup.db.redis
 
 #contants
 INDEX_NAME = 'node'
@@ -28,7 +31,27 @@ module.exports = class Entity extends Neo
     constructor: (@_node) ->
         super @_node
 
-    vote: (attr, vote, cb) ->
+    vote: (attr, voteLink, cb) ->
+        #Add a vote link between entity node and attr node
+        #Records the vote in redis
+        await @_node.createRelationshipTo attr._node,
+            voteLink.name,
+            voteLink.data,
+            defer(err, rel)
+    
+        return cb err if err
+
+        redis.incr "entity:#{@_node.id}::attr:#{attr._node.id}::#{voteLink.data.type}"
+
+        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::pos", defer(err, upVote)
+        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::neg", defer(err, downVote)
+
+        voteTally = {
+            upVote: upVote or 0
+            downVote: downVote or 0
+        }
+
+        cb null, voteTally
 
     unlinkEntity: (other, relation, cb) ->
         @_node.getRelationships relation, (err, rels) ->

@@ -1,11 +1,13 @@
 #entity.coffee
 #Routes to CRUD entities
-
+_und = require('underscore')
 Neo = require('../models/neo')
 Entity = require('../models/entity')
+VoteLink = require('../models/votelink')
 Attribute = require('../models/attribute')
-Constants = require('../models/stdSchema')
-Response = require('../models/stdSchema')
+StdSchema = require('../models/stdSchema')
+Constants = StdSchema.Constants
+Response = StdSchema
 
 # POST /entity
 exports.create = (req, res, next) ->
@@ -73,25 +75,38 @@ exports.listAttribute = (req, res, next) ->
     await
         entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
             defer(err, nodes)
-
     res.json((new Attribute node).serialize() for node in nodes)
 
 #POST /entity/:id/attribute/:id/vote
 exports.voteAttribute = (req, res, next) ->
-    await Entity.get req.params.eId, defer(errE, entity)
-    await Attribute.get req.params.aId, defer(errA, attr)
+    await
+        Entity.get req.params.eId, defer(errE, entity)
+        Attribute.get req.params.aId, defer(errA, attr)
+   
+    if errE
+        console.log "errE"
+        return next(errE)
+    if errA
+        console.log "errA"
+        return next(errA)
 
-    vote = new VoteLink req.body
+    voteData = _und.clone req.body
+    voteData.ipAddr = req.header['x-forwarded-for'] or req.connection.remoteAddress
+    voteData.browser = req.useragent.Browser
+    voteData.os = req.useragent.OS
+    voteData.lang = req.headers['accept-language']
 
-    entity.vote attr, vote (err) ->
+    vote = new VoteLink voteData
+    
+    entity.vote attr, vote, (err, voteTally) ->
         return res.statusCode(500) if err
-        res.send()
+        res.send(voteTally)
 
 #POST
 exports.relation = (req, res, next) ->
     await
-        Entity.get req.params.id, defer(err, entity)
-        Entity.get req.body.otherId, defer(err, other)
+        Entity.get req.params.eId, defer(errE, entity)
+        Attribute.get req.params.aId, defer(errA, attr)
     
     switch req.body.action
         when "add" then entity.linkEntity other, req.params.relation, (err) -> console.log(err)

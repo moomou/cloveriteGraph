@@ -10,6 +10,6 @@
 
   redis = require('redis');
 
-  exports.rClient = redis.createClient;
+  exports.redis = redis.createClient();
 
 }).call(this);

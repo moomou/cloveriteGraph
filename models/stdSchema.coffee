@@ -1,6 +1,6 @@
 _und = require('underscore')
 
-Constants = {
+exports.Constants = Constants = {
     INDEX_NAME: 'node',
     INDEX_KEY: 'type',
     INDEX_VAL: 'entity',
@@ -18,7 +18,7 @@ Constants = {
 ###
     Relationship Schema
 ###
-class ErrorResponse
+exports.ErrorResponse = class ErrorResponse
     constructor: (
         @msg,       #message describing the problem
         @fix        #potential fix

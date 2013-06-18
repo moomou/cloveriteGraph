@@ -1,8 +1,11 @@
 #attribute.coffee
 #attribute model logic.
 _und = require 'underscore'
+
+Setup = require './setup'
 Neo = require './neo'
 Meta = require './meta'
+redis = Setup.db.redis
 
 #contants
 INDEX_NAME = 'node'

@@ -5,6 +5,7 @@
 var express = require('express')
   , routes = require('./routes')
   , http = require('http')
+  , useragent = require('express-useragent')
   , path = require('path');
 
 var app = express();
@@ -15,6 +16,8 @@ app.use(express.logger('dev'));
 app.use(express.query());
 app.use(express.bodyParser());
 app.use(express.methodOverride());
+app.use(useragent.express());
+
 //app.use(app.router);
 
 // development only
@@ -37,9 +40,10 @@ app.post('/entity/:id/attribute', routes.entity.addAttribute);
 app.get('/entity/:id/attribute', routes.entity.listAttribute);
 app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute);
 
-app.post('/entity/:id/attribute/:aId/vote', routes.entity.voteAttribute);
+app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute);
 
-//app.get('/entity/:id/link/:relation', routes.entity.show);
+app.get('/entity/:id/:relation/', routes.entity.listRelated);
+app.get('/entity/:id/:relation/', routes.entity.listRelated);
 
 //Attribute
 app.post('/attribute', routes.attribute.create);
