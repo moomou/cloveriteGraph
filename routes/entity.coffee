@@ -14,7 +14,8 @@ exports.create = (req, res, next) ->
     await Entity.create req.body, defer(err, entity)
     return next(err) if err
 
-    res.status(201).json entity.serialize()
+    await entity.serialize defer blob
+    res.status(201).json blob
 
 #GET /entity/?q=
 exports.search = (req, res, next) ->
@@ -23,14 +24,18 @@ exports.search = (req, res, next) ->
 exports.show = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return next err if err
-    res.json(entity.serialize())
+
+    await entity.serialize defer blob
+    res.json blob
 
 #PUT /entity/:id
 exports.edit = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(err, entity)
     return next err if err
 
-    res.json(entity.serialize())
+    await entity.serialize defer blob
+    res.json blob
+
 
 #DELETE /entity/:id
 exports.del = (req, res, next) ->
@@ -41,8 +46,7 @@ exports.del = (req, res, next) ->
 
     return next err if err
 
-    res.statusCode = 204
-    res.send()
+    res.statusCode(204).send()
 
 #POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
@@ -50,19 +54,15 @@ exports.addAttribute = (req, res, next) ->
         Entity.get req.params.id, defer(errE, entity)
         Attribute.getOrCreate req.body, defer(errA, attr)
 
-    if errE or errA
-        errorRes = Response.ErrorResponse(
-            "Error Occured",
-            "Unknown"
-        )
-
-        return res.statusCode(500).json errorRes.serialize()
+        return next(errE) if errE
+        return next(errA) if errA
 
     await attr._node.createRelationshipTo entity._node,
         Constants.REL_ATTRIBUTE, {},
         defer(err, rel)
 
-    res.status(201).json (new Neo rel).serialize()
+    await (new Neo rel).serialize defer blob
+    res.status(201).json blob
 
 #DELETE /entity/:eId/attribute/:aId
 exports.delAttribute = (req, res, next) ->
@@ -75,7 +75,13 @@ exports.listAttribute = (req, res, next) ->
     await
         entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
             defer(err, nodes)
-    res.json((new Attribute node).serialize() for node in nodes)
+
+    blobs = []
+    await
+        for node, ind in nodes
+            (new Attribute node).serialize defer(blobs[ind]), entity._node.id
+
+    res.json(blob for blob in blobs)
 
 #POST /entity/:id/attribute/:id/vote
 exports.voteAttribute = (req, res, next) ->
@@ -111,3 +117,5 @@ exports.relation = (req, res, next) ->
     switch req.body.action
         when "add" then entity.linkEntity other, req.params.relation, (err) -> console.log(err)
         when "remove" then entity.unlinkEntity other, req.params.relation, (err) -> console.log(err)
+
+#POST

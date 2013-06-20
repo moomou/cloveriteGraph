@@ -3,14 +3,16 @@
 Neo = require('../models/neo')
 Entity = require('../models/entity')
 Attribute = require('../models/attribute')
-Constants = require('../models/stdSchema')
-Response = require('../models/stdSchema')
+StdSchema = require('../models/stdSchema')
+Constants = StdSchema.Constants
 
 # POST /attribute
 exports.create = (req, res, next) ->
     await Attribute.create req.body, defer(err, attr)
     return next(err) if err
-    res.json attr.serialize()
+    
+    await attr.serialize defer(blob)
+    res.json blob
 
 # GET /attribute/?q=
 exports.search = (req, res, next) ->
@@ -19,13 +21,17 @@ exports.search = (req, res, next) ->
 exports.show = (req, res, next) ->
     await Attribute.get req.params.id, defer(err, attr)
     return next err if err
-    res.json(attr.serialize())
+
+    await attr.serialize defer(blob)
+    res.json blob
 
 # PUT /attribute/:id
 exports.edit = (req, res, next) ->
     await Attribute.put req.params.id, req.body, defer(err, attr)
     return next(err) if err
-    res.json attr.serialize()
+
+    await attr.serialize defer(blob)
+    res.json blob
 
 # DELETE /attribute/:id
 exports.del = (req, res, next) ->
@@ -35,7 +41,7 @@ exports.del = (req, res, next) ->
     await entity.del defer(err)
 
     return next(err) if err
-    res.json({})
+    res.statusCode(204).send()
 
 # POST /attribute/:id/:relation
 ###
@@ -53,10 +59,18 @@ exports.del = (req, res, next) ->
 
 #GET /entity/:id/attribute
 exports.listEntity = (req, res, next) ->
-    await Entity.get req.params.id, defer(errE, entity)
-    await
-        entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
+    await Attribute.get req.params.id, defer(errAttr, attr)
+    return next errAttr if errAttr
+
+    await #check direction field
+        attr._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'out'},
             defer(err, nodes)
 
-    res.json((new Attribute node).serialize() for node in nodes)
+    return next err if err
+    
+    blobs = []
+    await
+        for node, ind in nodes
+            (new Entity node).serialize defer(blobs[ind])
 
+    res.json(blob for blob in blobs)

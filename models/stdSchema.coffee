@@ -12,7 +12,8 @@ exports.Constants = Constants = {
     REL_PARENT: '_PARENT',
     REL_CHILD: '_CHILD',
     REL_CONTAINER: '_CONTAINER',
-    REL_RESOURCE: '_RESOURCE'
+    REL_RESOURCE: '_RESOURCE',
+    REL_META: '_META'
 }
 
 ###
