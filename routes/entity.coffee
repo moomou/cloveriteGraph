@@ -36,7 +36,6 @@ exports.edit = (req, res, next) ->
     await entity.serialize defer blob
     res.json blob
 
-
 #DELETE /entity/:id
 exports.del = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
@@ -108,14 +107,53 @@ exports.voteAttribute = (req, res, next) ->
         return res.statusCode(500) if err
         res.send(voteTally)
 
-#POST
-exports.relation = (req, res, next) ->
-    await
-        Entity.get req.params.eId, defer(errE, entity)
-        Attribute.get req.params.aId, defer(errA, attr)
-    
-    switch req.body.action
-        when "add" then entity.linkEntity other, req.params.relation, (err) -> console.log(err)
-        when "remove" then entity.unlinkEntity other, req.params.relation, (err) -> console.log(err)
+# POST /entity/:id/relation?
+exports.listRelation = (req, res, next) ->
+    await Entity.get req.params.id, defer(err, entity)
 
-#POST
+    return next(err) if err
+    
+    relType = req.params.relation ? ''
+
+    await entity._node.outgoing relType, defer(err, rels)
+
+    blobs = []
+    await
+        for rel, ind in rels
+
+            extraData = {
+                type: rel.type,
+                start: rel.start.id,
+                end: rel.end.id
+            }
+
+            (new Neo rel).serialize defer(blobs[ind]), extraData
+                
+    res.json(blob for blob in blobs)
+
+# POST /entity/:id/relation/entity/:id
+exports.linkEntity = (req, res, next) ->
+    await
+        Entity.get req.params.srcId, defer(errSrc, srcEntity)
+        Entity.get req.params.dstId, defer(errDst, dstEntity)
+
+    return next(errSrc) if errSrc
+    return next(errDst) if errDst
+    
+    relation = req.body
+
+    await
+        if relation['src_dst']
+            srcEntity._node createRelationshipTo dstEntity._node, relation['src_dst'],
+                defer(errSrc, src_dstRel)
+
+        if relation['dst_src']
+            dstEntity._node createRelationshipTo dstEntity._node, relation['dst_src'],
+                defer(errDst, dst_srcRel)
+    
+    return next(errSrc) if errSrc
+    return next(errDst) if errDst
+
+    res.statusCode(202).send()
+
+exports.unlinkEntity = (req, res, next) ->

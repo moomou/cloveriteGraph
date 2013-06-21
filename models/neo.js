@@ -32,7 +32,10 @@
       _und.extend(data, {
         id: this._node.id
       }, extraData);
-      return cb(data);
+      if (cb) {
+        return cb(data);
+      }
+      return data;
     };
 
     Neo.prototype.update = function(newData) {
@@ -90,7 +93,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 53
+        lineno: 55
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -106,7 +109,7 @@
               return indexErr = arguments[0];
             };
           })(),
-          lineno: 59
+          lineno: 61
         }));
         __iced_deferrals._fulfill();
       })(function() {

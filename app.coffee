@@ -45,11 +45,11 @@ app.del('/entity/:eId/attribute/:aId/comment', routes.entity.delComment)
 ###
 
 #Entity->relation
-app.get('/entity/:id/relation/', routes.entity.listRelation)  #returns all relationship
-app.get('/entity/:id/:relation/', routes.entity.listRelation) #return entity connected by relation, can be prefix or exact match
+app.get('/entity/:id/:relation', routes.entity.listRelation) #return entity connected by relation, can be prefix or exact match
+app.get('/entity/:id/relation', routes.entity.listRelation)  #returns all relationship
 
-app.post('/entity/:srcId/:relation/entity/:dstId', routes.entity.linkEntity)
-app.del('/entity/:srcId/:relation/entity/:dstId', routes.entity.unlinkEntity)
+app.post('/entity/:srcId/relation/entity/:dstId', routes.entity.linkEntity)
+app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity)
 
 #Attribute
 app.post('/attribute', routes.attribute.create)
@@ -58,6 +58,7 @@ app.get('/attribute/:id', routes.attribute.show)
 app.put('/attribute/:id', routes.attribute.edit)
 app.del('/attribute/:id', routes.attribute.del)
 
+#Attribute->entity
 app.get('/attribute/:id/entity', routes.attribute.listEntity)
 
 http.createServer(app).listen(app.get('port'), ->

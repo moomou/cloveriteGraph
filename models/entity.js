@@ -162,6 +162,14 @@
     return Neo.get(Entity, id, cb);
   };
 
+  Entity.getOrCreate = function(reqBody, cb) {
+    if (reqBody['id']) {
+      return Entity.get(reqBody['id'], cb);
+    } else {
+      return Entity.create(reqBody, cb);
+    }
+  };
+
   Entity.put = function(nodeId, reqBody, cb) {
     return Neo.put(Entity, nodeId, reqBody, cb);
   };

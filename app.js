@@ -62,13 +62,13 @@
   */
 
 
-  app.get('/entity/:id/relation/', routes.entity.listRelation);
+  app.get('/entity/:id/:relation', routes.entity.listRelation);
 
-  app.get('/entity/:id/:relation/', routes.entity.listRelation);
+  app.get('/entity/:id/relation', routes.entity.listRelation);
 
-  app.post('/entity/:srcId/:relation/entity/:dstId', routes.entity.linkEntity);
+  app.post('/entity/:srcId/relation/entity/:dstId', routes.entity.linkEntity);
 
-  app.del('/entity/:srcId/:relation/entity/:dstId', routes.entity.unlinkEntity);
+  app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity);
 
   app.post('/attribute', routes.attribute.create);
 

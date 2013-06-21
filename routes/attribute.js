@@ -23,7 +23,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "attribute.coffee",
+        filename: "routes/attribute.coffee",
         funcname: "create"
       });
       Attribute.create(req.body, __iced_deferrals.defer({
@@ -43,7 +43,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "attribute.coffee",
+          filename: "routes/attribute.coffee",
           funcname: "create"
         });
         attr.serialize(__iced_deferrals.defer({
@@ -71,7 +71,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "attribute.coffee",
+        filename: "routes/attribute.coffee",
         funcname: "show"
       });
       Attribute.get(req.params.id, __iced_deferrals.defer({
@@ -91,7 +91,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "attribute.coffee",
+          filename: "routes/attribute.coffee",
           funcname: "show"
         });
         attr.serialize(__iced_deferrals.defer({
@@ -117,7 +117,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "attribute.coffee",
+        filename: "routes/attribute.coffee",
         funcname: "edit"
       });
       Attribute.put(req.params.id, req.body, __iced_deferrals.defer({
@@ -137,7 +137,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "attribute.coffee",
+          filename: "routes/attribute.coffee",
           funcname: "edit"
         });
         attr.serialize(__iced_deferrals.defer({
@@ -163,7 +163,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "attribute.coffee",
+        filename: "routes/attribute.coffee",
         funcname: "del"
       });
       Attribute.get(req.params.id, __iced_deferrals.defer({
@@ -183,7 +183,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "attribute.coffee",
+          filename: "routes/attribute.coffee",
           funcname: "del"
         });
         entity.del(__iced_deferrals.defer({
@@ -226,7 +226,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "attribute.coffee",
+        filename: "routes/attribute.coffee",
         funcname: "listEntity"
       });
       Attribute.get(req.params.id, __iced_deferrals.defer({
@@ -246,7 +246,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "attribute.coffee",
+          filename: "routes/attribute.coffee",
           funcname: "listEntity"
         });
         attr._node.getRelationshipNodes({
@@ -271,7 +271,7 @@
           var _i, _len;
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "attribute.coffee",
+            filename: "routes/attribute.coffee",
             funcname: "listEntity"
           });
           for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {

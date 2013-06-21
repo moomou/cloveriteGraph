@@ -17,7 +17,9 @@ module.exports = class Neo
         data = @_node.data
 
         _und.extend data, id: @_node.id, extraData
-        cb(data)
+
+        return cb(data) if cb
+        return data
 
     update: (newData) ->
         if newData.version != @_node.data.version
@@ -60,7 +62,7 @@ Neo.create = (Class, reqBody, index, cb) ->
             defer(indexErr)
             
     return cb(saveErr, null) if saveErr
-    return cb(indexErr, null) if indexErr 
+    return cb(indexErr, null) if indexErr
     return cb(null, obj)
 
 Neo.get = (Class, id, cb) ->

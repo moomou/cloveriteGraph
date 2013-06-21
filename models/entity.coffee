@@ -43,7 +43,7 @@ module.exports = class Entity extends Neo
         }
 
         cb null, voteTally
-
+    
     unlinkEntity: (other, relation, cb) ->
         @_node.getRelationships relation, (err, rels) ->
             return cb err if err
@@ -70,6 +70,12 @@ Entity.create = (reqBody, cb) ->
 
 Entity.get = (id, cb) ->
     Neo.get Entity, id, cb
-    
+
+Entity.getOrCreate = (reqBody, cb) ->
+    if reqBody['id']
+        return Entity.get reqBody['id'], cb
+    else
+        return Entity.create reqBody, cb
+
 Entity.put = (nodeId, reqBody, cb) ->
     Neo.put Entity, nodeId, reqBody, cb
