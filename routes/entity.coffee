@@ -1,24 +1,40 @@
 #entity.coffee
 #Routes to CRUD entities
 _und = require('underscore')
+
 Neo = require('../models/neo')
 Entity = require('../models/entity')
 VoteLink = require('../models/votelink')
 Attribute = require('../models/attribute')
+Tag = require('../models/tag')
 StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
 
 # POST /entity
 exports.create = (req, res, next) ->
+    errs = []
+    tagObjs = []
+    tags = req.body['tags'] ? []
+
+    await
+        for tagName, ind in tags
+            Tag.getOrCreate tagName, defer(errs[ind], tagObjs[ind])
+
+    err = _und.find(errs, (err) -> err)
+    return next(err) if err
+
     await Entity.create req.body, defer(err, entity)
     return next(err) if err
 
+    #"tag" entity
+    for tagObj, ind in tagObjs
+        tagObj._node.createRelationshipTo entity._node,
+            Constants.REL_TAG,
+            (err, rel) ->
+
     await entity.serialize defer blob
     res.status(201).json blob
-
-#GET /entity/?q=
-exports.search = (req, res, next) ->
 
 #GET /entity/:id
 exports.show = (req, res, next) ->

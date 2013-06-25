@@ -6,16 +6,31 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
+INDEX_NAME = 'attribute'
+
 #contants
-INDEX_NAME = 'node'
-INDEX_KEY = 'type'
-INDEX_VAL = 'attribute'
+Indexes = [
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'name',
+        INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'description',
+        INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'type',
+        INDEX_VALUE: ''
+    }
+]
 
 AttributeSchema = {
     name: 'Name of attribute',
     description: '',
     type: '',
-    tags: [''],
 }
 
 #Private constructor
@@ -39,25 +54,19 @@ module.exports = class Attribute extends Neo
 ###
 Static Method
 ###
+Attribute.INDEX_NAME = 'attribute'
+
 Attribute.deserialize = (data) ->
     Neo.deserialize AttributeSchema, data
  
 Attribute.create = (reqBody, cb) ->
-    index = {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: INDEX_KEY,
-        INDEX_VAL: INDEX_VAL
-    }
-    Neo.create Attribute, reqBody, index, cb
+    Neo.create Attribute, reqBody, Indexes, cb
 
 Attribute.get = (id, cb) ->
     Neo.get Attribute, id, cb
  
 Attribute.getOrCreate = (reqBody, cb) ->
-    if reqBody['id']
-        return Attribute.get reqBody['id'], cb
-    else
-        return Attribute.create reqBody, cb
+    Neo.getOrCreate Attribute, reqBody, cb
 
 Attribute.put = (nodeId, reqBody, cb) ->
     Neo.put Attribute, nodeId, reqBody, cb

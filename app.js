@@ -32,9 +32,11 @@
     app.use(express.errorHandler());
   }
 
-  app.post('/entity', routes.entity.create);
+  app.get('/search', routes.search.searchHandler);
 
-  app.get('/entity', routes.entity.search);
+  app.get('/search/:type', routes.search.searchHandler);
+
+  app.post('/entity', routes.entity.create);
 
   app.get('/entity/:id', routes.entity.show);
 
@@ -71,8 +73,6 @@
   app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity);
 
   app.post('/attribute', routes.attribute.create);
-
-  app.get('/attribute', routes.attribute.search);
 
   app.get('/attribute/:id', routes.attribute.show);
 

@@ -67,13 +67,22 @@
 
   })();
 
+  Neo.fillIndex = function(indexes, data) {
+    var result;
+    result = _und.clone(indexes);
+    _und.map(result, function(index) {
+      return index['INDEX_VALUE'] = data[index['INDEX_KEY']];
+    });
+    return result;
+  };
+
   Neo.deserialize = function(ClassSchema, data) {
     _und.defaults(data, ClassSchema);
     return data;
   };
 
-  Neo.create = function(Class, reqBody, index, cb) {
-    var data, indexErr, node, obj, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+  Neo.create = function(Class, reqBody, indexes, cb) {
+    var data, err, i, ind, index, node, obj, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -93,32 +102,39 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 55
+        lineno: 59
       }));
       __iced_deferrals._fulfill();
     })(function() {
+      if (saveErr) {
+        return cb(saveErr, null);
+      }
       (function(__iced_k) {
+        var _i, _len, _ref;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
           filename: "neo.coffee",
           funcname: "create"
         });
-        node.index(index.INDEX_NAME, index.INDEX_KEY, index.INDEX_VAL, __iced_deferrals.defer({
-          assign_fn: (function() {
-            return function() {
-              return indexErr = arguments[0];
-            };
-          })(),
-          lineno: 61
-        }));
+        _ref = Neo.fillIndex(indexes, reqBody);
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          index = _ref[i];
+          node.index(index.INDEX_NAME, index.INDEX_KEY, index.INDEX_VALUE, __iced_deferrals.defer({
+            assign_fn: (function() {
+              return function() {
+                err = arguments[0];
+                return ind = arguments[1];
+              };
+            })(),
+            lineno: 67
+          }));
+        }
         __iced_deferrals._fulfill();
       })(function() {
-        if (saveErr) {
-          return cb(saveErr, null);
-        }
-        if (indexErr) {
+        if (err) {
           return cb(indexErr, null);
         }
+        console.log("CREATED: " + Class.Name);
         return cb(null, obj);
       });
     });
@@ -134,7 +150,7 @@
   };
 
   Neo.put = function(Class, nodeId, reqBody, cb) {
-    return Neo.get(Class, nodeId, function(err, obj) {
+    return Class.get(nodeId, function(err, obj) {
       var valid;
       if (err) {
         return cb(err, null);
@@ -152,12 +168,70 @@
     });
   };
 
+  Neo.find = function(Class, indexName, key, value, cb) {
+    return db.neo.getIndexedNode(indexName, key, value, function(err, node) {
+      if (err) {
+        return cb(err, null);
+      }
+      if (node) {
+        return cb(null, new Class(node));
+      }
+      return cb(null, null);
+    });
+  };
+
+  Neo.getOrCreate = function(Class, reqBody, cb) {
+    var err, obj, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    if (reqBody['id']) {
+      return Class.get(reqBody['id'], cb);
+    }
+    (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        filename: "neo.coffee",
+        funcname: "getOrCreate"
+      });
+      Neo.find(Class, Class.INDEX_NAME, 'name', reqBody['name'], __iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            err = arguments[0];
+            return obj = arguments[1];
+          };
+        })(),
+        lineno: 110
+      }));
+      __iced_deferrals._fulfill();
+    })(function() {
+      if (obj) {
+        console.log(Class.Name + ": " + reqBody.toString());
+        if (obj) {
+          return cb(null, obj);
+        }
+      }
+      return Class.create(reqBody, cb);
+    });
+  };
+
   Neo.query = function(Class, query, params, cb) {
     return db.neo.query(query, params, function(err, res) {
       if (err) {
         return cb(err, null);
       }
       return cb(null, res);
+    });
+  };
+
+  Neo.search = function(Class, indexName, query, cb) {
+    return db.neo.queryNodeIndex(indexName, query, function(err, nodes) {
+      if (err) {
+        cb(err);
+      }
+      return cb(null, _und.map(nodes, function(node) {
+        return new Class(node);
+      }));
     });
   };
 

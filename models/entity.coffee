@@ -5,17 +5,32 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
+INDEX_NAME = 'entity'
 #contants
-INDEX_NAME = 'node'
-INDEX_KEY = 'type'
-INDEX_VAL = 'entity'
+Indexes = [
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'name',
+        INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'description',
+        INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'description',
+        INDEX_VALUE: ''
+    }
+]
 
 EntitySchema = {
     imgURL: '',
     name: 'Name of entity',
     description: '',
     type: '',
-    tags: [''],
+    tags: ['']
 }
 
 module.exports = class Entity extends Neo
@@ -57,25 +72,21 @@ module.exports = class Entity extends Neo
 ###
 Static Method
 ###
+Entity.Name = 'ENTITY'
+Entity.INDEX_NAME = INDEX_NAME
+
 Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data
  
 Entity.create = (reqBody, cb) ->
-    index = {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: INDEX_KEY,
-        INDEX_VAL: INDEX_VAL
-    }
-    Neo.create Entity, reqBody, index, cb
+    Neo.create Entity, reqBody, Indexes, cb
 
 Entity.get = (id, cb) ->
     Neo.get Entity, id, cb
 
 Entity.getOrCreate = (reqBody, cb) ->
-    if reqBody['id']
-        return Entity.get reqBody['id'], cb
-    else
-        return Entity.create reqBody, cb
+    console.log "HHHHHH"
+    Neo.getOrCreate Entity, reqBody, cb
 
 Entity.put = (nodeId, reqBody, cb) ->
     Neo.put Entity, nodeId, reqBody, cb

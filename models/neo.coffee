@@ -39,30 +39,37 @@ module.exports = class Neo
     del: (cb) ->
         @_node.del (err) -> cb err, true
 
+Neo.fillIndex = (indexes, data) ->
+    result = _und.clone indexes
+    _und.map(result,
+        (index) ->
+            index['INDEX_VALUE'] = data[index['INDEX_KEY']]
+    )
+    result
+
 Neo.deserialize = (ClassSchema, data) ->
     _und.defaults data, ClassSchema
     return data
 
-Neo.create = (Class, reqBody, index, cb) ->
+Neo.create = (Class, reqBody, indexes, cb) ->
     data = Class.deserialize(reqBody)
-
     _und.extend(data, MetaSchema)
 
     node = db.neo.createNode data
-    
     obj = new Class(node)
-    
-    await
-        obj.save defer(saveErr)
+    await obj.save defer(saveErr)
+    return cb(saveErr, null) if saveErr
 
     await
-        node.index index.INDEX_NAME,
-            index.INDEX_KEY,
-            index.INDEX_VAL,
-            defer(indexErr)
-            
-    return cb(saveErr, null) if saveErr
-    return cb(indexErr, null) if indexErr
+        for index, i in Neo.fillIndex(indexes, reqBody)
+            node.index index.INDEX_NAME,
+                index.INDEX_KEY,
+                index.INDEX_VALUE,
+                defer(err, ind)
+
+    return cb(indexErr, null) if err
+    
+    console.log "CREATED: " + Class.Name
     return cb(null, obj)
 
 Neo.get = (Class, id, cb) ->
@@ -72,7 +79,7 @@ Neo.get = (Class, id, cb) ->
             cb(null, new Class node)
 
 Neo.put = (Class, nodeId, reqBody, cb) ->
-    Neo.get Class, nodeId, (err, obj) ->
+    Class.get nodeId, (err, obj) ->
         return cb(err, null) if err
 
         valid = obj.update(reqBody)
@@ -82,13 +89,46 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
                 return cb(null, obj)
         cb(err, null)
 
+Neo.find = (Class, indexName, key, value, cb) ->
+    db.neo.getIndexedNode indexName,
+        key,
+        value,
+        (err, node) ->
+            return cb(err, null) if err
+            return cb(null, new Class node) if node
+            return cb(null, null)
+
+Neo.getOrCreate = (Class, reqBody, cb) ->
+    if reqBody['id']
+        return Class.get reqBody['id'], cb
+    
+    #No Id provided, search for it
+    await
+        Neo.find Class,
+            Class.INDEX_NAME,
+            'name',
+            reqBody['name'],
+            defer(err, obj)
+    if obj
+        console.log Class.Name + ": " + reqBody.toString()
+        return cb(null, obj) if obj
+
+    #Not found, create
+    return Class.create(reqBody, cb)
+
+#Cypher 
 Neo.query = (Class, query, params, cb) ->
-    db.neo.query(
-        query,
+    db.neo.query query,
         params,
         (err, res) ->
             return cb(err, null) if err
             cb(null, res)
-    )
+
+Neo.search = (Class, indexName, query, cb) ->
+    db.neo.queryNodeIndex indexName,
+        query,
+        (err, nodes) ->
+            cb err if err
+            cb(null, _und.map(nodes, (node)-> new Class node))
 
 Neo.createLink = (srcNode, destNode, linkName, linkData, cb) ->

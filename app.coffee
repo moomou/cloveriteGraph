@@ -20,12 +20,16 @@ if ('development' == app.get('env'))
   app.use(express.errorHandler())
 
   ##Routes
+#Global Function  
+app.get('/search', routes.search.searchHandler)
+app.get('/search/:type', routes.search.searchHandler)
+
 #Entity
 app.post('/entity', routes.entity.create)
-app.get('/entity', routes.entity.search)
 app.get('/entity/:id', routes.entity.show)
 app.put('/entity/:id', routes.entity.edit)
 app.del('/entity/:id', routes.entity.del)
+
 #Entity->attribute
 app.post('/entity/:id/attribute', routes.entity.addAttribute)
 app.get('/entity/:id/attribute', routes.entity.listAttribute)
@@ -53,7 +57,6 @@ app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity)
 
 #Attribute
 app.post('/attribute', routes.attribute.create)
-app.get('/attribute', routes.attribute.search)
 app.get('/attribute/:id', routes.attribute.show)
 app.put('/attribute/:id', routes.attribute.edit)
 app.del('/attribute/:id', routes.attribute.del)
