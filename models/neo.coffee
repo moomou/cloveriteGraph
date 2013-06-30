@@ -26,6 +26,7 @@ module.exports = class Neo
         return data
 
     update: (newData) ->
+        console.log "I AM HERE"
         if newData.version != @_node.data.version
             return false
         _und.extend @_node.data, newData
@@ -87,11 +88,12 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
         return cb(err, null) if err
 
         valid = obj.update(reqBody)
+
         if valid
-            obj.save (err) ->
-                return cb(err, null) if err
-                return cb(null, obj)
-        cb(err, null)
+            await obj.save defer(saveErr)
+
+        return cb(saveErr, null) if saveErr
+        return cb(null, obj)
 
 Neo.find = (Class, indexName, key, value, cb) ->
     db.neo.getIndexedNode indexName,

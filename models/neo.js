@@ -45,6 +45,7 @@
     };
 
     Neo.prototype.update = function(newData) {
+      console.log("I AM HERE");
       if (newData.version !== this._node.data.version) {
         return false;
       }
@@ -108,7 +109,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 63
+        lineno: 64
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -132,7 +133,7 @@
                 return ind = arguments[1];
               };
             })(),
-            lineno: 71
+            lineno: 72
           }));
         }
         __iced_deferrals._fulfill();
@@ -157,20 +158,40 @@
 
   Neo.put = function(Class, nodeId, reqBody, cb) {
     return Class.get(nodeId, function(err, obj) {
-      var valid;
+      var saveErr, valid, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+        _this = this;
+      __iced_k = __iced_k_noop;
+      ___iced_passed_deferral = iced.findDeferral(arguments);
       if (err) {
         return cb(err, null);
       }
       valid = obj.update(reqBody);
-      if (valid) {
-        obj.save(function(err) {
-          if (err) {
-            return cb(err, null);
-          }
-          return cb(null, obj);
-        });
-      }
-      return cb(err, null);
+      (function(__iced_k) {
+        if (valid) {
+          (function(__iced_k) {
+            __iced_deferrals = new iced.Deferrals(__iced_k, {
+              parent: ___iced_passed_deferral,
+              filename: "neo.coffee"
+            });
+            obj.save(__iced_deferrals.defer({
+              assign_fn: (function() {
+                return function() {
+                  return saveErr = arguments[0];
+                };
+              })(),
+              lineno: 92
+            }));
+            __iced_deferrals._fulfill();
+          })(__iced_k);
+        } else {
+          return __iced_k();
+        }
+      })(function() {
+        if (saveErr) {
+          return cb(saveErr, null);
+        }
+        return cb(null, obj);
+      });
     });
   };
 
@@ -207,7 +228,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 114
+        lineno: 116
       }));
       __iced_deferrals._fulfill();
     })(function() {
