@@ -4,6 +4,8 @@
 
 
 
+  require('source-map-support').install();
+
   _und = require('underscore');
 
   Neo = require('../models/neo');
@@ -56,3 +58,7 @@
   };
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=search.map
+*/

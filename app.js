@@ -4,6 +4,8 @@
 
 
 
+  require('source-map-support').install();
+
   express = require('express');
 
   routes = require('./routes');
@@ -37,6 +39,8 @@
   app.get('/search/:type', routes.search.searchHandler);
 
   app.post('/entity', routes.entity.create);
+
+  app.get('/entity/?', routes.entity.search);
 
   app.get('/entity/:id', routes.entity.show);
 
@@ -74,6 +78,8 @@
 
   app.post('/attribute', routes.attribute.create);
 
+  app.get('/attribute', routes.attribute.search);
+
   app.get('/attribute/:id', routes.attribute.show);
 
   app.put('/attribute/:id', routes.attribute.edit);
@@ -87,3 +93,7 @@
   });
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=app.map
+*/

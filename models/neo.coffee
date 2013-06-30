@@ -2,6 +2,10 @@ _und = require 'underscore'
 Setup = require './setup'
 db = Setup.db
 
+###
+#Normal values related to transaction; 
+#Permission not implemented here
+###
 MetaSchema = {
     createdAt: -1,    #time created
     modifiedAt: -1,   #last modified time

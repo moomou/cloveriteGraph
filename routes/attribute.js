@@ -5,6 +5,8 @@
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
 
+  require('source-map-support').install();
+
   _und = require('underscore');
 
   Neo = require('../models/neo');
@@ -18,6 +20,55 @@
   StdSchema = require('../models/stdSchema');
 
   Constants = StdSchema.Constants;
+
+  exports.search = function(req, res, next) {
+    var attr, attrBlob, err, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    if (!req.query.id) {
+      return res.json("EMPTY");
+    }
+    (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        filename: "attribute.coffee",
+        funcname: "search"
+      });
+      Attribute.get(req.query.id, __iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            err = arguments[0];
+            return attr = arguments[1];
+          };
+        })(),
+        lineno: 19
+      }));
+      __iced_deferrals._fulfill();
+    })(function() {
+      if (err) {
+        return next(err);
+      }
+      (function(__iced_k) {
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "attribute.coffee",
+          funcname: "search"
+        });
+        attr.serialize(__iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              return attrBlob = arguments[0];
+            };
+          })(),
+          lineno: 23
+        }));
+        __iced_deferrals._fulfill();
+      })(function() {
+        return res.json(attrBlob);
+      });
+    });
+  };
 
   exports.create = function(req, res, next) {
     var attr, blob, err, errs, ind, tagName, tagNode, tagNodes, tags, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref,
@@ -43,7 +94,7 @@
               return __slot_3[__slot_4] = arguments[1];
             };
           })(errs, ind, tagNodes, ind),
-          lineno: 19
+          lineno: 34
         }));
       }
       __iced_deferrals._fulfill();
@@ -67,7 +118,7 @@
               return attr = arguments[1];
             };
           })(),
-          lineno: 24
+          lineno: 39
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -91,7 +142,7 @@
                 return blob = arguments[0];
               };
             })(),
-            lineno: 31
+            lineno: 46
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -102,7 +153,7 @@
   };
 
   exports.show = function(req, res, next) {
-    var attr, blob, err, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var attr, blob, entityId, err, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -119,13 +170,15 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 36
+        lineno: 51
       }));
       __iced_deferrals._fulfill();
     })(function() {
+      var _ref;
       if (err) {
         return next(err);
       }
+      entityId = (_ref = req.query['entityId']) != null ? _ref : null;
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
@@ -138,8 +191,8 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 39
-        }));
+          lineno: 56
+        }), entityId);
         __iced_deferrals._fulfill();
       })(function() {
         return res.json(blob);
@@ -165,7 +218,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 44
+        lineno: 61
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -184,7 +237,7 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 47
+          lineno: 64
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -211,7 +264,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 52
+        lineno: 69
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -230,7 +283,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 55
+          lineno: 72
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -274,7 +327,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 76
+        lineno: 93
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -297,7 +350,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 81
+          lineno: 98
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -320,7 +373,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(blobs, ind),
-              lineno: 88
+              lineno: 105
             }));
           }
           __iced_deferrals._fulfill();
@@ -340,3 +393,7 @@
   };
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=attribute.map
+*/

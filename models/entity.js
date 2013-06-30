@@ -173,7 +173,6 @@
   };
 
   Entity.getOrCreate = function(reqBody, cb) {
-    console.log("HHHHHH");
     return Neo.getOrCreate(Entity, reqBody, cb);
   };
 
@@ -182,3 +181,7 @@
   };
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=entity.map
+*/

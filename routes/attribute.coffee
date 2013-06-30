@@ -1,5 +1,8 @@
 #attribute.coffee
 #Routes to CRUD entities
+
+require('source-map-support').install()
+
 _und = require('underscore')
 
 Neo = require('../models/neo')
@@ -8,6 +11,18 @@ Attribute = require('../models/attribute')
 Tag = require('../models/tag')
 StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
+
+#GET /entity/
+exports.search = (req, res, next) ->
+    return res.json("EMPTY") unless req.query.id
+
+    await
+        Attribute.get req.query.id, defer(err, attr)
+
+    return next err if err
+
+    await attr.serialize defer attrBlob
+    res.json attrBlob
 
 # POST /attribute
 exports.create = (req, res, next) ->
@@ -37,7 +52,9 @@ exports.show = (req, res, next) ->
     await Attribute.get req.params.id, defer(err, attr)
     return next err if err
 
-    await attr.serialize defer(blob)
+    entityId = req.query['entityId'] ? null
+
+    await attr.serialize(defer(blob),entityId)
     res.json blob
 
 # PUT /attribute/:id

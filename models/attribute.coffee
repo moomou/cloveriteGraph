@@ -30,7 +30,8 @@ Indexes = [
 AttributeSchema = {
     name: 'Name of attribute',
     description: '',
-    type: '',
+    type: '',    #data, quality, norm
+    tone: 'pos', #defaults to pos
 }
 
 #Private constructor

@@ -36,3 +36,7 @@
   })();
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=votelink.map
+*/

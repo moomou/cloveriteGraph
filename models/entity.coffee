@@ -85,7 +85,6 @@ Entity.get = (id, cb) ->
     Neo.get Entity, id, cb
 
 Entity.getOrCreate = (reqBody, cb) ->
-    console.log "HHHHHH"
     Neo.getOrCreate Entity, reqBody, cb
 
 Entity.put = (nodeId, reqBody, cb) ->

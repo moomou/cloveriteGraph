@@ -1,5 +1,7 @@
 #entity.coffee
 #Routes to CRUD entities
+require('source-map-support').install()
+
 _und = require('underscore')
 
 Neo = require('../models/neo')
@@ -10,6 +12,32 @@ Tag = require('../models/tag')
 StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
+
+#GET /entity/
+exports.search = (req, res, next) ->
+    return res.json("EMPTY") unless req.query.id
+
+    await
+        Entity.get req.query.id, defer(err, entity)
+
+    return next err if err
+    attrBlobs = []
+
+    if req.query['attr']
+        await
+            entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
+                defer(err, nodes)
+
+        await
+            for node, ind in nodes
+                (new Attribute node).serialize defer(attrBlobs[ind]), entity._node.id
+
+        return next err if err
+        await entity.serialize defer(entityBlob), attributes: attrBlobs
+    else
+        await entity.serialize defer entityBlob
+
+    res.json entityBlob
 
 # POST /entity
 exports.create = (req, res, next) ->
@@ -38,11 +66,27 @@ exports.create = (req, res, next) ->
 
 #GET /entity/:id
 exports.show = (req, res, next) ->
-    await Entity.get req.params.id, defer(err, entity)
-    return next err if err
+    await
+        Entity.get req.params.id, defer(err, entity)
 
-    await entity.serialize defer blob
-    res.json blob
+    return next err if err
+    attrBlobs = []
+
+    if req.query['attr']
+        await
+            entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
+                defer(err, nodes)
+
+        await
+            for node, ind in nodes
+                (new Attribute node).serialize defer(attrBlobs[ind]), entity._node.id
+
+        return next err if err
+        await entity.serialize defer(entityBlob), attributes: attrBlobs
+    else
+        await entity.serialize defer entityBlob
+
+    res.json entityBlob
 
 #PUT /entity/:id
 exports.edit = (req, res, next) ->
@@ -69,14 +113,14 @@ exports.addAttribute = (req, res, next) ->
         Entity.get req.params.id, defer(errE, entity)
         Attribute.getOrCreate req.body, defer(errA, attr)
 
-        return next(errE) if errE
-        return next(errA) if errA
+    return next(errE) if errE
+    return next(errA) if errA
 
     await attr._node.createRelationshipTo entity._node,
         Constants.REL_ATTRIBUTE, {},
         defer(err, rel)
 
-    await (new Neo rel).serialize defer blob
+    await attr.serialize defer blob
     res.status(201).json blob
 
 #DELETE /entity/:eId/attribute/:aId

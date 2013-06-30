@@ -11,6 +11,12 @@
 
   db = Setup.db;
 
+  /*
+  #Normal values related to transaction; 
+  #Permission not implemented here
+  */
+
+
   MetaSchema = {
     createdAt: -1,
     modifiedAt: -1,
@@ -102,7 +108,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 59
+        lineno: 63
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -126,7 +132,7 @@
                 return ind = arguments[1];
               };
             })(),
-            lineno: 67
+            lineno: 71
           }));
         }
         __iced_deferrals._fulfill();
@@ -201,7 +207,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 110
+        lineno: 114
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -238,3 +244,7 @@
   Neo.createLink = function(srcNode, destNode, linkName, linkData, cb) {};
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=neo.map
+*/
