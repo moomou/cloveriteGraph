@@ -15,7 +15,7 @@
 
   redis = Setup.db.redis;
 
-  INDEX_NAME = 'attribute';
+  INDEX_NAME = 'nAttribute';
 
   Indexes = [
     {
@@ -69,7 +69,7 @@
               return upVote = arguments[1];
             };
           })(),
-          lineno: 45
+          lineno: 44
         }));
         redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::neg", __iced_deferrals.defer({
           assign_fn: (function() {
@@ -78,7 +78,7 @@
               return downVote = arguments[1];
             };
           })(),
-          lineno: 46
+          lineno: 45
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -99,7 +99,9 @@
   */
 
 
-  Attribute.INDEX_NAME = 'attribute';
+  Attribute.Name = 'nAttribute';
+
+  Attribute.INDEX_NAME = INDEX_NAME;
 
   Attribute.deserialize = function(data) {
     return Neo.deserialize(AttributeSchema, data);

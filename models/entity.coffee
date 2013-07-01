@@ -5,8 +5,8 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
-INDEX_NAME = 'entity'
-#contants
+INDEX_NAME = 'nEntity'
+
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
@@ -72,7 +72,7 @@ module.exports = class Entity extends Neo
 ###
 Static Method
 ###
-Entity.Name = 'ENTITY'
+Entity.Name = 'nEntity'
 Entity.INDEX_NAME = INDEX_NAME
 
 Entity.deserialize = (data) ->

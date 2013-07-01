@@ -6,9 +6,7 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
-INDEX_NAME = 'attribute'
-
-#contants
+INDEX_NAME = 'nAttribute'
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
@@ -38,6 +36,7 @@ AttributeSchema = {
 module.exports = class Attribute extends Neo
     constructor: (@_node) ->
         super @_node
+
     serialize: (cb, entityId) ->
         if not entityId
             return super(cb, null)
@@ -55,7 +54,8 @@ module.exports = class Attribute extends Neo
 ###
 Static Method
 ###
-Attribute.INDEX_NAME = 'attribute'
+Attribute.Name = 'nAttribute'
+Attribute.INDEX_NAME = INDEX_NAME
 
 Attribute.deserialize = (data) ->
     Neo.deserialize AttributeSchema, data

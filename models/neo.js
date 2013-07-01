@@ -45,7 +45,6 @@
     };
 
     Neo.prototype.update = function(newData) {
-      console.log("I AM HERE");
       if (newData.version !== this._node.data.version) {
         return false;
       }
@@ -84,8 +83,10 @@
   };
 
   Neo.deserialize = function(ClassSchema, data) {
+    var validKeys;
+    validKeys = _und.keys(ClassSchema);
     _und.defaults(data, ClassSchema);
-    return data;
+    return _und.pick(data, validKeys);
   };
 
   Neo.create = function(Class, reqBody, indexes, cb) {

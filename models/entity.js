@@ -15,7 +15,7 @@
 
   redis = Setup.db.redis;
 
-  INDEX_NAME = 'entity';
+  INDEX_NAME = 'nEntity';
 
   Indexes = [
     {
@@ -156,7 +156,7 @@
   */
 
 
-  Entity.Name = 'ENTITY';
+  Entity.Name = 'nEntity';
 
   Entity.INDEX_NAME = INDEX_NAME;
 

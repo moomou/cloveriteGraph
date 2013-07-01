@@ -26,7 +26,6 @@ module.exports = class Neo
         return data
 
     update: (newData) ->
-        console.log "I AM HERE"
         if newData.version != @_node.data.version
             return false
         _und.extend @_node.data, newData
@@ -53,8 +52,9 @@ Neo.fillIndex = (indexes, data) ->
     result
 
 Neo.deserialize = (ClassSchema, data) ->
+    validKeys = _und.keys(ClassSchema)
     _und.defaults data, ClassSchema
-    return data
+    return _und.pick(data, validKeys)
 
 Neo.create = (Class, reqBody, indexes, cb) ->
     data = Class.deserialize(reqBody)
@@ -130,6 +130,7 @@ Neo.query = (Class, query, params, cb) ->
             return cb(err, null) if err
             cb(null, res)
 
+#Lucene
 Neo.search = (Class, indexName, query, cb) ->
     db.neo.queryNodeIndex indexName,
         query,

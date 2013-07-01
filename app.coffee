@@ -28,7 +28,7 @@ app.get('/search/:type', routes.search.searchHandler)
 
 #Entity
 app.post('/entity', routes.entity.create)
-app.get('/entity/?', routes.entity.search)
+app.get('/entity', routes.entity.search)
 app.get('/entity/:id', routes.entity.show)
 app.put('/entity/:id', routes.entity.edit)
 app.del('/entity/:id', routes.entity.del)

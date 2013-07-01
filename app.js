@@ -40,7 +40,7 @@
 
   app.post('/entity', routes.entity.create);
 
-  app.get('/entity/?', routes.entity.search);
+  app.get('/entity', routes.entity.search);
 
   app.get('/entity/:id', routes.entity.show);
 

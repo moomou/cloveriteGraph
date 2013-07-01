@@ -12,7 +12,7 @@ Tag = require('../models/tag')
 StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 
-#GET /entity/
+# GET /entity/
 exports.search = (req, res, next) ->
     return res.json("EMPTY") unless req.query.id
 
@@ -26,24 +26,9 @@ exports.search = (req, res, next) ->
 
 # POST /attribute
 exports.create = (req, res, next) ->
-    tagNodes = []
-    errs = []
-    tags = req.body['tags'] ? []
-
-    await
-        for tagName, ind in tags
-            Tag.getOrCreate tagName, defer(errs[ind], tagNodes[ind])
-
-    err = _und.find(errs, (err) -> err)
-    return next(err) if err
- 
     await Attribute.create req.body, defer(err, attr)
     return next(err) if err
     
-    #"tag" attr 
-    for tagNode, ind in tagNodes
-        tagNode._node createRelationshipTo attr._node, Constants.REL_TAG, (err, rel) ->
- 
     await attr.serialize defer(blob)
     res.json blob
 
@@ -73,7 +58,7 @@ exports.del = (req, res, next) ->
     await entity.del defer(err)
 
     return next(err) if err
-    res.statusCode(204).send()
+    res.status(204).send()
 
 # POST /attribute/:id/:relation
 ###
@@ -89,7 +74,7 @@ exports.del = (req, res, next) ->
     List all attribute related to this attribute through [relation]
 ###
 
-#GET /entity/:id/attribute
+#GET /attribute/:id/entity
 exports.listEntity = (req, res, next) ->
     await Attribute.get req.params.id, defer(errAttr, attr)
     return next errAttr if errAttr

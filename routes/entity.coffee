@@ -5,10 +5,14 @@ require('source-map-support').install()
 _und = require('underscore')
 
 Neo = require('../models/neo')
+
 Entity = require('../models/entity')
-VoteLink = require('../models/votelink')
 Attribute = require('../models/attribute')
 Tag = require('../models/tag')
+
+Vote = require('../models/vote')
+Link = require('../models/link')
+
 StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
@@ -16,28 +20,6 @@ Response = StdSchema
 #GET /entity/
 exports.search = (req, res, next) ->
     return res.json("EMPTY") unless req.query.id
-
-    await
-        Entity.get req.query.id, defer(err, entity)
-
-    return next err if err
-    attrBlobs = []
-
-    if req.query['attr']
-        await
-            entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
-                defer(err, nodes)
-
-        await
-            for node, ind in nodes
-                (new Attribute node).serialize defer(attrBlobs[ind]), entity._node.id
-
-        return next err if err
-        await entity.serialize defer(entityBlob), attributes: attrBlobs
-    else
-        await entity.serialize defer entityBlob
-
-    res.json entityBlob
 
 # POST /entity
 exports.create = (req, res, next) ->
@@ -58,7 +40,7 @@ exports.create = (req, res, next) ->
     #"tag" entity
     for tagObj, ind in tagObjs
         tagObj._node.createRelationshipTo entity._node,
-            Constants.REL_TAG,
+            Constants.REL_TAG, {},
             (err, rel) ->
 
     await entity.serialize defer blob
@@ -72,14 +54,14 @@ exports.show = (req, res, next) ->
     return next err if err
     attrBlobs = []
 
-    if req.query['attr']
+    if req.query['attr'] != "false"
         await
             entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
                 defer(err, nodes)
 
         await
             for node, ind in nodes
-                (new Attribute node).serialize defer(attrBlobs[ind]), entity._node.id
+                (new Attribute node).serialize(defer(attrBlobs[ind]), entity._node.id)
 
         return next err if err
         await entity.serialize defer(entityBlob), attributes: attrBlobs
@@ -105,7 +87,7 @@ exports.del = (req, res, next) ->
 
     return next err if err
 
-    res.statusCode(204).send()
+    res.status(204).send()
 
 #POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
@@ -161,26 +143,25 @@ exports.voteAttribute = (req, res, next) ->
     voteData.os = req.useragent.OS
     voteData.lang = req.headers['accept-language']
 
-    vote = new VoteLink voteData
-    
+    vote = new Vote voteData
+
     entity.vote attr, vote, (err, voteTally) ->
-        return res.statusCode(500) if err
+        return res.status(500) if err
         res.send(voteTally)
 
-# POST /entity/:id/relation?
+# GET /entity/:id/relation?
 exports.listRelation = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
-
     return next(err) if err
     
     relType = req.params.relation ? ''
-
-    await entity._node.outgoing relType, defer(err, rels)
+    
+    await
+        entity._node.outgoing relType, defer(err, rels)
 
     blobs = []
     await
         for rel, ind in rels
-
             extraData = {
                 type: rel.type,
                 start: rel.start.id,
@@ -204,16 +185,21 @@ exports.linkEntity = (req, res, next) ->
 
     await
         if relation['src_dst']
-            srcEntity._node createRelationshipTo dstEntity._node, relation['src_dst'],
-                defer(errSrc, src_dstRel)
-
+            link = new Link relation['src_dst']
+            console.log link
+            srcEntity._node.createRelationshipTo dstEntity._node,
+                link.name,
+                link.data,
+                defer(es, src_dstRel)
+            
         if relation['dst_src']
-            dstEntity._node createRelationshipTo dstEntity._node, relation['dst_src'],
-                defer(errDst, dst_srcRel)
-    
-    return next(errSrc) if errSrc
-    return next(errDst) if errDst
+            link = new Link relation['dst_src']
+            console.log link
+            dstEntity._node.createRelationshipTo srcEntity._node,
+                link.name,
+                link.data,
+                defer(et, dst_srcRel)
 
-    res.statusCode(202).send()
+    res.status(201).send()
 
 exports.unlinkEntity = (req, res, next) ->
