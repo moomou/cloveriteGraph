@@ -98,19 +98,26 @@ exports.searchHandler = (req, res, next) ->
     results = []
 
     #serial searches, continue only if no result
-    for searchClass, ind in searchClasses
-        query = queryAnalyzer(searchClass, req.query['q'])
+    await
+        for searchClass, ind in searchClasses
+            query = queryAnalyzer(searchClass, req.query['q'])
 
-        await Neo.query searchClass,
-            query.replace('__indexName__', searchClass.INDEX_NAME),
-            {},
-            defer(err, results[ind])
+            Neo.query searchClass,
+                query.replace('__indexName__', searchClass.INDEX_NAME),
+                {},
+                defer(err, results[ind])
 
-    blobResults = {}
+    blobResults = []
+    identified = {}
+
     for result, indX in results
-        searchClassBlob = []
-        for obj, indY in result
-            searchClassBlob.push((new searchClasses[indX] obj.result).serialize())
-        blobResults[searchClasses[indX].Name] = searchClassBlob
+        for obj, indY in result #always return entity results
+            entitySerialized = (new Entity obj.result).serialize()
 
+            if not identified[entitySerialized.id] #do not duplicate result
+                blobResults.push(entitySerialized)
+                identified[entitySerialized.id] = true
+
+    #cache results?
+     
     res.json(blobResults)
