@@ -44,12 +44,12 @@ module.exports = class Attribute extends Neo
             return super(cb, null)
 
         await
-            redis.get "entity:#{entityId}::attr:#{@_node.id}::pos", defer(err, upVote)
-            redis.get "entity:#{entityId}::attr:#{@_node.id}::neg", defer(err, downVote)
+            redis.get "entity:#{entityId}::attr:#{@_node.id}::positive", defer(err, upVote)
+            redis.get "entity:#{entityId}::attr:#{@_node.id}::negative", defer(err, downVote)
 
         voteTally = {
-            upVote: upVote or 0
-            downVote: downVote or 0
+            upVote: parseInt(upVote) or 0
+            downVote: parseInt(downVote) or 0
         }
 
         super cb, voteTally

@@ -49,12 +49,12 @@ module.exports = class Entity extends Neo
 
         redis.incr "entity:#{@_node.id}::attr:#{attr._node.id}::#{voteLink.data.type}"
 
-        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::pos", defer(err, upVote)
-        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::neg", defer(err, downVote)
+        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::positive", defer(err, upVote)
+        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::negative", defer(err, downVote)
 
         voteTally = {
-            upVote: upVote or 0
-            downVote: downVote or 0
+            upVote: parseInt(upVote) or 0
+            downVote: parseInt(downVote) or 0
         }
 
         cb null, voteTally

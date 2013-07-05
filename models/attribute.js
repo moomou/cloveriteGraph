@@ -64,7 +64,7 @@
           filename: "attribute.coffee",
           funcname: "Attribute.serialize"
         });
-        redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::pos", __iced_deferrals.defer({
+        redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::positive", __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
               err = arguments[0];
@@ -73,7 +73,7 @@
           })(),
           lineno: 46
         }));
-        redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::neg", __iced_deferrals.defer({
+        redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::negative", __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
               err = arguments[0];
@@ -85,8 +85,8 @@
         __iced_deferrals._fulfill();
       })(function() {
         voteTally = {
-          upVote: upVote || 0,
-          downVote: downVote || 0
+          upVote: parseInt(upVote) || 0,
+          downVote: parseInt(downVote) || 0
         };
         return Attribute.__super__.serialize.call(_this, cb, voteTally);
       });
