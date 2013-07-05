@@ -28,9 +28,7 @@
   Response = StdSchema;
 
   exports.search = function(req, res, next) {
-    if (!req.query.id) {
-      return res.json("EMPTY");
-    }
+    return redirect('/search');
   };
 
   exports.create = function(req, res, next) {

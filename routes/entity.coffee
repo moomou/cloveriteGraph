@@ -19,7 +19,7 @@ Response = StdSchema
 
 #GET /entity/
 exports.search = (req, res, next) ->
-    return res.json("EMPTY") unless req.query.id
+    redirect('/search')
 
 # POST /entity
 exports.create = (req, res, next) ->
