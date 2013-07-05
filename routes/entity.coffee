@@ -17,9 +17,9 @@ StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
 
-#GET /entity/
+# GET /entity/search/
 exports.search = (req, res, next) ->
-    redirect('/search')
+    res.redirect "/search/?q=#{req.query['q']}"
 
 # POST /entity
 exports.create = (req, res, next) ->
@@ -48,6 +48,9 @@ exports.create = (req, res, next) ->
 
 #GET /entity/:id
 exports.show = (req, res, next) ->
+    if isNaN req.params.id
+        return res.json {}
+
     await
         Entity.get req.params.id, defer(err, entity)
 

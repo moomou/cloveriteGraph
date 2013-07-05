@@ -22,52 +22,7 @@
   Constants = StdSchema.Constants;
 
   exports.search = function(req, res, next) {
-    var attr, attrBlob, err, ___iced_passed_deferral, __iced_deferrals, __iced_k,
-      _this = this;
-    __iced_k = __iced_k_noop;
-    ___iced_passed_deferral = iced.findDeferral(arguments);
-    if (!req.query.id) {
-      return res.json("EMPTY");
-    }
-    (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        filename: "attribute.coffee",
-        funcname: "search"
-      });
-      Attribute.get(req.query.id, __iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            err = arguments[0];
-            return attr = arguments[1];
-          };
-        })(),
-        lineno: 19
-      }));
-      __iced_deferrals._fulfill();
-    })(function() {
-      if (err) {
-        return next(err);
-      }
-      (function(__iced_k) {
-        __iced_deferrals = new iced.Deferrals(__iced_k, {
-          parent: ___iced_passed_deferral,
-          filename: "attribute.coffee",
-          funcname: "search"
-        });
-        attr.serialize(__iced_deferrals.defer({
-          assign_fn: (function() {
-            return function() {
-              return attrBlob = arguments[0];
-            };
-          })(),
-          lineno: 23
-        }));
-        __iced_deferrals._fulfill();
-      })(function() {
-        return res.json(attrBlob);
-      });
-    });
+    return res.redirect("/search/?q=" + req.query['q']);
   };
 
   exports.create = function(req, res, next) {
@@ -88,7 +43,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 28
+        lineno: 20
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -107,7 +62,7 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 31
+          lineno: 23
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -121,6 +76,9 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
+    if (isNaN(req.params.id)) {
+      return res.json({});
+    }
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -134,7 +92,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 36
+        lineno: 32
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -155,7 +113,7 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 41
+          lineno: 38
         }), entityId);
         __iced_deferrals._fulfill();
       })(function() {
@@ -182,7 +140,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 46
+        lineno: 43
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -201,7 +159,7 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 49
+          lineno: 46
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -228,7 +186,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 54
+        lineno: 51
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -247,7 +205,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 57
+          lineno: 54
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -291,7 +249,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 78
+        lineno: 75
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -314,7 +272,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 83
+          lineno: 80
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -337,7 +295,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(blobs, ind),
-              lineno: 90
+              lineno: 87
             }));
           }
           __iced_deferrals._fulfill();

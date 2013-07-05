@@ -12,17 +12,9 @@ Tag = require('../models/tag')
 StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 
-# GET /entity/
+# GET /attribute/search/
 exports.search = (req, res, next) ->
-    return res.json("EMPTY") unless req.query.id
-
-    await
-        Attribute.get req.query.id, defer(err, attr)
-
-    return next err if err
-
-    await attr.serialize defer attrBlob
-    res.json attrBlob
+    res.redirect "/search/?q=#{req.query['q']}"
 
 # POST /attribute
 exports.create = (req, res, next) ->
@@ -34,7 +26,12 @@ exports.create = (req, res, next) ->
 
 # GET /attribute/:id
 exports.show = (req, res, next) ->
-    await Attribute.get req.params.id, defer(err, attr)
+    if isNaN req.params.id
+        return res.json {}
+
+    await
+        Attribute.get req.params.id, defer(err, attr)
+
     return next err if err
 
     entityId = req.query['entityId'] ? null

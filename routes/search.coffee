@@ -89,6 +89,7 @@ luceneQueryContructor = (query) ->
 # GET /search/:type
 exports.searchHandler = (req, res, next) ->
     #generic searching if no type specified
+    return res.json {} unless req.query['q'] 
 
     if req.params.type
         searchClasses = [searchableClass[req.params.type]]

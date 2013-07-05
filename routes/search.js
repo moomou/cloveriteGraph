@@ -128,6 +128,9 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
+    if (!req.query['q']) {
+      return res.json({});
+    }
     if (req.params.type) {
       searchClasses = [searchableClass[req.params.type]];
     } else {
@@ -151,7 +154,7 @@
               return __slot_1[__slot_2] = arguments[1];
             };
           })(results, ind),
-          lineno: 107
+          lineno: 108
         }));
       }
       __iced_deferrals._fulfill();
