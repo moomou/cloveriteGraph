@@ -40,7 +40,7 @@
     lucene: Neo.search
   };
 
-  queryAnalyzer = function(query) {
+  queryAnalyzer = function(searchClass, query) {
     var attrQuery, mainQuery, relQuery, remainder, _ref, _ref1;
     mainQuery = attrQuery = relQuery = '';
     console.log("query: " + query);
@@ -72,10 +72,10 @@
         }
       });
     }
-    return cypherQueryConstructor(mainQuery, attrQuery, relQuery);
+    return cypherQueryConstructor(searchClass, mainQuery, attrQuery, relQuery);
   };
 
-  cypherQueryConstructor = function(name, attrMatches, relMatches) {
+  cypherQueryConstructor = function(searchClass, name, attrMatches, relMatches) {
     var attrMatchQ, attrName, endQ, ind, relMatchQ, relName, startNodeQ, _i, _j, _len, _len1;
     if (name == null) {
       name = '';
@@ -103,7 +103,14 @@
       relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)" + relName + "'");
     }
     relMatchQ = relMatchQ.join(' WITH n as n ');
-    return ['cypher', [startNodeQ, attrMatchQ, "WITH n as n", relMatchQ, endQ].join('\n')];
+    switch (searchClass) {
+      case Tag:
+        return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", attrMatchQ, "WITH n as n", relMatchQ, endQ].join('\n');
+      case Attribute:
+        return [startNodeQ, "MATCH (n)-[:_ATTRIBUTE]->(entity) WITH entity as n", attrMatchQ, "WITH n as n", relMatchQ, endQ].join('\n');
+      default:
+        return [startNodeQ, attrMatchQ, "WITH n as n", relMatchQ, endQ].join('\n');
+    }
   };
 
   luceneQueryContructor = function(query) {
@@ -117,39 +124,62 @@
   };
 
   exports.searchHandler = function(req, res, next) {
-    var blobResults, err, ind, indX, indY, obj, query, queryType, result, results, search, searchClass, searchClassBlob, searchClasses, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref,
+    var blobResults, err, ind, indX, indY, obj, query, result, results, searchClass, searchClassBlob, searchClasses, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     if (req.params.type) {
       searchClasses = [searchableClass[req.params.type]];
     } else {
-      searchClasses = searchableClass;
+      searchClasses = _und.values(searchableClass);
     }
-    _ref = queryAnalyzer(req.query['q']), queryType = _ref[0], query = _ref[1];
-    search = searchFunc[queryType];
-    console.log("CYPHER_QUERY: " + query);
     results = [];
     (function(__iced_k) {
-      var _i, _len;
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        filename: "search.coffee",
-        funcname: "searchHandler"
-      });
-      for (ind = _i = 0, _len = searchClasses.length; _i < _len; ind = ++_i) {
-        searchClass = searchClasses[ind];
-        search(searchClass, query.replace('__indexName__', searchClass.INDEX_NAME), {}, __iced_deferrals.defer({
-          assign_fn: (function(__slot_1, __slot_2) {
-            return function() {
-              err = arguments[0];
-              return __slot_1[__slot_2] = arguments[1];
-            };
-          })(results, ind),
-          lineno: 100
-        }));
-      }
-      __iced_deferrals._fulfill();
+      var _i, _len, _ref, _results, _while;
+      _ref = searchClasses;
+      _len = _ref.length;
+      ind = 0;
+      _results = [];
+      _while = function(__iced_k) {
+        var _break, _continue, _next;
+        _break = function() {
+          return __iced_k(_results);
+        };
+        _continue = function() {
+          return iced.trampoline(function() {
+            ++ind;
+            return _while(__iced_k);
+          });
+        };
+        _next = function(__iced_next_arg) {
+          _results.push(__iced_next_arg);
+          return _continue();
+        };
+        if (!(ind < _len)) {
+          return _break();
+        } else {
+          searchClass = _ref[ind];
+          query = queryAnalyzer(searchClass, req.query['q']);
+          (function(__iced_k) {
+            __iced_deferrals = new iced.Deferrals(__iced_k, {
+              parent: ___iced_passed_deferral,
+              filename: "search.coffee",
+              funcname: "searchHandler"
+            });
+            Neo.query(searchClass, query.replace('__indexName__', searchClass.INDEX_NAME), {}, __iced_deferrals.defer({
+              assign_fn: (function(__slot_1, __slot_2) {
+                return function() {
+                  err = arguments[0];
+                  return __slot_1[__slot_2] = arguments[1];
+                };
+              })(results, ind),
+              lineno: 106
+            }));
+            __iced_deferrals._fulfill();
+          })(_next);
+        }
+      };
+      _while(__iced_k);
     })(function() {
       var _i, _j, _len, _len1;
       blobResults = {};
