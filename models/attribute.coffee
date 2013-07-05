@@ -31,7 +31,7 @@ AttributeSchema = {
     dataLink: '',   #link to data source
     description: '',#describing what this attribute is
     type: '',       #data, quality, norm
-    tone: 'pos'     #defaults to pos
+    tone: 'positive'     #defaults to pos
 }
 
 #Private constructor

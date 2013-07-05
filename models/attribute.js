@@ -39,7 +39,7 @@
     dataLink: '',
     description: '',
     type: '',
-    tone: 'pos'
+    tone: 'positive'
   };
 
   module.exports = Attribute = (function(_super) {
