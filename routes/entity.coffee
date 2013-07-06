@@ -307,7 +307,7 @@ exports.linkEntity = (req, res, next) ->
                 linkName,
                 linkData,
                 defer(es, src_dstRel)
-            
+    await
         if relation['dst_src']
             linkName  = Link.normalizeName(relation['dst_src']['name'])
             linkData = Link.cleanData(relation['dst_src']['data'])

@@ -850,22 +850,31 @@
             lineno: 308
           }));
         }
-        if (relation['dst_src']) {
-          linkName = Link.normalizeName(relation['dst_src']['name']);
-          linkData = Link.cleanData(relation['dst_src']['data']);
-          dstEntity._node.createRelationshipTo(srcEntity._node, linkName, linkData, __iced_deferrals.defer({
-            assign_fn: (function() {
-              return function() {
-                et = arguments[0];
-                return dst_srcRel = arguments[1];
-              };
-            })(),
-            lineno: 317
-          }));
-        }
         __iced_deferrals._fulfill();
       })(function() {
-        return res.status(201).send();
+        (function(__iced_k) {
+          __iced_deferrals = new iced.Deferrals(__iced_k, {
+            parent: ___iced_passed_deferral,
+            filename: "entity.coffee",
+            funcname: "linkEntity"
+          });
+          if (relation['dst_src']) {
+            linkName = Link.normalizeName(relation['dst_src']['name']);
+            linkData = Link.cleanData(relation['dst_src']['data']);
+            dstEntity._node.createRelationshipTo(srcEntity._node, linkName, linkData, __iced_deferrals.defer({
+              assign_fn: (function() {
+                return function() {
+                  et = arguments[0];
+                  return dst_srcRel = arguments[1];
+                };
+              })(),
+              lineno: 317
+            }));
+          }
+          __iced_deferrals._fulfill();
+        })(function() {
+          return res.status(201).send();
+        });
       });
     });
   };
