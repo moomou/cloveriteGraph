@@ -25,12 +25,10 @@ Indexes = [
 ]
 
 LinkSchema = {
-    srcURL: '',   #link to data source
-    description: '',#describing what this attribute is
-    value: '',      #data value, could be 3 types: string, number, and boolean
-
-    veracity: 0,      #whehter this link is factual or not
-    startend: ''      #for index use
+    srcURL: '',      #link to data source
+    description: '', #describing what this attribute is
+    value: '',       #data value: string, number, and boolean
+    veracity: 0      #whehter this link is factual or not
 }
 
 module.exports = class Link extends Neo
@@ -46,13 +44,48 @@ Link.INDEX_NAME = INDEX_NAME
 Link.normalizeName = (name) ->
     "_#{name.toUpperCase()}"
 
+Link.normalizeData = (linkData) ->
+    Link.fillMetaData Link.cleanData(linkData)
+
 Link.cleanData = (data) ->
+    data = _und.clone(data)
     validKeys = _und.keys(LinkSchema)
     _und.defaults data, LinkSchema
     data
 
+Link.deserialize = (data) ->
+    Neo.deserialize(LinkSchema, data)
+
 Link.index = (rel, reqBody, cb = null) ->
     Neo.index(rel, Indexes, reqBody, cb)
 
+Link.fillMetaData = (linkData) ->
+    linkData = _und.clone(linkData)
+    _und.extend(linkData, Neo.MetaSchema)
+
+    linkData.createdAt =
+        linkData.modifiedAt = new Date().getTime() / 1000
+
+    linkData.version += 1
+    return linkData
+
 Link.find = (key, value, cb) ->
     Neo.findRel(Link, Link.INDEX_NAME, key, value, cb)
+
+Link.get = (id, cb) ->
+    Neo.getRel(Link, id, cb)
+
+Link.put = (relId, reqBody, cb) ->
+    Neo.put(Link, relId, reqBody, cb)
+
+Link.create = (reqBody, cb) ->
+    linkName  = Link.normalizeName(reqBody['name'])
+    linkData = Link.normalizeData(reqBody['data'])
+
+    res = {
+        name: linkName,
+        data: linkData
+    }
+
+    cb(null, res) if cb
+    res

@@ -73,6 +73,8 @@
 
   })();
 
+  Neo.MetaSchema = MetaSchema;
+
   Neo.fillIndex = function(indexes, data) {
     var result;
     result = _und.clone(indexes);
@@ -132,7 +134,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 74
+        lineno: 77
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -142,6 +144,15 @@
       Neo.index(node, indexes, reqBody);
       console.log("CREATED: " + Class.Name);
       return cb(null, obj);
+    });
+  };
+
+  Neo.getRel = function(Class, id, cb) {
+    return db.neo.getRelationshipById(id, function(err, rel) {
+      if (err) {
+        return cb(err, null);
+      }
+      return cb(null, new Class(rel));
     });
   };
 
@@ -177,7 +188,7 @@
                   return saveErr = arguments[0];
                 };
               })(),
-              lineno: 95
+              lineno: 103
             }));
             __iced_deferrals._fulfill();
           })(__iced_k);
@@ -205,7 +216,7 @@
     });
   };
 
-  Neo.findNode = function(Class, indexName, key, value, cb) {
+  Neo.find = function(Class, indexName, key, value, cb) {
     return db.neo.getIndexedNode(indexName, key, value, function(err, node) {
       if (err) {
         return cb(err, null);
@@ -231,14 +242,14 @@
         filename: "neo.coffee",
         funcname: "getOrCreate"
       });
-      Neo.findNode(Class, Class.INDEX_NAME, 'name', reqBody['name'], __iced_deferrals.defer({
+      Neo.find(Class, Class.INDEX_NAME, 'name', reqBody['name'], __iced_deferrals.defer({
         assign_fn: (function() {
           return function() {
             err = arguments[0];
             return obj = arguments[1];
           };
         })(),
-        lineno: 129
+        lineno: 136
       }));
       __iced_deferrals._fulfill();
     })(function() {

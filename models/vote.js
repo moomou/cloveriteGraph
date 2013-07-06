@@ -29,7 +29,7 @@
   ];
 
   VoteSchema = {
-    type: '',
+    tone: '',
     user: '',
     time: '',
     ipAddr: '',

@@ -43,6 +43,8 @@ module.exports = class Neo
     del: (cb) ->
         @_node.del (err) -> cb err, true
 
+Neo.MetaSchema = MetaSchema
+
 Neo.fillIndex = (indexes, data) ->
     result = _und.clone indexes
     _und.map(result,
@@ -72,6 +74,7 @@ Neo.create = (Class, reqBody, indexes, cb) ->
 
     node = db.neo.createNode data
     obj = new Class(node)
+
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr
 
@@ -79,6 +82,12 @@ Neo.create = (Class, reqBody, indexes, cb) ->
 
     console.log "CREATED: " + Class.Name
     return cb(null, obj)
+
+Neo.getRel = (Class, id, cb) ->
+    db.neo.getRelationshipById id,
+        (err, rel) ->
+            return cb(err, null) if err
+            cb(null, new Class rel)
 
 Neo.get = (Class, id, cb) ->
     db.neo.getNodeById id,
@@ -89,7 +98,6 @@ Neo.get = (Class, id, cb) ->
 Neo.put = (Class, nodeId, reqBody, cb) ->
     Class.get nodeId, (err, obj) ->
         return cb(err, null) if err
-
         valid = obj.update(reqBody)
 
         if valid
@@ -107,8 +115,7 @@ Neo.findRel = (Class, indexName, key, value, cb) ->
             return cb(null, new Class node) if node
             return cb(null, null)
 
-
-Neo.findNode = (Class, indexName, key, value, cb) ->
+Neo.find = (Class, indexName, key, value, cb) ->
     db.neo.getIndexedNode indexName,
         key,
         value,
@@ -123,7 +130,7 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
     
     #No Id provided, search for it
     await
-        Neo.findNode Class,
+        Neo.find Class,
             Class.INDEX_NAME,
             'name',
             reqBody['name'],

@@ -25,7 +25,7 @@ Indexes = [
 ]
 
 VoteSchema = {
-    type: '',       #vote type: pos, neg
+    tone: '',       #vote type: pos, neg
     user: '',       #username or unknown
     time: '',       #timestamp when vote was registered
     ipAddr: '',     #ip address of the vote

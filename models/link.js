@@ -38,8 +38,7 @@
     srcURL: '',
     description: '',
     value: '',
-    veracity: 0,
-    startend: ''
+    veracity: 0
   };
 
   module.exports = Link = (function(_super) {
@@ -67,11 +66,20 @@
     return "_" + (name.toUpperCase());
   };
 
+  Link.normalizeData = function(linkData) {
+    return Link.fillMetaData(Link.cleanData(linkData));
+  };
+
   Link.cleanData = function(data) {
     var validKeys;
+    data = _und.clone(data);
     validKeys = _und.keys(LinkSchema);
     _und.defaults(data, LinkSchema);
     return data;
+  };
+
+  Link.deserialize = function(data) {
+    return Neo.deserialize(LinkSchema, data);
   };
 
   Link.index = function(rel, reqBody, cb) {
@@ -81,8 +89,38 @@
     return Neo.index(rel, Indexes, reqBody, cb);
   };
 
+  Link.fillMetaData = function(linkData) {
+    linkData = _und.clone(linkData);
+    _und.extend(linkData, Neo.MetaSchema);
+    linkData.createdAt = linkData.modifiedAt = new Date().getTime() / 1000;
+    linkData.version += 1;
+    return linkData;
+  };
+
   Link.find = function(key, value, cb) {
     return Neo.findRel(Link, Link.INDEX_NAME, key, value, cb);
+  };
+
+  Link.get = function(id, cb) {
+    return Neo.getRel(Link, id, cb);
+  };
+
+  Link.put = function(relId, reqBody, cb) {
+    return Neo.put(Link, relId, reqBody, cb);
+  };
+
+  Link.create = function(reqBody, cb) {
+    var linkData, linkName, res;
+    linkName = Link.normalizeName(reqBody['name']);
+    linkData = Link.normalizeData(reqBody['data']);
+    res = {
+      name: linkName,
+      data: linkData
+    };
+    if (cb) {
+      cb(null, res);
+    }
+    return res;
   };
 
 }).call(this);

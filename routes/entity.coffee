@@ -20,6 +20,16 @@ Response = StdSchema
 getStartEndIndex = (start, rel, end) ->
     "#{start}_#{rel}_#{end}"
 
+getOutgoingRelsCypherQuery = (startId, relType) ->
+    cypher = "START n=node(#{startId}) MATCH n-[r]->other "
+
+    if relType == "relation"
+        cypher += "WHERE type(r) <> '_VOTE'"
+    else
+        cypher += "WHERE type(r) = '#{Link.normalizeName relType}'"
+
+    cypher += " RETURN r;"
+
 # GET /entity/search/
 exports.search = (req, res, next) ->
     res.redirect "/search/?q=#{req.query['q']}"
@@ -58,21 +68,37 @@ exports.show = (req, res, next) ->
         Entity.get req.params.id, defer(err, entity)
 
     return next err if err
-    attrBlobs = []
 
     if req.query['attr'] != "false"
+        rels = []
+        attrBlobs = []
+
         await
             entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
                 defer(err, nodes)
+        return next err if err
 
         await
             for node, ind in nodes
+                startendVal = getStartEndIndex(node.id,
+                    Constants.REL_ATTRIBUTE,
+                    entity._node.id
+                )
+
+                Link.find('startend', startendVal, defer(err, rels[ind]))
                 (new Attribute node).serialize(defer(attrBlobs[ind]), entity._node.id)
 
-        return next err if err
-        await entity.serialize defer(entityBlob), attributes: attrBlobs
+        for blob, ind in attrBlobs
+            if rels[ind]
+                linkData = linkData:rels[ind].serialize()
+            else
+                linkData = linkData:{}
+                
+            _und.extend(blob, linkData)
+ 
+        entityBlob = entity.serialize(null, attributes: attrBlobs)
     else
-        await entity.serialize defer entityBlob
+        entityBlob = entity.serialize(null, entityBlob)
 
     res.json entityBlob
 
@@ -95,6 +121,40 @@ exports.del = (req, res, next) ->
 
     res.status(204).send()
 
+#GET /entity/:id/attribute
+exports.listAttribute = (req, res, next) ->
+    await Entity.get req.params.id, defer(errE, entity)
+    return next(err) if err
+
+    await
+        entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
+            defer(err, nodes)
+
+    return next(err) if err
+
+    rels = []
+    blobs = []
+
+    await
+        for node, ind in nodes
+            startendVal = getStartEndIndex(node.id,
+                Constants.REL_ATTRIBUTE,
+                req.params.id
+            )
+
+            Link.find('startend', startendVal, defer(err, rels[ind]))
+            (new Attribute node).serialize defer(blobs[ind]), entity._node.id
+
+    for blob, ind in blobs
+        if rels[ind]
+            linkData = linkData:rels[ind].serialize()
+        else
+            linkData = linkData:{}
+            
+        _und.extend(blob, linkData)
+    
+    res.json(blobs)
+
 #POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
     await
@@ -104,45 +164,30 @@ exports.addAttribute = (req, res, next) ->
     return next(errE) if errE
     return next(errA) if errA
 
-    linkData = _und.clone(req.body['linkData'] || {})
-
-    linkData['startend'] = getStartEndIndex(attr._node.id,
+    linkData = Link.normalizeData _und.clone(req.body['linkData'] || {})
+    linkData['startend'] = getStartEndIndex(
+        attr._node.id,
         Constants.REL_ATTRIBUTE,
-        entity._node.id
+        req.params.id
     )
-
+    
     await attr._node.createRelationshipTo entity._node,
         Constants.REL_ATTRIBUTE,
         linkData,
         defer(err, rel)
 
     return next(err) if err
-
     Link.index(rel, linkData)
     
     await attr.serialize defer blob
 
-    _und.extend(blob, linkData)
+    _und.extend(blob, linkData: linkData)
     res.status(201).json blob
 
 #DELETE /entity/:eId/attribute/:aId
 exports.delAttribute = (req, res, next) -> #TODO
     await Entity.get req.params.eId, defer(errE, entity)
     await Attribute.get req.params.aId, defer(errA, attr)
-
-#GET /entity/:id/attribute
-exports.listAttribute = (req, res, next) ->
-    await Entity.get req.params.id, defer(errE, entity)
-    await
-        entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
-            defer(err, nodes)
-
-    blobs = []
-    await
-        for node, ind in nodes
-            (new Attribute node).serialize defer(blobs[ind]), entity._node.id
-
-    res.json(blob for blob in blobs)
 
 #GET /entity/:id/attribute/:id
 exports.getAttribute = (req, res, next) ->
@@ -164,10 +209,7 @@ exports.getAttribute = (req, res, next) ->
     blob = {}
     await attr.serialize(defer(blob), entityId)
 
-    relData = rel.serialize()
-    delete relData['id']
-
-    _und.extend(blob, relData)
+    _und.extend(blob, linkData:rel.serialize())
 
     res.json blob
 
@@ -178,21 +220,17 @@ exports.updateAttributeLink = (req, res, next) ->
 
     linkData = _und.clone(req.body['linkData'] || {})
 
-    startendVal = getStartEndIndex(attrId,
-        Constants.REL_ATTRIBUTE,
-        entityId
-    )
-
     await
-        Link.find('startend', startendVal, defer(errLink, rel))
+        Attribute.get attrId, defer(errAttr, attr)
+        Link.put(linkData['id'], linkData, defer(errLink, rel))
 
-    err = errLink
+    err = errAttr || errLink
     return next(err) if err
 
-    rel.update(linkData)
-    await rel.save defer(err)
+    blob = attr.serialize()
+    _und.extend blob, linkData: rel.serialize()
 
-    res.json rel.serialize()
+    res.json blob
 
 #POST /entity/:id/attribute/:id/vote
 exports.voteAttribute = (req, res, next) ->
@@ -219,26 +257,33 @@ exports.voteAttribute = (req, res, next) ->
         return res.status(500) if err
         res.send(voteTally)
 
-# GET /entity/:id/relation?
+# GET /entity/:id/relation
 exports.listRelation = (req, res, next) ->
-    await Entity.get req.params.id, defer(err, entity)
-    return next(err) if err
-    
-    relType = req.params.relation ? ''
-    
-    await
-        entity._node.outgoing relType, defer(err, rels)
+    entityId = req.params.id
+    relType = req.params.relation
+
+    query = getOutgoingRelsCypherQuery(entityId, relType)
+
+    await Neo.query Link, query, {}, defer(err, rels)
 
     blobs = []
     await
         for rel, ind in rels
+            rel = new Link rel.r
+
+            tmp = rel._node._data.start.split('/')
+            startId = tmp[tmp.length - 1]
+
+            tmp = rel._node._data.end.split('/')
+            endId = tmp[tmp.length - 1]
+
             extraData = {
-                type: rel.type,
-                start: rel.start.id,
-                end: rel.end.id
+                type: rel._node._data.type,
+                start: startId
+                end: endId
             }
 
-            (new Neo rel).serialize defer(blobs[ind]), extraData
+            rel.serialize defer(blobs[ind]), extraData
                 
     res.json(blob for blob in blobs)
 
@@ -258,7 +303,6 @@ exports.linkEntity = (req, res, next) ->
             linkName  = Link.normalizeName(relation['src_dst']['name'])
             linkData = Link.cleanData(relation['src_dst']['data'])
 
-            console.log link
             srcEntity._node.createRelationshipTo dstEntity._node,
                 linkName,
                 linkData,
@@ -267,8 +311,7 @@ exports.linkEntity = (req, res, next) ->
         if relation['dst_src']
             linkName  = Link.normalizeName(relation['dst_src']['name'])
             linkData = Link.cleanData(relation['dst_src']['data'])
-
-            console.log link
+             
             dstEntity._node.createRelationshipTo srcEntity._node,
                 linkName,
                 linkData,
