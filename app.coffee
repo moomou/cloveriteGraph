@@ -36,6 +36,7 @@ app.del('/entity/:id', routes.entity.del)
 #Entity->attribute
 app.post('/entity/:id/attribute', routes.entity.addAttribute)
 app.get('/entity/:id/attribute', routes.entity.listAttribute)
+app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute)
 app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute)
 app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute)
 

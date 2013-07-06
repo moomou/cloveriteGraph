@@ -27,11 +27,8 @@ Indexes = [
 
 AttributeSchema = {
     name: 'Name of attribute',
-    value: '',      #data value, could be 3 types: string, number, and boolean
-    dataLink: '',   #link to data source
-    description: '',#describing what this attribute is
-    type: '',       #data, quality, norm
-    tone: 'positive'     #defaults to pos
+    type: '',            #data, quality, norm
+    tone: 'positive'     #defaults to positive
 }
 
 #Private constructor

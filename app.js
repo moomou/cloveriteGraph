@@ -50,6 +50,8 @@
 
   app.get('/entity/:id/attribute', routes.entity.listAttribute);
 
+  app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute);
+
   app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute);
 
   app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute);

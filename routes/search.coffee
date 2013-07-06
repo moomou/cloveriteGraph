@@ -45,6 +45,7 @@ queryAnalyzer = (searchClass, query) ->
     attrQuery = attrQuery.split(' ')
         .map((item) -> item.trim())
         .filter((item) -> item unless not item) unless not attrQuery
+
     relQuery = remainder.split(' ')
         .map((item) -> item.trim())
         .filter((item) -> item unless not item) unless not remainder
@@ -57,18 +58,18 @@ cypherQueryConstructor = (searchClass, name = '', attrMatches = [], relMatches =
     console.log "relMatches: #{relMatches}"
 
     #potential injection attack
-    startNodeQ = "START n=node:__indexName__('name:#{name}~0.65')"
+    startNodeQ = "START n=node:__indexName__('name:#{encodeURIComponent name}~0.65')"
     endQ = 'RETURN DISTINCT n AS result;'
     
     attrMatchQ = []
     relMatchQ = []
 
     for attrName, ind in attrMatches
-        attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)#{attrName}'")
+        attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)#{encodeURIComponent attrName}'")
     attrMatchQ = attrMatchQ.join(' WITH n as n ')
 
     for relName, ind in relMatches
-        relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)#{relName}'")
+        relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)#{encodeURIComponent relName}'")
     relMatchQ = relMatchQ.join(' WITH n as n ')
 
     switch searchClass
@@ -102,7 +103,7 @@ exports.searchHandler = (req, res, next) ->
     await
         for searchClass, ind in searchClasses
             query = queryAnalyzer(searchClass, req.query['q'])
-
+            console.log query
             Neo.query searchClass,
                 query.replace('__indexName__', searchClass.INDEX_NAME),
                 {},

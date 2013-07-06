@@ -17,6 +17,9 @@ StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
 
+getStartEndIndex = (start, rel, end) ->
+    "#{start}_#{rel}_#{end}"
+
 # GET /entity/search/
 exports.search = (req, res, next) ->
     res.redirect "/search/?q=#{req.query['q']}"
@@ -101,15 +104,29 @@ exports.addAttribute = (req, res, next) ->
     return next(errE) if errE
     return next(errA) if errA
 
+    linkData = _und.clone(req.body['linkData'] || {})
+
+    linkData['startend'] = getStartEndIndex(attr._node.id,
+        Constants.REL_ATTRIBUTE,
+        entity._node.id
+    )
+
     await attr._node.createRelationshipTo entity._node,
-        Constants.REL_ATTRIBUTE, {},
+        Constants.REL_ATTRIBUTE,
+        linkData,
         defer(err, rel)
 
+    return next(err) if err
+
+    Link.index(rel, linkData)
+    
     await attr.serialize defer blob
+
+    _und.extend(blob, linkData)
     res.status(201).json blob
 
 #DELETE /entity/:eId/attribute/:aId
-exports.delAttribute = (req, res, next) ->
+exports.delAttribute = (req, res, next) -> #TODO
     await Entity.get req.params.eId, defer(errE, entity)
     await Attribute.get req.params.aId, defer(errA, attr)
 
@@ -126,6 +143,56 @@ exports.listAttribute = (req, res, next) ->
             (new Attribute node).serialize defer(blobs[ind]), entity._node.id
 
     res.json(blob for blob in blobs)
+
+#GET /entity/:id/attribute/:id
+exports.getAttribute = (req, res, next) ->
+    attrId = req.params.aId
+    entityId = req.params.eId
+
+    startendVal = getStartEndIndex(attrId,
+        Constants.REL_ATTRIBUTE,
+        entityId
+    )
+
+    await
+        Link.find('startend', startendVal, defer(errLink, rel))
+        Attribute.get attrId, defer(errAttr, attr)
+
+    err = errLink || errAttr
+    return next(err) if err
+
+    blob = {}
+    await attr.serialize(defer(blob), entityId)
+
+    relData = rel.serialize()
+    delete relData['id']
+
+    _und.extend(blob, relData)
+
+    res.json blob
+
+#PUT /entity/:id/attribute/:id
+exports.updateAttributeLink = (req, res, next) ->
+    attrId = req.params.aId
+    entityId = req.params.eId
+
+    linkData = _und.clone(req.body['linkData'] || {})
+
+    startendVal = getStartEndIndex(attrId,
+        Constants.REL_ATTRIBUTE,
+        entityId
+    )
+
+    await
+        Link.find('startend', startendVal, defer(errLink, rel))
+
+    err = errLink
+    return next(err) if err
+
+    rel.update(linkData)
+    await rel.save defer(err)
+
+    res.json rel.serialize()
 
 #POST /entity/:id/attribute/:id/vote
 exports.voteAttribute = (req, res, next) ->
@@ -188,19 +255,23 @@ exports.linkEntity = (req, res, next) ->
 
     await
         if relation['src_dst']
-            link = new Link relation['src_dst']
+            linkName  = Link.normalizeName(relation['src_dst']['name'])
+            linkData = Link.cleanData(relation['src_dst']['data'])
+
             console.log link
             srcEntity._node.createRelationshipTo dstEntity._node,
-                link.name,
-                link.data,
+                linkName,
+                linkData,
                 defer(es, src_dstRel)
             
         if relation['dst_src']
-            link = new Link relation['dst_src']
+            linkName  = Link.normalizeName(relation['dst_src']['name'])
+            linkData = Link.cleanData(relation['dst_src']['data'])
+
             console.log link
             dstEntity._node.createRelationshipTo srcEntity._node,
-                link.name,
-                link.data,
+                linkName,
+                linkData,
                 defer(et, dst_srcRel)
 
     res.status(201).send()

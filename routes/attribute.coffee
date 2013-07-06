@@ -36,7 +36,7 @@ exports.show = (req, res, next) ->
 
     entityId = req.query['entityId'] ? null
 
-    await attr.serialize(defer(blob),entityId)
+    await attr.serialize(defer(blob), entityId)
     res.json blob
 
 # PUT /attribute/:id

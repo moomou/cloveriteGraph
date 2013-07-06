@@ -89,8 +89,30 @@
     return _und.pick(data, validKeys);
   };
 
+  Neo.index = function(node, indexes, reqBody, cb) {
+    var i, index, _i, _len, _ref, _results;
+    if (cb == null) {
+      cb = null;
+    }
+    _ref = Neo.fillIndex(indexes, reqBody);
+    _results = [];
+    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+      index = _ref[i];
+      console.log(index);
+      _results.push(node.index(index.INDEX_NAME, index.INDEX_KEY, index.INDEX_VALUE, function(err, ind) {
+        if (cb && err) {
+          cb(err, null);
+        }
+        if (cb) {
+          return cb(null, ind);
+        }
+      }));
+    }
+    return _results;
+  };
+
   Neo.create = function(Class, reqBody, indexes, cb) {
-    var data, err, i, ind, index, node, obj, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var data, node, obj, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -110,41 +132,16 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 64
+        lineno: 74
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (saveErr) {
         return cb(saveErr, null);
       }
-      (function(__iced_k) {
-        var _i, _len, _ref;
-        __iced_deferrals = new iced.Deferrals(__iced_k, {
-          parent: ___iced_passed_deferral,
-          filename: "neo.coffee",
-          funcname: "create"
-        });
-        _ref = Neo.fillIndex(indexes, reqBody);
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          index = _ref[i];
-          node.index(index.INDEX_NAME, index.INDEX_KEY, index.INDEX_VALUE, __iced_deferrals.defer({
-            assign_fn: (function() {
-              return function() {
-                err = arguments[0];
-                return ind = arguments[1];
-              };
-            })(),
-            lineno: 72
-          }));
-        }
-        __iced_deferrals._fulfill();
-      })(function() {
-        if (err) {
-          return cb(indexErr, null);
-        }
-        console.log("CREATED: " + Class.Name);
-        return cb(null, obj);
-      });
+      Neo.index(node, indexes, reqBody);
+      console.log("CREATED: " + Class.Name);
+      return cb(null, obj);
     });
   };
 
@@ -180,7 +177,7 @@
                   return saveErr = arguments[0];
                 };
               })(),
-              lineno: 92
+              lineno: 95
             }));
             __iced_deferrals._fulfill();
           })(__iced_k);
@@ -196,7 +193,19 @@
     });
   };
 
-  Neo.find = function(Class, indexName, key, value, cb) {
+  Neo.findRel = function(Class, indexName, key, value, cb) {
+    return db.neo.getIndexedRelationship(indexName, key, value, function(err, node) {
+      if (err) {
+        return cb(err, null);
+      }
+      if (node) {
+        return cb(null, new Class(node));
+      }
+      return cb(null, null);
+    });
+  };
+
+  Neo.findNode = function(Class, indexName, key, value, cb) {
     return db.neo.getIndexedNode(indexName, key, value, function(err, node) {
       if (err) {
         return cb(err, null);
@@ -222,14 +231,14 @@
         filename: "neo.coffee",
         funcname: "getOrCreate"
       });
-      Neo.find(Class, Class.INDEX_NAME, 'name', reqBody['name'], __iced_deferrals.defer({
+      Neo.findNode(Class, Class.INDEX_NAME, 'name', reqBody['name'], __iced_deferrals.defer({
         assign_fn: (function() {
           return function() {
             err = arguments[0];
             return obj = arguments[1];
           };
         })(),
-        lineno: 116
+        lineno: 129
       }));
       __iced_deferrals._fulfill();
     })(function() {

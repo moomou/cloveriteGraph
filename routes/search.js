@@ -89,18 +89,18 @@
     console.log("name: " + name);
     console.log("attrMatches: " + attrMatches);
     console.log("relMatches: " + relMatches);
-    startNodeQ = "START n=node:__indexName__('name:" + name + "~0.65')";
+    startNodeQ = "START n=node:__indexName__('name:" + (encodeURIComponent(name)) + "~0.65')";
     endQ = 'RETURN DISTINCT n AS result;';
     attrMatchQ = [];
     relMatchQ = [];
     for (ind = _i = 0, _len = attrMatches.length; _i < _len; ind = ++_i) {
       attrName = attrMatches[ind];
-      attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)" + attrName + "'");
+      attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)" + (encodeURIComponent(attrName)) + "'");
     }
     attrMatchQ = attrMatchQ.join(' WITH n as n ');
     for (ind = _j = 0, _len1 = relMatches.length; _j < _len1; ind = ++_j) {
       relName = relMatches[ind];
-      relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)" + relName + "'");
+      relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)" + (encodeURIComponent(relName)) + "'");
     }
     relMatchQ = relMatchQ.join(' WITH n as n ');
     switch (searchClass) {
@@ -147,6 +147,7 @@
       for (ind = _i = 0, _len = searchClasses.length; _i < _len; ind = ++_i) {
         searchClass = searchClasses[ind];
         query = queryAnalyzer(searchClass, req.query['q']);
+        console.log(query);
         Neo.query(searchClass, query.replace('__indexName__', searchClass.INDEX_NAME), {}, __iced_deferrals.defer({
           assign_fn: (function(__slot_1, __slot_2) {
             return function() {
@@ -154,7 +155,7 @@
               return __slot_1[__slot_2] = arguments[1];
             };
           })(results, ind),
-          lineno: 108
+          lineno: 109
         }));
       }
       __iced_deferrals._fulfill();

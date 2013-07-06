@@ -49,12 +49,22 @@ Neo.fillIndex = (indexes, data) ->
         (index) ->
             index['INDEX_VALUE'] = data[index['INDEX_KEY']]
     )
-    result
+    return result
 
 Neo.deserialize = (ClassSchema, data) ->
     validKeys = _und.keys(ClassSchema)
     _und.defaults data, ClassSchema
     return _und.pick(data, validKeys)
+
+Neo.index = (node, indexes, reqBody, cb = null) ->
+    for index, i in Neo.fillIndex(indexes, reqBody)
+        console.log index
+        node.index index.INDEX_NAME,
+            index.INDEX_KEY,
+            index.INDEX_VALUE,
+            (err, ind) ->
+                cb(err, null) if cb and err
+                cb(null, ind) if cb
 
 Neo.create = (Class, reqBody, indexes, cb) ->
     data = Class.deserialize(reqBody)
@@ -65,15 +75,8 @@ Neo.create = (Class, reqBody, indexes, cb) ->
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr
 
-    await
-        for index, i in Neo.fillIndex(indexes, reqBody)
-            node.index index.INDEX_NAME,
-                index.INDEX_KEY,
-                index.INDEX_VALUE,
-                defer(err, ind)
+    Neo.index(node, indexes, reqBody)
 
-    return cb(indexErr, null) if err
-    
     console.log "CREATED: " + Class.Name
     return cb(null, obj)
 
@@ -95,7 +98,17 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
         return cb(saveErr, null) if saveErr
         return cb(null, obj)
 
-Neo.find = (Class, indexName, key, value, cb) ->
+Neo.findRel = (Class, indexName, key, value, cb) ->
+    db.neo.getIndexedRelationship indexName,
+        key,
+        value,
+        (err, node) ->
+            return cb(err, null) if err
+            return cb(null, new Class node) if node
+            return cb(null, null)
+
+
+Neo.findNode = (Class, indexName, key, value, cb) ->
     db.neo.getIndexedNode indexName,
         key,
         value,
@@ -110,7 +123,7 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
     
     #No Id provided, search for it
     await
-        Neo.find Class,
+        Neo.findNode Class,
             Class.INDEX_NAME,
             'name',
             reqBody['name'],
