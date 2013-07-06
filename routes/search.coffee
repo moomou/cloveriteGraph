@@ -57,19 +57,23 @@ cypherQueryConstructor = (searchClass, name = '', attrMatches = [], relMatches =
     console.log "attrMatches: #{attrMatches}"
     console.log "relMatches: #{relMatches}"
 
+    name = name.replace(' ', encodeURIComponent(' '))
+    attrMatches = attrMatches.replace(' ', encodeURIComponent(' '))
+    relMatches = relMatches.replace(' ', encodeURIComponent(' '))
+
     #potential injection attack
-    startNodeQ = "START n=node:__indexName__('name:#{encodeURIComponent name}~0.65')"
+    startNodeQ = "START n=node:__indexName__('name:#{name}~0.65')"
     endQ = 'RETURN DISTINCT n AS result;'
     
     attrMatchQ = []
     relMatchQ = []
 
     for attrName, ind in attrMatches
-        attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)#{encodeURIComponent attrName}'")
+        attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)#{attrName}'")
     attrMatchQ = attrMatchQ.join(' WITH n as n ')
 
     for relName, ind in relMatches
-        relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)#{encodeURIComponent relName}'")
+        relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)#{relName}'")
     relMatchQ = relMatchQ.join(' WITH n as n ')
 
     switch searchClass

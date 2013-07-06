@@ -89,18 +89,21 @@
     console.log("name: " + name);
     console.log("attrMatches: " + attrMatches);
     console.log("relMatches: " + relMatches);
-    startNodeQ = "START n=node:__indexName__('name:" + (encodeURIComponent(name)) + "~0.65')";
+    name = name.replace(' ', encodeURIComponent(' '));
+    attrMatches = attrMatches.replace(' ', encodeURIComponent(' '));
+    relMatches = relMatches.replace(' ', encodeURIComponent(' '));
+    startNodeQ = "START n=node:__indexName__('name:" + name + "~0.65')";
     endQ = 'RETURN DISTINCT n AS result;';
     attrMatchQ = [];
     relMatchQ = [];
     for (ind = _i = 0, _len = attrMatches.length; _i < _len; ind = ++_i) {
       attrName = attrMatches[ind];
-      attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)" + (encodeURIComponent(attrName)) + "'");
+      attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)" + attrName + "'");
     }
     attrMatchQ = attrMatchQ.join(' WITH n as n ');
     for (ind = _j = 0, _len1 = relMatches.length; _j < _len1; ind = ++_j) {
       relName = relMatches[ind];
-      relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)" + (encodeURIComponent(relName)) + "'");
+      relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)" + relName + "'");
     }
     relMatchQ = relMatchQ.join(' WITH n as n ');
     switch (searchClass) {
@@ -155,7 +158,7 @@
               return __slot_1[__slot_2] = arguments[1];
             };
           })(results, ind),
-          lineno: 109
+          lineno: 113
         }));
       }
       __iced_deferrals._fulfill();
