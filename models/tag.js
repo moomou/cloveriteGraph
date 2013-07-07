@@ -14,7 +14,7 @@
 
   redis = Setup.db.redis;
 
-  INDEX_NAME = 'tag';
+  INDEX_NAME = 'nTag';
 
   Indexes = [
     {
@@ -45,9 +45,9 @@
   */
 
 
-  Tag.Name = 'TAG';
+  Tag.Name = 'nTag';
 
-  Tag.INDEX_NAME = 'tag';
+  Tag.INDEX_NAME = INDEX_NAME;
 
   Tag.deserialize = function(data) {
     return Neo.deserialize(TagSchema, data);

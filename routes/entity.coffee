@@ -157,9 +157,14 @@ exports.listAttribute = (req, res, next) ->
 
 #POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
+    data = _und.clone req.body
+    delete data['id']
+
+    console.log data
+
     await
         Entity.get req.params.id, defer(errE, entity)
-        Attribute.getOrCreate req.body, defer(errA, attr)
+        Attribute.getOrCreate data, defer(errA, attr)
 
     return next(errE) if errE
     return next(errA) if errA

@@ -6,7 +6,7 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
-INDEX_NAME = 'tag'
+INDEX_NAME = 'nTag'
 
 Indexes = [
     {
@@ -29,8 +29,8 @@ module.exports = class Tag extends Neo
 ###
 Static Method
 ###
-Tag.Name = 'TAG'
-Tag.INDEX_NAME = 'tag'
+Tag.Name = 'nTag'
+Tag.INDEX_NAME = INDEX_NAME
 
 Tag.deserialize = (data) ->
     Neo.deserialize TagSchema, data

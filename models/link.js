@@ -62,24 +62,16 @@
 
   Link.INDEX_NAME = INDEX_NAME;
 
+  Link.deserialize = function(data) {
+    return Neo.deserialize(LinkSchema, data);
+  };
+
   Link.normalizeName = function(name) {
     return "_" + (name.toUpperCase());
   };
 
   Link.normalizeData = function(linkData) {
-    return Link.fillMetaData(Link.cleanData(linkData));
-  };
-
-  Link.cleanData = function(data) {
-    var validKeys;
-    data = _und.clone(data);
-    validKeys = _und.keys(LinkSchema);
-    _und.defaults(data, LinkSchema);
-    return data;
-  };
-
-  Link.deserialize = function(data) {
-    return Neo.deserialize(LinkSchema, data);
+    return Link.fillMetaData(Link.deserialize(linkData));
   };
 
   Link.index = function(rel, reqBody, cb) {
@@ -106,7 +98,9 @@
   };
 
   Link.put = function(relId, reqBody, cb) {
-    return Neo.put(Link, relId, reqBody, cb);
+    var data;
+    data = Link.deserialize(reqBody);
+    return Neo.put(Link, relId, data, cb);
   };
 
   Link.create = function(reqBody, cb) {

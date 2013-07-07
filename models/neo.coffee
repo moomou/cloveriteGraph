@@ -54,7 +54,12 @@ Neo.fillIndex = (indexes, data) ->
     return result
 
 Neo.deserialize = (ClassSchema, data) ->
-    validKeys = _und.keys(ClassSchema)
+    data = _und.clone data
+
+    validKeys = ['id', 'version', 'private']
+    validKeys = _und.union(_und.keys(ClassSchema),
+        validKeys)
+
     _und.defaults data, ClassSchema
     return _und.pick(data, validKeys)
 
@@ -69,8 +74,13 @@ Neo.index = (node, indexes, reqBody, cb = null) ->
                 cb(null, ind) if cb
 
 Neo.create = (Class, reqBody, indexes, cb) ->
+    #Clean input data
     data = Class.deserialize(reqBody)
+    omitKeys = _und.union(['id'], _und.keys(MetaSchema))
+    data = _und.omit(data, omitKeys)
     _und.extend(data, MetaSchema)
+
+    console.log data
 
     node = db.neo.createNode data
     obj = new Class(node)
@@ -96,9 +106,11 @@ Neo.get = (Class, id, cb) ->
             cb(null, new Class node)
 
 Neo.put = (Class, nodeId, reqBody, cb) ->
+    data = Class.deserialize(reqBody)
+
     Class.get nodeId, (err, obj) ->
         return cb(err, null) if err
-        valid = obj.update(reqBody)
+        valid = obj.update(data)
 
         if valid
             await obj.save defer(saveErr)
@@ -135,6 +147,7 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
             'name',
             reqBody['name'],
             defer(err, obj)
+
     if obj
         console.log Class.Name + ": " + reqBody.toString()
         return cb(null, obj) if obj

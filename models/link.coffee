@@ -41,20 +41,14 @@ Static Method
 Link.Name = 'rLink'
 Link.INDEX_NAME = INDEX_NAME
 
+Link.deserialize = (data) ->
+    Neo.deserialize(LinkSchema, data)
+
 Link.normalizeName = (name) ->
     "_#{name.toUpperCase()}"
 
 Link.normalizeData = (linkData) ->
-    Link.fillMetaData Link.cleanData(linkData)
-
-Link.cleanData = (data) ->
-    data = _und.clone(data)
-    validKeys = _und.keys(LinkSchema)
-    _und.defaults data, LinkSchema
-    data
-
-Link.deserialize = (data) ->
-    Neo.deserialize(LinkSchema, data)
+    Link.fillMetaData Link.deserialize(linkData)
 
 Link.index = (rel, reqBody, cb = null) ->
     Neo.index(rel, Indexes, reqBody, cb)
@@ -76,7 +70,8 @@ Link.get = (id, cb) ->
     Neo.getRel(Link, id, cb)
 
 Link.put = (relId, reqBody, cb) ->
-    Neo.put(Link, relId, reqBody, cb)
+    data = Link.deserialize(reqBody)
+    Neo.put(Link, relId, data, cb)
 
 Link.create = (reqBody, cb) ->
     linkName  = Link.normalizeName(reqBody['name'])

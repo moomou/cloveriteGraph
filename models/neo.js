@@ -86,7 +86,9 @@
 
   Neo.deserialize = function(ClassSchema, data) {
     var validKeys;
-    validKeys = _und.keys(ClassSchema);
+    data = _und.clone(data);
+    validKeys = ['id', 'version', 'private'];
+    validKeys = _und.union(_und.keys(ClassSchema), validKeys);
     _und.defaults(data, ClassSchema);
     return _und.pick(data, validKeys);
   };
@@ -114,12 +116,15 @@
   };
 
   Neo.create = function(Class, reqBody, indexes, cb) {
-    var data, node, obj, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var data, node, obj, omitKeys, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     data = Class.deserialize(reqBody);
+    omitKeys = _und.union(['id'], _und.keys(MetaSchema));
+    data = _und.omit(data, omitKeys);
     _und.extend(data, MetaSchema);
+    console.log(data);
     node = db.neo.createNode(data);
     obj = new Class(node);
     (function(__iced_k) {
@@ -134,7 +139,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 77
+        lineno: 87
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -166,6 +171,8 @@
   };
 
   Neo.put = function(Class, nodeId, reqBody, cb) {
+    var data;
+    data = Class.deserialize(reqBody);
     return Class.get(nodeId, function(err, obj) {
       var saveErr, valid, ___iced_passed_deferral, __iced_deferrals, __iced_k,
         _this = this;
@@ -174,7 +181,7 @@
       if (err) {
         return cb(err, null);
       }
-      valid = obj.update(reqBody);
+      valid = obj.update(data);
       (function(__iced_k) {
         if (valid) {
           (function(__iced_k) {
@@ -188,7 +195,7 @@
                   return saveErr = arguments[0];
                 };
               })(),
-              lineno: 103
+              lineno: 115
             }));
             __iced_deferrals._fulfill();
           })(__iced_k);
@@ -249,7 +256,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 136
+        lineno: 148
       }));
       __iced_deferrals._fulfill();
     })(function() {
