@@ -58,8 +58,11 @@ cypherQueryConstructor = (searchClass, name = '', attrMatches = [], relMatches =
     console.log "relMatches: #{relMatches}"
 
     name = name.replace(' ', encodeURIComponent(' '))
-    attrMatches = attrMatches.replace(' ', encodeURIComponent(' '))
-    relMatches = relMatches.replace(' ', encodeURIComponent(' '))
+
+    attrMatches = _und.map(attrMatches,
+        (attrMatch) => attrMatch.replace(' ', encodeURIComponent(' ')))
+    relMatches = _und.map(relMatches,
+        (relMatch) => relMatch.replace(' ', encodeURIComponent(' ')))
 
     #potential injection attack
     startNodeQ = "START n=node:__indexName__('name:#{name}~0.65')"

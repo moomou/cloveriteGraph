@@ -842,7 +842,7 @@
         });
         if (relation['src_dst']) {
           linkName = Link.normalizeName(relation['src_dst']['name']);
-          linkData = Link.cleanData(relation['src_dst']['data']);
+          linkData = Link.deserialize(relation['src_dst']['data']);
           srcEntity._node.createRelationshipTo(dstEntity._node, linkName, linkData, __iced_deferrals.defer({
             assign_fn: (function() {
               return function() {
@@ -863,7 +863,7 @@
           });
           if (relation['dst_src']) {
             linkName = Link.normalizeName(relation['dst_src']['name']);
-            linkData = Link.cleanData(relation['dst_src']['data']);
+            linkData = Link.deserialize(relation['dst_src']['data']);
             dstEntity._node.createRelationshipTo(srcEntity._node, linkName, linkData, __iced_deferrals.defer({
               assign_fn: (function() {
                 return function() {
@@ -871,7 +871,7 @@
                   return dst_srcRel = arguments[1];
                 };
               })(),
-              lineno: 322
+              lineno: 323
             }));
           }
           __iced_deferrals._fulfill();

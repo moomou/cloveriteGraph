@@ -76,7 +76,8 @@
   };
 
   cypherQueryConstructor = function(searchClass, name, attrMatches, relMatches) {
-    var attrMatchQ, attrName, endQ, ind, relMatchQ, relName, startNodeQ, _i, _j, _len, _len1;
+    var attrMatchQ, attrName, endQ, ind, relMatchQ, relName, startNodeQ, _i, _j, _len, _len1,
+      _this = this;
     if (name == null) {
       name = '';
     }
@@ -90,8 +91,12 @@
     console.log("attrMatches: " + attrMatches);
     console.log("relMatches: " + relMatches);
     name = name.replace(' ', encodeURIComponent(' '));
-    attrMatches = attrMatches.replace(' ', encodeURIComponent(' '));
-    relMatches = relMatches.replace(' ', encodeURIComponent(' '));
+    attrMatches = _und.map(attrMatches, function(attrMatch) {
+      return attrMatch.replace(' ', encodeURIComponent(' '));
+    });
+    relMatches = _und.map(relMatches, function(relMatch) {
+      return relMatch.replace(' ', encodeURIComponent(' '));
+    });
     startNodeQ = "START n=node:__indexName__('name:" + name + "~0.65')";
     endQ = 'RETURN DISTINCT n AS result;';
     attrMatchQ = [];
@@ -158,7 +163,7 @@
               return __slot_1[__slot_2] = arguments[1];
             };
           })(results, ind),
-          lineno: 113
+          lineno: 116
         }));
       }
       __iced_deferrals._fulfill();
