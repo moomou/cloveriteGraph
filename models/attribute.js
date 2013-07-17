@@ -102,6 +102,8 @@
 
   Attribute.INDEX_NAME = INDEX_NAME;
 
+  Attribute.Indexes = Indexes;
+
   Attribute.deserialize = function(data) {
     return Neo.deserialize(AttributeSchema, data);
   };

@@ -55,6 +55,7 @@ Static Method
 ###
 Attribute.Name = 'nAttribute'
 Attribute.INDEX_NAME = INDEX_NAME
+Attribute.Indexes = Indexes
 
 Attribute.deserialize = (data) ->
     Neo.deserialize AttributeSchema, data

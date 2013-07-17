@@ -17,6 +17,7 @@ StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
 
+# Support Functions
 getStartEndIndex = (start, rel, end) ->
     "#{start}_#{rel}_#{end}"
 
@@ -29,6 +30,8 @@ getOutgoingRelsCypherQuery = (startId, relType) ->
         cypher += "WHERE type(r) = '#{Link.normalizeName relType}'"
 
     cypher += " RETURN r;"
+
+# END -- 
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
@@ -105,7 +108,25 @@ exports.show = (req, res, next) ->
 #PUT /entity/:id
 exports.edit = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(err, entity)
-    return next err if err
+    return next(err) if err
+
+    # Need to refactor later
+    errs = []
+    tagObjs = []
+    tags = req.body['tags'] ? []
+
+    await
+        for tagName, ind in tags
+            Tag.getOrCreate tagName, defer(errs[ind], tagObjs[ind])
+
+    err = _und.find(errs, (err) -> err)
+    return next(err) if err
+
+    #"tag" entity
+    for tagObj, ind in tagObjs
+        tagObj._node.createRelationshipTo entity._node,
+            Constants.REL_TAG, {},
+            (err, rel) ->
 
     await entity.serialize defer blob
     res.json blob

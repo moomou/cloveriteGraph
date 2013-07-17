@@ -49,6 +49,8 @@
 
   Tag.INDEX_NAME = INDEX_NAME;
 
+  Tag.Indexes = Indexes;
+
   Tag.deserialize = function(data) {
     return Neo.deserialize(TagSchema, data);
   };

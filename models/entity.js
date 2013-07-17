@@ -160,6 +160,8 @@
 
   Entity.INDEX_NAME = INDEX_NAME;
 
+  Entity.Indexes = Indexes;
+
   Entity.deserialize = function(data) {
     return Neo.deserialize(EntitySchema, data);
   };

@@ -74,6 +74,7 @@ Static Method
 ###
 Entity.Name = 'nEntity'
 Entity.INDEX_NAME = INDEX_NAME
+Entity.Indexes = Indexes
 
 Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data

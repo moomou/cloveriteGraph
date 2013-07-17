@@ -7,7 +7,6 @@ Neo = require './neo'
 redis = Setup.db.redis
 
 INDEX_NAME = 'nTag'
-
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
@@ -31,6 +30,7 @@ Static Method
 ###
 Tag.Name = 'nTag'
 Tag.INDEX_NAME = INDEX_NAME
+Tag.Indexes = Indexes
 
 Tag.deserialize = (data) ->
     Neo.deserialize TagSchema, data

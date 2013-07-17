@@ -115,6 +115,8 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
         if valid
             await obj.save defer(saveErr)
 
+        Neo.index(obj._node, Class.Indexes, reqBody)
+
         return cb(saveErr, null) if saveErr
         return cb(null, obj)
 

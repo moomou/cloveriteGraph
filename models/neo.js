@@ -203,6 +203,7 @@
           return __iced_k();
         }
       })(function() {
+        Neo.index(obj._node, Class.Indexes, reqBody);
         if (saveErr) {
           return cb(saveErr, null);
         }
@@ -256,7 +257,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 148
+        lineno: 150
       }));
       __iced_deferrals._fulfill();
     })(function() {
