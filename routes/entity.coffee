@@ -1,7 +1,5 @@
 #entity.coffee
 #Routes to CRUD entities
-require('source-map-support').install()
-
 _und = require('underscore')
 
 Neo = require('../models/neo')
@@ -17,10 +15,9 @@ StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
 
-# Support Functions
-getStartEndIndex = (start, rel, end) ->
-    "#{start}_#{rel}_#{end}"
+Utility = require('./utility')
 
+# Support Functions
 getOutgoingRelsCypherQuery = (startId, relType) ->
     cypher = "START n=node(#{startId}) MATCH n-[r]->other "
 
@@ -73,32 +70,8 @@ exports.show = (req, res, next) ->
     return next err if err
 
     if req.query['attr'] != "false"
-        rels = []
-        attrBlobs = []
-
         await
-            entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
-                defer(err, nodes)
-        return next err if err
-
-        await
-            for node, ind in nodes
-                startendVal = getStartEndIndex(node.id,
-                    Constants.REL_ATTRIBUTE,
-                    entity._node.id
-                )
-
-                Link.find('startend', startendVal, defer(err, rels[ind]))
-                (new Attribute node).serialize(defer(attrBlobs[ind]), entity._node.id)
-
-        for blob, ind in attrBlobs
-            if rels[ind]
-                linkData = linkData:rels[ind].serialize()
-            else
-                linkData = linkData:{}
-                
-            _und.extend(blob, linkData)
- 
+            Utility.getEntityAttributes(entity, defer(attrBlobs))
         entityBlob = entity.serialize(null, attributes: attrBlobs)
     else
         entityBlob = entity.serialize(null, entityBlob)
@@ -158,7 +131,7 @@ exports.listAttribute = (req, res, next) ->
 
     await
         for node, ind in nodes
-            startendVal = getStartEndIndex(node.id,
+            startendVal = Utility.getStartEndIndex(node.id,
                 Constants.REL_ATTRIBUTE,
                 req.params.id
             )
@@ -191,7 +164,7 @@ exports.addAttribute = (req, res, next) ->
     return next(errA) if errA
 
     linkData = Link.normalizeData _und.clone(req.body['linkData'] || {})
-    linkData['startend'] = getStartEndIndex(
+    linkData['startend'] = Utility.getStartEndIndex(
         attr._node.id,
         Constants.REL_ATTRIBUTE,
         req.params.id
@@ -220,7 +193,7 @@ exports.getAttribute = (req, res, next) ->
     attrId = req.params.aId
     entityId = req.params.eId
 
-    startendVal = getStartEndIndex(attrId,
+    startendVal = Utility.getStartEndIndex(attrId,
         Constants.REL_ATTRIBUTE,
         entityId
     )

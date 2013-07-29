@@ -13,6 +13,8 @@ StdSchema = require('../models/stdSchema')
 Constants = StdSchema.Constants
 Response = StdSchema
 
+Utility = require('./utility')
+
 attrSplit = /\bwith\b/
 relSplit = /\bat\b/
 
@@ -121,7 +123,12 @@ exports.searchHandler = (req, res, next) ->
 
     for result, indX in results
         for obj, indY in result #always return entity results
-            entitySerialized = (new Entity obj.result).serialize()
+            entity = (new Entity obj.result)
+
+            await
+                Utility.getEntityAttributes(entity, defer(attrBlobs))
+
+            entitySerialized = entity.serialize(null, attributes: attrBlobs)
 
             if not identified[entitySerialized.id] #do not duplicate result
                 blobResults.push(entitySerialized)
