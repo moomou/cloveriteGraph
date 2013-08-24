@@ -27,12 +27,15 @@ getOutgoingRelsCypherQuery = (startId, relType) ->
         cypher += "WHERE type(r) = '#{Link.normalizeName relType}'"
 
     cypher += " RETURN r;"
-
 # END -- 
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
     res.redirect "/search/?q=#{req.query['q']}"
+
+###
+# Entity section
+###
 
 # POST /entity
 exports.create = (req, res, next) ->
@@ -115,6 +118,10 @@ exports.del = (req, res, next) ->
 
     res.status(204).send()
 
+###
+# Entity Attribute Section
+###
+
 #GET /entity/:id/attribute
 exports.listAttribute = (req, res, next) ->
     await Entity.get req.params.id, defer(errE, entity)
@@ -163,7 +170,9 @@ exports.addAttribute = (req, res, next) ->
     return next(errE) if errE
     return next(errA) if errA
 
-    linkData = Link.normalizeData _und.clone(req.body['linkData'] || {})
+    linkData = Link.normalizeData _und.clone(req.body || {})
+    console.log linkData
+
     linkData['startend'] = Utility.getStartEndIndex(
         attr._node.id,
         Constants.REL_ATTRIBUTE,
@@ -255,6 +264,11 @@ exports.voteAttribute = (req, res, next) ->
     entity.vote attr, vote, (err, voteTally) ->
         return res.status(500) if err
         res.send(voteTally)
+
+
+###
+# Entity Relation section
+###
 
 # GET /entity/:id/relation
 exports.listRelation = (req, res, next) ->

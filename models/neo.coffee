@@ -74,7 +74,7 @@ Neo.index = (node, indexes, reqBody, cb = null) ->
                 cb(null, ind) if cb
 
 Neo.create = (Class, reqBody, indexes, cb) ->
-    #Clean input data
+    # Clean input data
     data = Class.deserialize(reqBody)
     omitKeys = _und.union(['id'], _und.keys(MetaSchema))
     data = _und.omit(data, omitKeys)

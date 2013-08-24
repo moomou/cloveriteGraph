@@ -66,7 +66,3 @@
   Vote.INDEX_NAME = INDEX_NAME;
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=vote.map
-*/

@@ -7,9 +7,12 @@ b-cov
 *.pid
 *.gz
 *.swp
+*.map
 
 pids
 logs
 results
+tags
+node_modules
 
 npm-debug.log

@@ -258,7 +258,3 @@
   };
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=search.map
-*/

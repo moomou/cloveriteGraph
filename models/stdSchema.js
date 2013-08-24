@@ -61,7 +61,3 @@
   })();
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=stdSchema.map
-*/

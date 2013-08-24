@@ -1,9 +1,7 @@
-require('source-map-support').install()
-
+useragent = require('express-useragent')
 express = require('express')
 routes = require('./routes')
 http = require('http')
-useragent = require('express-useragent')
 path = require('path')
 
 app = express()
@@ -15,7 +13,7 @@ app.use(express.bodyParser())
 app.use(express.methodOverride())
 app.use(useragent.express())
 
-#app.use(app.router)
+app.use(app.router)
 
 #development only
 if ('development' == app.get('env'))
@@ -64,11 +62,10 @@ app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute)
 # POST - add comment
 # GET - get all comment
 # DEL - delete a comment
-###
-
 app.post('/entity/:id/comment', routes.entity.addComment)
 app.get('/entity/:id/comment', routes.entity.listComment)
 app.del('/entity/:id/comment', routes.entity.delComment)
+###
 
 ###
 # Entity Relation

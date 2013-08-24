@@ -25,8 +25,11 @@ Indexes = [
 ]
 
 LinkSchema = {
+    # configured value
     srcURL: '',      #link to data source
     description: '', #describing what this attribute is
+
+    # calculated value
     value: '',       #data value: string, number, and boolean
     veracity: 0      #whehter this link is factual or not
 }

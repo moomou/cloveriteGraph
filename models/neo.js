@@ -294,7 +294,3 @@
   Neo.createLink = function(srcNode, destNode, linkName, linkData, cb) {};
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=neo.map
-*/

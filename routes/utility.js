@@ -116,7 +116,3 @@
   };
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=utility.map
-*/

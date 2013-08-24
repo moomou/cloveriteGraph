@@ -39,7 +39,3 @@
   })(Neo);
 
 }).call(this);
-
-/*
-//@ sourceMappingURL=file.map
-*/
