@@ -2,7 +2,6 @@
 #Routes to CRUD entities
 
 require('source-map-support').install()
-
 _und = require('underscore')
 
 Neo = require('../models/neo')
@@ -20,7 +19,7 @@ exports.search = (req, res, next) ->
 exports.create = (req, res, next) ->
     await Attribute.create req.body, defer(err, attr)
     return next(err) if err
-    
+
     await attr.serialize defer(blob)
     res.json blob
 
@@ -29,9 +28,7 @@ exports.show = (req, res, next) ->
     if isNaN req.params.id
         return res.json {}
 
-    await
-        Attribute.get req.params.id, defer(err, attr)
-
+    await Attribute.get req.params.id, defer(err, attr)
     return next err if err
 
     entityId = req.query['entityId'] ? null
@@ -81,8 +78,9 @@ exports.listEntity = (req, res, next) ->
             defer(err, nodes)
 
     return next err if err
-    
+
     blobs = []
+
     await
         for node, ind in nodes
             (new Entity node).serialize defer(blobs[ind])

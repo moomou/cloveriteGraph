@@ -50,6 +50,7 @@ module.exports = class Attribute extends Neo
         }
 
         super cb, voteTally
+
 ###
 Static Method
 ###
@@ -59,13 +60,13 @@ Attribute.Indexes = Indexes
 
 Attribute.deserialize = (data) ->
     Neo.deserialize AttributeSchema, data
- 
+
 Attribute.create = (reqBody, cb) ->
     Neo.create Attribute, reqBody, Indexes, cb
 
 Attribute.get = (id, cb) ->
     Neo.get Attribute, id, cb
- 
+
 Attribute.getOrCreate = (reqBody, cb) ->
     Neo.getOrCreate Attribute, reqBody, cb
 

@@ -21,54 +21,92 @@ app.use(useragent.express())
 if ('development' == app.get('env'))
   app.use(express.errorHandler())
 
-  ##Routes
-#Global Function  
-#app.get('/search', routes.search.searchHandler)
+###
+# Routes
+###
+
+#Search Handler for multiple resource
 app.get('/search/:type?', routes.search.searchHandler)
 
-#Entity
+###
+# Entity Method
+# POST
+# GET
+# DEL
+# PUT
+###
+
 app.post('/entity', routes.entity.create)
-app.get('/entity/search', routes.entity.search)
 app.get('/entity/:id', routes.entity.show)
 app.put('/entity/:id', routes.entity.edit)
 app.del('/entity/:id', routes.entity.del)
 
-#Entity->attribute
-app.post('/entity/:id/attribute', routes.entity.addAttribute)
+app.get('/entity/search', routes.entity.search)
 
+###
+# Entity Attribute  Method
+# POST - add attribute
+# GET - get all attribute
+# DEL - delete an attribute
+# PUT - update Attribute
+###
+
+app.post('/entity/:id/attribute', routes.entity.addAttribute)
 app.get('/entity/:id/attribute', routes.entity.listAttribute)
 app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute)
 app.put('/entity/:eId/attribute/:aId', routes.entity.updateAttributeLink)
 app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute)
+
 app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute)
 
-#Entity->comment
+### TODO
+# Entity Comment Method
+# POST - add comment
+# GET - get all comment
+# DEL - delete a comment
 ###
+
 app.post('/entity/:id/comment', routes.entity.addComment)
-app.post('/entity/:eId/attribute/:aId/comment', routes.entity.addComment)
-
 app.get('/entity/:id/comment', routes.entity.listComment)
-app.get('/entity/:eId/attribute/:aId/comment', routes.entity.listComment)
-
 app.del('/entity/:id/comment', routes.entity.delComment)
-app.del('/entity/:eId/attribute/:aId/comment', routes.entity.delComment)
+
+###
+# Entity Relation
+# Entity Comment Method
+# GET - get relation
+# POST - add relation
+# DEL - delete a comment
 ###
 
-#Entity->relation
-app.get('/entity/:id/:relation', routes.entity.listRelation) #return entity connected by relation, can be prefix or exact match
-app.get('/entity/:id/relation', routes.entity.listRelation)  #returns all relationship
+#return entity connected by relation, can be prefix or exact match
+app.get('/entity/:id/:relation', routes.entity.listRelation)
+
+#returns all relationship
+app.get('/entity/:id/relation', routes.entity.listRelation)
 
 app.post('/entity/:srcId/relation/entity/:dstId', routes.entity.linkEntity)
 app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity)
 
-#Attribute
+###
+# Attribute
+# POST
+# GET
+# DEL
+# PUT
+###
+
 app.post('/attribute', routes.attribute.create)
-app.get('/attribute/search', routes.attribute.search)
 app.get('/attribute/:id', routes.attribute.show)
 app.put('/attribute/:id', routes.attribute.edit)
 app.del('/attribute/:id', routes.attribute.del)
 
-#Attribute->entity
+app.get('/attribute/search', routes.attribute.search)
+
+###
+# Attribute Entity
+# GET - get all entity who have this attribute
+###
+
 app.get('/attribute/:id/entity', routes.attribute.listEntity)
 
 http.createServer(app).listen(app.get('port'), ->
