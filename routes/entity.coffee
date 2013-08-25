@@ -31,6 +31,7 @@ getOutgoingRelsCypherQuery = (startId, relType) ->
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
+    console.log "HI"
     res.redirect "/search/?q=#{req.query['q']}"
 
 ###

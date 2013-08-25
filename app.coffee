@@ -1,8 +1,8 @@
-useragent = require('express-useragent')
 express = require('express')
-routes = require('./routes')
 http = require('http')
-path = require('path')
+useragent = require('express-useragent')
+
+routes = require('./routes')
 
 app = express()
 
@@ -33,13 +33,13 @@ app.get('/search/:type?', routes.search.searchHandler)
 # DEL
 # PUT
 ###
+app.get('/entity/search', routes.entity.search)
 
 app.post('/entity', routes.entity.create)
 app.get('/entity/:id', routes.entity.show)
 app.put('/entity/:id', routes.entity.edit)
 app.del('/entity/:id', routes.entity.del)
 
-app.get('/entity/search', routes.entity.search)
 
 ###
 # Entity Attribute  Method
@@ -91,13 +91,13 @@ app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity)
 # DEL
 # PUT
 ###
+app.get('/attribute/search', routes.attribute.search)
 
 app.post('/attribute', routes.attribute.create)
 app.get('/attribute/:id', routes.attribute.show)
 app.put('/attribute/:id', routes.attribute.edit)
 app.del('/attribute/:id', routes.attribute.del)
 
-app.get('/attribute/search', routes.attribute.search)
 
 ###
 # Attribute Entity

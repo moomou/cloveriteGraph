@@ -110,6 +110,24 @@
         }
       }
     },
+    "express-useragent": {
+      "version": "0.0.7-1",
+      "from": "express-useragent@"
+    },
+    "iced-coffee-script": {
+      "version": "1.6.2d",
+      "from": "iced-coffee-script@",
+      "resolved": "https://registry.npmjs.org/iced-coffee-script/-/iced-coffee-script-1.6.2d.tgz"
+    },
+    "restler": {
+      "version": "2.0.1",
+      "from": "restler@"
+    },
+    "underscore": {
+      "version": "1.4.4",
+      "from": "underscore@",
+      "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.4.4.tgz"
+    },
     "redis": {
       "version": "0.8.3",
       "from": "redis@",
@@ -146,6 +164,43 @@
       "version": "1.6.3",
       "from": "coffee-script@1.6.3",
       "resolved": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.6.3.tgz"
+    },
+    "coffee-script-mapped": {
+      "version": "0.1.4",
+      "from": "coffee-script-mapped@",
+      "resolved": "https://registry.npmjs.org/coffee-script-mapped/-/coffee-script-mapped-0.1.4.tgz",
+      "dependencies": {
+        "source-map": {
+          "version": "0.1.23",
+          "from": "source-map@0.1.x",
+          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.1.23.tgz",
+          "dependencies": {
+            "amdefine": {
+              "version": "0.0.5",
+              "from": "amdefine@>=0.0.4",
+              "resolved": "https://registry.npmjs.org/amdefine/-/amdefine-0.0.5.tgz"
+            }
+          }
+        }
+      }
+    },
+    "source-map-support": {
+      "version": "0.1.6",
+      "from": "source-map-support@",
+      "resolved": "https://registry.npmjs.org/source-map-support/-/source-map-support-0.1.6.tgz",
+      "dependencies": {
+        "source-map": {
+          "version": "0.1.8",
+          "from": "source-map@0.1.8",
+          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.1.8.tgz",
+          "dependencies": {
+            "amdefine": {
+              "version": "0.0.5",
+              "from": "amdefine@>=0.0.4"
+            }
+          }
+        }
+      }
     }
   }
 }
