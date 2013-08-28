@@ -1,6 +1,8 @@
 #entity.coffee
 #Routes to CRUD entities
 _und = require('underscore')
+rest = require('restler')
+Logger = require('util')
 
 Neo = require('../models/neo')
 
@@ -12,6 +14,7 @@ Vote = require('../models/vote')
 Link = require('../models/link')
 
 StdSchema = require('../models/stdSchema')
+
 Constants = StdSchema.Constants
 Response = StdSchema
 
@@ -27,7 +30,17 @@ getOutgoingRelsCypherQuery = (startId, relType) ->
         cypher += "WHERE type(r) = '#{Link.normalizeName relType}'"
 
     cypher += " RETURN r;"
-# END -- 
+
+getJSONData = (remoteAddress, cb) ->
+    rest.get(remoteAddress).on 'complete', (remoteData, remoteRes) ->
+        if not remoteRes?
+            cb("")
+        else if remoteRes? and remoteRes.headers['content-type'].indexOf('application/json') isnt -1
+            cb(remoteData)
+        else
+            cb("N/A")
+
+# END --
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
@@ -123,7 +136,7 @@ exports.del = (req, res, next) ->
 # Entity Attribute Section
 ###
 
-#GET /entity/:id/attribute
+# GET /entity/:id/attribute
 exports.listAttribute = (req, res, next) ->
     await Entity.get req.params.id, defer(errE, entity)
     return next(err) if err
@@ -152,18 +165,19 @@ exports.listAttribute = (req, res, next) ->
             linkData = linkData:rels[ind].serialize()
         else
             linkData = linkData:{}
-            
+
         _und.extend(blob, linkData)
-    
+
     res.json(blobs)
 
-#POST /entity/:id/attribute
+# POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
+
+    # Clean Data
     data = _und.clone req.body
     delete data['id']
 
-    console.log data
-
+    # Retrieve the 2 entities
     await
         Entity.get req.params.id, defer(errE, entity)
         Attribute.getOrCreate data, defer(errA, attr)
@@ -171,26 +185,70 @@ exports.addAttribute = (req, res, next) ->
     return next(errE) if errE
     return next(errA) if errA
 
-    linkData = Link.normalizeData _und.clone(req.body || {})
-    console.log linkData
+    await
+        entity._node.path attr._node,
+            Constants.REL_ATTRIBUTE,
+            "all",   #direction
+            1,       # depth
+            'shortestPath', #algo - cannot change?
+            defer(errPath, path)
 
+    return next(errPath) if errPath
+
+    linkData = Link.normalizeData _und.clone(req.body || {})
     linkData['startend'] = Utility.getStartEndIndex(
         attr._node.id,
         Constants.REL_ATTRIBUTE,
         req.params.id
     )
-    
-    await attr._node.createRelationshipTo entity._node,
-        Constants.REL_ATTRIBUTE,
-        linkData,
-        defer(err, rel)
 
-    return next(err) if err
+    console.log "__NEW__"
+    console.log linkData
+    console.log "__END__"
+
+    # If Path already exists
+    if path
+        splits = path.relationships[0]._data.self.split('/')
+        relId = splits[splits.length - 1]
+
+        await
+            Link.get relId, defer(err, link)
+        existingLinkData = link.serialize()
+
+        console.log "__EXISTING__"
+        console.log existingLinkData
+        console.log "__END__"
+
+        # Updating Remote Data
+        if existingLinkData.srcURL != linkData.srcURL
+            await getJSONData(linkData.srcURL, defer(value))
+            linkData.value = value
+            linkData.type = if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
+
+        linkData = _und.extend existingLinkData, linkData
+
+        console.log "__MERGED__"
+        console.log linkData
+        console.log "__END__"
+
+        Link.put relId, linkData, ->
+        rel = path.relationships[0]
+    else
+        await getJSONData(linkData.srcURL, defer(value))
+        linkData.value = value
+        linkData.type = if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
+        linkData = Link.fillMetaData(linkData)
+
+        await attr._node.createRelationshipTo entity._node,
+            Constants.REL_ATTRIBUTE,
+            linkData,
+            defer(err, rel)
+        return next(err) if err
+
     Link.index(rel, linkData)
-    
-    await attr.serialize defer blob
 
-    _und.extend(blob, linkData: linkData)
+    await attr.serialize defer blob
+    _und.extend blob, linkData: linkData
     res.status(201).json blob
 
 #DELETE /entity/:eId/attribute/:aId
@@ -218,8 +276,7 @@ exports.getAttribute = (req, res, next) ->
     blob = {}
     await attr.serialize(defer(blob), entityId)
 
-    _und.extend(blob, linkData:rel.serialize())
-
+    _und.extend(blob, linkData: rel.serialize())
     res.json blob
 
 #PUT /entity/:id/attribute/:id
@@ -246,7 +303,7 @@ exports.voteAttribute = (req, res, next) ->
     await
         Entity.get req.params.eId, defer(errE, entity)
         Attribute.get req.params.aId, defer(errA, attr)
-   
+
     if errE
         console.log "errE"
         return next(errE)
@@ -298,7 +355,7 @@ exports.listRelation = (req, res, next) ->
             }
 
             rel.serialize defer(blobs[ind]), extraData
-                
+
     res.json(blob for blob in blobs)
 
 # POST /entity/:id/relation/entity/:id
@@ -309,7 +366,7 @@ exports.linkEntity = (req, res, next) ->
 
     return next(errSrc) if errSrc
     return next(errDst) if errDst
-    
+
     relation = req.body
 
     await
@@ -326,7 +383,7 @@ exports.linkEntity = (req, res, next) ->
         if relation['dst_src']
             linkName  = Link.normalizeName(relation['dst_src']['name'])
             linkData = Link.deserialize(relation['dst_src']['data'])
-             
+
             dstEntity._node.createRelationshipTo srcEntity._node,
                 linkName,
                 linkData,

@@ -1,6 +1,8 @@
 #attribute.coffee
 #attribute model logic.
+
 _und = require 'underscore'
+Logger = require('util')
 
 Setup = require './setup'
 Neo = require './neo'
@@ -68,6 +70,7 @@ Attribute.get = (id, cb) ->
     Neo.get Attribute, id, cb
 
 Attribute.getOrCreate = (reqBody, cb) ->
+    Logger.debug("Attribute getOrCreate")
     Neo.getOrCreate Attribute, reqBody, cb
 
 Attribute.put = (nodeId, reqBody, cb) ->

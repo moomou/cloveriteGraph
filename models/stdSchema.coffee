@@ -5,6 +5,7 @@ exports.Constants = Constants = {
     INDEX_KEY: 'type',
     INDEX_VAL: 'entity',
 
+    # Generic Relation
     REL_LOCATION: '_LOCATION',
     REL_VOTE: '_VOTE',
     REL_AWARD: '_AWARD',
@@ -13,7 +14,16 @@ exports.Constants = Constants = {
     REL_CHILD: '_CHILD',
     REL_CONTAINER: '_CONTAINER',
     REL_RESOURCE: '_RESOURCE',
-    REL_TAG: '_TAG'
+    
+    REL_TAG: '_TAG',
+
+    # User to Entity, Attribute
+    REL_CREATED: '_CREATED',
+    REL_MODIFIED: '_MODIFIED',
+
+    # Attr Type
+    ATTR_NUMERIC: "attr_numeric",
+    ATTR_REFERENCE: "attr_ref"
 }
 
 ###
@@ -24,6 +34,7 @@ exports.ErrorResponse = class ErrorResponse
         @msg,       #message describing the problem
         @fix        #potential fix
     ) ->
+
     serialize: ->
         return {
             message: @msg,

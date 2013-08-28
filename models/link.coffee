@@ -51,7 +51,8 @@ Link.normalizeName = (name) ->
     "_#{name.toUpperCase()}"
 
 Link.normalizeData = (linkData) ->
-    Link.fillMetaData Link.deserialize(linkData)
+    Link.deserialize(linkData)
+    #Link.fillMetaData 
 
 Link.index = (rel, reqBody, cb = null) ->
     Neo.index(rel, Indexes, reqBody, cb)
@@ -73,8 +74,8 @@ Link.get = (id, cb) ->
     Neo.getRel(Link, id, cb)
 
 Link.put = (relId, reqBody, cb) ->
-    data = Link.deserialize(reqBody)
-    Neo.put(Link, relId, data, cb)
+    console.log "Link PUT: "
+    Neo.put(Link, relId, reqBody, cb)
 
 Link.create = (reqBody, cb) ->
     linkName  = Link.normalizeName(reqBody['name'])

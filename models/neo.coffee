@@ -1,4 +1,6 @@
 _und = require 'underscore'
+Logger = require 'util'
+
 Setup = require './setup'
 db = Setup.db
 
@@ -26,7 +28,11 @@ module.exports = class Neo
         return data
 
     update: (newData) ->
+        console.log "Data VER: " + @_node.data.version
+        console.log "New VER: " + newData.version
+
         if newData.version != @_node.data.version
+            console.log "Invalid Update Requested"
             return false
         _und.extend @_node.data, newData
         return true
@@ -114,10 +120,9 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
 
         if valid
             await obj.save defer(saveErr)
+            Neo.index(obj._node, Class.Indexes, reqBody)
+            return cb(saveErr, null) if saveErr
 
-        Neo.index(obj._node, Class.Indexes, reqBody)
-
-        return cb(saveErr, null) if saveErr
         return cb(null, obj)
 
 Neo.findRel = (Class, indexName, key, value, cb) ->
@@ -130,6 +135,7 @@ Neo.findRel = (Class, indexName, key, value, cb) ->
             return cb(null, null)
 
 Neo.find = (Class, indexName, key, value, cb) ->
+    Logger.debug("Neo Find: " + indexName)
     db.neo.getIndexedNode indexName,
         key,
         value,
@@ -142,16 +148,18 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
     if reqBody['id']
         return Class.get reqBody['id'], cb
     
-    #No Id provided, search for it
-    await
-        Neo.find Class,
-            Class.INDEX_NAME,
-            'name',
-            reqBody['name'],
-            defer(err, obj)
+    Logger.debug 'Neo Get or Create'
+    Logger.debug Class
+
+    # No Id provided, search for it
+    await Neo.find Class,
+        Class.INDEX_NAME,
+        'name',
+        reqBody['name'],
+        defer(err, obj)
 
     if obj
-        console.log Class.Name + ": " + reqBody.toString()
+        Logger.debug "Neo Find Returned " + Class.Name + ": " + reqBody.toString()
         return cb(null, obj) if obj
 
     #Not found, create

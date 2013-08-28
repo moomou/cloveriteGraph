@@ -1,5 +1,6 @@
 #entity.coffee
 _und = require 'underscore'
+Logger = require('util')
 
 Setup = require './setup'
 Neo = require './neo'
@@ -86,6 +87,7 @@ Entity.get = (id, cb) ->
     Neo.get Entity, id, cb
 
 Entity.getOrCreate = (reqBody, cb) ->
+    Logger.debug("Entity getOrCreate")
     Neo.getOrCreate Entity, reqBody, cb
 
 Entity.put = (nodeId, reqBody, cb) ->
