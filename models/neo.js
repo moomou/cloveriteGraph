@@ -132,6 +132,7 @@
     console.log(data);
     node = db.neo.createNode(data);
     obj = new Class(node);
+    console.log(obj);
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -144,7 +145,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 93
+        lineno: 95
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -200,7 +201,7 @@
                   return saveErr = arguments[0];
                 };
               })(),
-              lineno: 121
+              lineno: 123
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -267,7 +268,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 158
+        lineno: 160
       }));
       __iced_deferrals._fulfill();
     })(function() {

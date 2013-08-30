@@ -123,17 +123,75 @@
 
 
   /*
+  # Internal API for creating userNode
+  */
+
+  exports._createUser = function(req, cb) {
+    var accessToken, err, user, userToken, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    accessToken = req.header['ACCESS_TOKEN'];
+    userToken = req.body.userToken;
+    (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        filename: "utility.coffee",
+        funcname: "_createUser"
+      });
+      redis.isMemeber("superToken", isSuperAwesome);
+      __iced_deferrals._fulfill();
+    })(function() {
+      (function(__iced_k) {
+        if (isSuperAwesome) {
+          (function(__iced_k) {
+            __iced_deferrals = new iced.Deferrals(__iced_k, {
+              parent: ___iced_passed_deferral,
+              filename: "utility.coffee",
+              funcname: "_createUser"
+            });
+            User.create(__iced_deferrals.defer({
+              assign_fn: (function() {
+                return function() {
+                  err = arguments[0];
+                  return user = arguments[1];
+                };
+              })(),
+              lineno: 69
+            }));
+            __iced_deferrals._fulfill();
+          })(function() {
+            if (err) {
+              res.json({
+                error: err
+              });
+            }
+            return __iced_k(res.json(user.serialize()));
+          });
+        } else {
+          return __iced_k();
+        }
+      })(function() {
+        return res.status(403).json({
+          error: "Permission Denied"
+        });
+      });
+    });
+  };
+
+
+  /*
   # Reads http header to get access token
   # Exchange this token for a user unique identifier
   # then return the raw neo4j node of the user
   */
 
   exports.getUser = function(req, cb) {
-    var accessToken, err, neoUserId, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var accessToken, err, neoUserId, user, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
-    accessToken = req.header['ACCESS_TOKEN'];
+    accessToken = (_ref = req.header['ACCESS_TOKEN']) != null ? _ref : "none";
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -147,60 +205,32 @@
             return neoUserId = arguments[1];
           };
         })(),
-        lineno: 64
+        lineno: 86
       }));
       __iced_deferrals._fulfill();
     })(function() {
       err = user = null;
+      if (!neoUserId) {
+        return cb(null, null);
+      }
       (function(__iced_k) {
-        if (!neoUserId) {
-          (function(__iced_k) {
-            __iced_deferrals = new iced.Deferrals(__iced_k, {
-              parent: ___iced_passed_deferral,
-              filename: "utility.coffee",
-              funcname: "getUser"
-            });
-            User.create(__iced_deferrals.defer({
-              assign_fn: (function() {
-                return function() {
-                  err = arguments[0];
-                  return user = arguments[1];
-                };
-              })(),
-              lineno: 69
-            }));
-            __iced_deferrals._fulfill();
-          })(function() {
-            (function(__iced_k) {
-              __iced_deferrals = new iced.Deferrals(__iced_k, {
-                parent: ___iced_passed_deferral,
-                filename: "utility.coffee",
-                funcname: "getUser"
-              });
-              redis.set(accessToken, user._node.id);
-              __iced_deferrals._fulfill();
-            })(__iced_k);
-          });
-        } else {
-          (function(__iced_k) {
-            __iced_deferrals = new iced.Deferrals(__iced_k, {
-              parent: ___iced_passed_deferral,
-              filename: "utility.coffee",
-              funcname: "getUser"
-            });
-            User.get(neoUserId)(__iced_deferrals.defer({
-              assign_fn: (function() {
-                return function() {
-                  err = arguments[0];
-                  return user = arguments[1];
-                };
-              })(),
-              lineno: 72
-            }));
-            __iced_deferrals._fulfill();
-          })(__iced_k);
-        }
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "utility.coffee",
+          funcname: "getUser"
+        });
+        User.get(neoUserId, __iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              err = arguments[0];
+              return user = arguments[1];
+            };
+          })(),
+          lineno: 93
+        }));
+        __iced_deferrals._fulfill();
       })(function() {
+        console.log("Utility.getUser " + user);
         if (err) {
           cb(err, null);
         }

@@ -1,11 +1,13 @@
 _und = require 'underscore'
-Logger = require('util')
+Logger = require 'util'
+
+Neo = require './neo'
 
 Setup = require './setup'
-Neo = require './neo'
 redis = Setup.db.redis
 
 INDEX_NAME = 'nUser'
+
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
@@ -14,20 +16,20 @@ Indexes = [
     }
 ]
 
-
 UserSchema = {
     createdCount: 0,
     modifiedCount: 0,
     reputation: 'Z',
 }
 
-User.Name = 'nUser'
-User.INDEX_NAME = INDEX_NAME
-User.Indexes = Indexes
-
+#Private constructor
 module.exports = class User extends Neo
     constructor: (@_node) ->
         super @_node
+
+User.Name = 'nUser'
+User.INDEX_NAME = INDEX_NAME
+User.Indexes = Indexes
 
 User.deserialize = (data) ->
     Neo.deserialize UserSchema, data

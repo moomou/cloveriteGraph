@@ -38,6 +38,7 @@ module.exports = class Attribute extends Neo
     constructor: (@_node) ->
         super @_node
 
+    # Takes an entity id to retrieve vote in redis
     serialize: (cb, entityId) ->
         if not entityId
             return super(cb, null)

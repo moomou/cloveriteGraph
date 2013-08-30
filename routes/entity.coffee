@@ -31,6 +31,8 @@ getOutgoingRelsCypherQuery = (startId, relType) ->
 
     cypher += " RETURN r;"
 
+# Remote web service for reading
+# numeric json data
 getJSONData = (remoteAddress, cb) ->
     rest.get(remoteAddress).on 'complete', (remoteData, remoteRes) ->
         if not remoteRes?
@@ -42,9 +44,15 @@ getJSONData = (remoteAddress, cb) ->
 
 # END --
 
+            # TO CHANGE
+exports.permissionRequired = (req, res, next) ->
+    await Utility.getUser req, defer(err, user)
+
+    if not user
+        return res.status(403).json error: "Permission Denied"
+
 # GET /entity/search/
 exports.search = (req, res, next) ->
-    console.log "HI"
     res.redirect "/search/?q=#{req.query['q']}"
 
 ###
@@ -58,16 +66,15 @@ exports.create = (req, res, next) ->
     tags = req.body['tags'] ? []
 
     await
+        Entity.create req.body, defer(err, entity)
+
         for tagName, ind in tags
             Tag.getOrCreate tagName, defer(errs[ind], tagObjs[ind])
 
-    err = _und.find(errs, (err) -> err)
+    err = err or _und.find(errs, (err) -> err)
     return next(err) if err
 
-    await Entity.create req.body, defer(err, entity)
-    return next(err) if err
-
-    #"tag" entity
+    # "tag" entity
     for tagObj, ind in tagObjs
         tagObj._node.createRelationshipTo entity._node,
             Constants.REL_TAG, {},
@@ -76,7 +83,7 @@ exports.create = (req, res, next) ->
     await entity.serialize defer blob
     res.status(201).json blob
 
-#GET /entity/:id
+# GET /entity/:id
 exports.show = (req, res, next) ->
     if isNaN req.params.id
         return res.json {}
@@ -322,7 +329,6 @@ exports.voteAttribute = (req, res, next) ->
     entity.vote attr, vote, (err, voteTally) ->
         return res.status(500) if err
         res.send(voteTally)
-
 
 ###
 # Entity Relation section

@@ -10,9 +10,9 @@
 
   Logger = require('util');
 
-  Setup = require('./setup');
-
   Neo = require('./neo');
+
+  Setup = require('./setup');
 
   redis = Setup.db.redis;
 
@@ -32,12 +32,6 @@
     reputation: 'Z'
   };
 
-  User.Name = 'nUser';
-
-  User.INDEX_NAME = INDEX_NAME;
-
-  User.Indexes = Indexes;
-
   module.exports = User = (function(_super) {
     __extends(User, _super);
 
@@ -49,6 +43,12 @@
     return User;
 
   })(Neo);
+
+  User.Name = 'nUser';
+
+  User.INDEX_NAME = INDEX_NAME;
+
+  User.Indexes = Indexes;
 
   User.deserialize = function(data) {
     return Neo.deserialize(UserSchema, data);

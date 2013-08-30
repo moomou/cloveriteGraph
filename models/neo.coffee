@@ -91,6 +91,8 @@ Neo.create = (Class, reqBody, indexes, cb) ->
     node = db.neo.createNode data
     obj = new Class(node)
 
+    console.log obj
+
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr
 

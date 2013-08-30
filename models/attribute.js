@@ -70,7 +70,7 @@
               return upVote = arguments[1];
             };
           })(),
-          lineno: 45
+          lineno: 46
         }));
         redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::negative", __iced_deferrals.defer({
           assign_fn: (function() {
@@ -79,7 +79,7 @@
               return downVote = arguments[1];
             };
           })(),
-          lineno: 46
+          lineno: 47
         }));
         __iced_deferrals._fulfill();
       })(function() {

@@ -55,22 +55,44 @@ exports.getEntityAttributes = (entity, cb) ->
     cb attrBlobs
 
 ###
+# Internal API for creating userNode
+###
+
+exports._createUser = (req, cb) ->
+    accessToken = req.header['ACCESS_TOKEN']
+    userToken = req.body.userToken
+
+    # Access token, after user logs in 
+    # points to the neo4j userNode Id
+    await redis.isMemeber("superToken", isSuperAwesome)
+
+    if isSuperAwesome
+        await User.create defer(err, user)
+        res.json error: err if err
+        res.json user.serialize()
+
+    res.status(403).json error: "Permission Denied"
+
+###
 # Reads http header to get access token
 # Exchange this token for a user unique identifier
 # then return the raw neo4j node of the user
 ###
 
 exports.getUser = (req, cb) ->
-    accessToken = req.header['ACCESS_TOKEN']
+    accessToken = req.header['ACCESS_TOKEN'] ? "none"
+
+    # Access token, after user logs in 
+    # points to the neo4j userNode Id
     await redis.get(accessToken, defer(err, neoUserId))
 
     err = user = null
 
-    if (not neoUserId) # First time user
-        await User.create defer(err, user)
-        await redis.set(accessToken, user._node.id)
-    else
-        await User.get(neoUserId) defer(err, user)
-    
+    if (not neoUserId) # Anonymous users
+        return cb(null, null)
+
+    await User.get neoUserId, defer(err, user)
+    console.log "Utility.getUser #{user}"
+
     cb(err, null) if err
     cb(null, user)
