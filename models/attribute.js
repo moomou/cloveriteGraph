@@ -128,5 +128,3 @@
   };
 
 }).call(this);
-
-//# sourceMappingURL=attribute.map

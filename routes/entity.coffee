@@ -42,10 +42,26 @@ getJSONData = (remoteAddress, cb) ->
         else
             cb("N/A")
 
+hasPermission = (req) ->
+    await
+        Entity.get req.params.id, defer(errEntity, entity)
+        Utility.getUser req, defer(errUser, user)
+
+    err = errUser or errEntity
+    throw "Unable to retrieve from neo4j"
+
+    isPrivate = entity._node.data.private
+    if isPrivate is true and not Utility.hasLink(
+        user._node,
+        entity._node,
+        Constants.REL_ACCESS)
+        return false
+    return true
+
 # END --
 
-            # TO CHANGE
-exports.permissionRequired = (req, res, next) ->
+# TO CHANGE
+exports.permissionRequired = (req, res, cb) ->
     await Utility.getUser req, defer(err, user)
 
     if not user
@@ -61,10 +77,18 @@ exports.search = (req, res, next) ->
 
 # POST /entity
 exports.create = (req, res, next) ->
+    await Utility.getUser req, defer(err, user)
+    return next(err) if user
+
+    # anonymous user cannot create private entity
+    if not user
+        req.body['private'] = false
+
     errs = []
     tagObjs = []
     tags = req.body['tags'] ? []
 
+    # Create Entity and Tags
     await
         Entity.create req.body, defer(err, entity)
 
@@ -85,13 +109,10 @@ exports.create = (req, res, next) ->
 
 # GET /entity/:id
 exports.show = (req, res, next) ->
-    if isNaN req.params.id
-        return res.json {}
+    return res.json {} if isNaN req.params.id
 
-    await
-        Entity.get req.params.id, defer(err, entity)
-
-    return next err if err
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
 
     if req.query['attr'] != "false"
         await
@@ -104,6 +125,9 @@ exports.show = (req, res, next) ->
 
 #PUT /entity/:id
 exports.edit = (req, res, next) ->
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
+
     await Entity.put req.params.id, req.body, defer(err, entity)
     return next(err) if err
 
@@ -130,13 +154,19 @@ exports.edit = (req, res, next) ->
 
 #DELETE /entity/:id
 exports.del = (req, res, next) ->
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
+
+    await Entity.put req.params.id, req.body, defer(err, entity)
+    return next(err) if err
+
+
     await Entity.get req.params.id, defer(err, entity)
     return next err if err
 
     await entity.del defer(err)
 
     return next err if err
-
     res.status(204).send()
 
 ###
@@ -145,6 +175,9 @@ exports.del = (req, res, next) ->
 
 # GET /entity/:id/attribute
 exports.listAttribute = (req, res, next) ->
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
+
     await Entity.get req.params.id, defer(errE, entity)
     return next(err) if err
 
@@ -179,6 +212,8 @@ exports.listAttribute = (req, res, next) ->
 
 # POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
 
     # Clean Data
     data = _und.clone req.body
@@ -192,16 +227,6 @@ exports.addAttribute = (req, res, next) ->
     return next(errE) if errE
     return next(errA) if errA
 
-    await
-        entity._node.path attr._node,
-            Constants.REL_ATTRIBUTE,
-            "all",   #direction
-            1,       # depth
-            'shortestPath', #algo - cannot change?
-            defer(errPath, path)
-
-    return next(errPath) if errPath
-
     linkData = Link.normalizeData _und.clone(req.body || {})
     linkData['startend'] = Utility.getStartEndIndex(
         attr._node.id,
@@ -212,6 +237,9 @@ exports.addAttribute = (req, res, next) ->
     console.log "__NEW__"
     console.log linkData
     console.log "__END__"
+
+    # hasLink returns the link if it exists
+    path = Utility.hasLink(entity._node, attr._node, Constants.REL_ATTRIBUTE)
 
     # If Path already exists
     if path
@@ -260,11 +288,21 @@ exports.addAttribute = (req, res, next) ->
 
 #DELETE /entity/:eId/attribute/:aId
 exports.delAttribute = (req, res, next) -> #TODO
-    await Entity.get req.params.eId, defer(errE, entity)
-    await Attribute.get req.params.aId, defer(errA, attr)
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
+    res.status(404).json error: "Not Implemented"
+
+    ###
+    await
+        Entity.get req.params.eId, defer(errE, entity)
+        Attribute.get req.params.aId, defer(errA, attr)
+    ###
 
 #GET /entity/:id/attribute/:id
 exports.getAttribute = (req, res, next) ->
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
+
     attrId = req.params.aId
     entityId = req.params.eId
 
@@ -288,9 +326,11 @@ exports.getAttribute = (req, res, next) ->
 
 #PUT /entity/:id/attribute/:id
 exports.updateAttributeLink = (req, res, next) ->
+    if not hasPermission(req)
+        return res.status(401).json error: "Permission Denied"
+
     attrId = req.params.aId
     entityId = req.params.eId
-
     linkData = _und.clone(req.body['linkData'] || {})
 
     await
@@ -311,12 +351,8 @@ exports.voteAttribute = (req, res, next) ->
         Entity.get req.params.eId, defer(errE, entity)
         Attribute.get req.params.aId, defer(errA, attr)
 
-    if errE
-        console.log "errE"
-        return next(errE)
-    if errA
-        console.log "errA"
-        return next(errA)
+    err = errA or errE
+    return next(err) if err
 
     voteData = _und.clone req.body
     voteData.ipAddr = req.header['x-forwarded-for'] or req.connection.remoteAddress
@@ -334,6 +370,7 @@ exports.voteAttribute = (req, res, next) ->
 # Entity Relation section
 ###
 
+# TODO Fix permission here!
 # GET /entity/:id/relation
 exports.listRelation = (req, res, next) ->
     entityId = req.params.id
@@ -364,6 +401,7 @@ exports.listRelation = (req, res, next) ->
 
     res.json(blob for blob in blobs)
 
+# TODO Fix permission here!
 # POST /entity/:id/relation/entity/:id
 exports.linkEntity = (req, res, next) ->
     await
@@ -397,4 +435,5 @@ exports.linkEntity = (req, res, next) ->
 
     res.status(201).send()
 
+# TODO Implement
 exports.unlinkEntity = (req, res, next) ->

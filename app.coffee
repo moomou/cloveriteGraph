@@ -23,8 +23,16 @@ if ('development' == app.get('env'))
 # Routes
 ###
 
-#Search Handler for multiple resource
+# Search Handler for multiple resource
 app.get('/search/:type?', routes.search.searchHandler)
+
+###
+# User Method
+# GET
+###
+# app.get('/user/created', routes.user.getCreated)
+# app.get('/user/voted', routes.user.getCreated)
+# app.get('/user/commented', routes.user.getCreated)
 
 ###
 # Entity Method
@@ -48,7 +56,6 @@ app.del('/entity/:id', routes.entity.del)
 # DEL - delete an attribute
 # PUT - update Attribute
 ###
-
 app.post('/entity/:id/attribute', routes.entity.addAttribute)
 app.get('/entity/:id/attribute', routes.entity.listAttribute)
 app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute)
@@ -103,7 +110,6 @@ app.del('/attribute/:id', routes.attribute.del)
 # Attribute Entity
 # GET - get all entity who have this attribute
 ###
-
 app.get('/attribute/:id/entity', routes.attribute.listEntity)
 
 http.createServer(app).listen(app.get('port'), ->

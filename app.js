@@ -41,6 +41,12 @@
 
 
   /*
+  # User Method
+  # GET
+  */
+
+
+  /*
   # Entity Method
   # POST
   # GET
@@ -139,5 +145,3 @@
   });
 
 }).call(this);
-
-//# sourceMappingURL=app.map

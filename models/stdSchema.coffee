@@ -18,6 +18,7 @@ exports.Constants = Constants = {
     REL_TAG: '_TAG',
 
     # User to Entity, Attribute
+    REL_ACCESS: '_ACCESS',
     REL_CREATED: '_CREATED',
     REL_MODIFIED: '_MODIFIED',
 
