@@ -45,6 +45,14 @@
   # GET
   */
 
+  app.post('/user/', routes.createUser);
+
+  app.get('/user/created', routes.user.getCreated);
+
+  app.get('/user/voted', routes.user.getCreated);
+
+  app.get('/user/commented', routes.user.getCreated);
+
 
   /*
   # Entity Method

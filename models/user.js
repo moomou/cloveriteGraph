@@ -71,5 +71,3 @@
   };
 
 }).call(this);
-
-//# sourceMappingURL=user.map

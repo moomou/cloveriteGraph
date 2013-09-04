@@ -58,19 +58,20 @@ exports.getEntityAttributes = (entity, cb) ->
 # then return the raw neo4j node of the user
 ###
 exports.getUser = (req, cb) ->
-    accessToken = req.header['ACCESS_TOKEN'] ? "none"
+    console.log "getUser"
+    accessToken = req.headers['access_token'] ? "none"
 
     # Access token, after user logs in
     # points to the neo4j userNode Id
     await redis.get(accessToken, defer(err, neoUserId))
-
     err = user = null
 
     if (not neoUserId) # Anonymous users
+        console.log "No such user"
         return cb(null, null)
 
+    console.log "Utility.getUser #{neoUserId}"
     await User.get neoUserId, defer(err, user)
-    console.log "Utility.getUser #{user}"
 
     cb(err, null) if err
     cb(null, user)
@@ -78,19 +79,28 @@ exports.getUser = (req, cb) ->
 ###
 # Checks if a particular link type exists between the two node
 ###
-exports.hasLink = (startNode, otherNode, linkType, dir) ->
+exports.hasLink = (startNode, otherNode, linkType, dir, cb) ->
     dir ?= "all"
 
-    await
-        startNode.path otherNode,
-            linkType,
-            dir,
-            1,       # depth
-            'shortestPath', #algo - cannot change?
-            defer(err, path)
- 
-    throw "Unable to retrieve info" if err
-    if path then path else false
+    startNode.path otherNode,
+        linkType,
+        dir,
+        1,              # depth
+        'shortestPath', #algo - cannot change?
+        (err, path) ->
+            return cb(err, null) if err
+            if path then cb(null, path) else cb(null, false)
+
+exports.createLink = (startNode, otherNode, linkType, linkData, cb) ->
+    console.log linkType
+    console.log linkData
+    startNode.createRelationshipTo otherNode,
+        linkType,
+        linkData,
+        (err, link) ->
+            console.log "Ok."
+            cb(new Error("Unable to create link"), null)
+            cb(null, link)
 
 ###
 # Permission Related Stuff
@@ -104,16 +114,23 @@ exports.isAdmin = isAdmin = (accessToken, cb) ->
 ###
 # Internal API for creating userNode
 ###
-exports.createUser = (req, cb) ->
-    accessToken = req.header['ACCESS_TOKEN']
+exports.createUser = (req, res, next) ->
+    console.log "In Create user"
+    accessToken = req.headers['access_token']
+    console.log accessToken
     userToken = req.body.userToken
+    console.log userToken
 
     # Access token, after user logs in
     # points to the neo4j userNode Id
     isAdmin accessToken, (err, isSuperAwesome) ->
         if isSuperAwesome
             await User.create defer(err, user)
-            res.json error: err if err
-            res.json user.serialize()
+            userObj = user.serialize()
+
+            redis.set userToken, userObj.id
+
+            return res.json error: err if err
+            return res.json userObj
         else
             res.status(403).json error: "Permission Denied"

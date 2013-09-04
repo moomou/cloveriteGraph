@@ -117,5 +117,3 @@
   };
 
 }).call(this);
-
-//# sourceMappingURL=link.map

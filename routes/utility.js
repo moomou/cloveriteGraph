@@ -133,7 +133,8 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
-    accessToken = (_ref = req.header['ACCESS_TOKEN']) != null ? _ref : "none";
+    console.log("getUser");
+    accessToken = (_ref = req.headers['access_token']) != null ? _ref : "none";
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -147,14 +148,16 @@
             return neoUserId = arguments[1];
           };
         })(),
-        lineno: 64
+        lineno: 65
       }));
       __iced_deferrals._fulfill();
     })(function() {
       err = user = null;
       if (!neoUserId) {
+        console.log("No such user");
         return cb(null, null);
       }
+      console.log("Utility.getUser " + neoUserId);
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
@@ -168,11 +171,10 @@
               return user = arguments[1];
             };
           })(),
-          lineno: 71
+          lineno: 73
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        console.log("Utility.getUser " + user);
         if (err) {
           cb(err, null);
         }
@@ -186,39 +188,29 @@
   # Checks if a particular link type exists between the two node
   */
 
-  exports.hasLink = function(startNode, otherNode, linkType, dir) {
-    var err, path, ___iced_passed_deferral, __iced_deferrals, __iced_k,
-      _this = this;
-    __iced_k = __iced_k_noop;
-    ___iced_passed_deferral = iced.findDeferral(arguments);
+  exports.hasLink = function(startNode, otherNode, linkType, dir, cb) {
     if (dir == null) {
       dir = "all";
     }
-    (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        filename: "utility.coffee",
-        funcname: "hasLink"
-      });
-      startNode.path(otherNode, linkType, dir, 1, 'shortestPath', __iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            err = arguments[0];
-            return path = arguments[1];
-          };
-        })(),
-        lineno: 89
-      }));
-      __iced_deferrals._fulfill();
-    })(function() {
+    return startNode.path(otherNode, linkType, dir, 1, 'shortestPath', function(err, path) {
       if (err) {
-        throw "Unable to retrieve info";
+        return cb(err, null);
       }
       if (path) {
-        return path;
+        return cb(null, path);
       } else {
-        return false;
+        return cb(null, false);
       }
+    });
+  };
+
+  exports.createLink = function(startNode, otherNode, linkType, linkData, cb) {
+    console.log(linkType);
+    console.log(linkData);
+    return startNode.createRelationshipTo(otherNode, linkType, linkData, function(err, link) {
+      console.log("Ok.");
+      cb(new Error("Unable to create link"), null);
+      return cb(null, link);
     });
   };
 
@@ -238,12 +230,15 @@
   # Internal API for creating userNode
   */
 
-  exports.createUser = function(req, cb) {
+  exports.createUser = function(req, res, next) {
     var accessToken, userToken;
-    accessToken = req.header['ACCESS_TOKEN'];
+    console.log("In Create user");
+    accessToken = req.headers['access_token'];
+    console.log(accessToken);
     userToken = req.body.userToken;
+    console.log(userToken);
     return isAdmin(accessToken, function(err, isSuperAwesome) {
-      var err, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      var err, user, userObj, ___iced_passed_deferral, __iced_deferrals, __iced_k,
         _this = this;
       __iced_k = __iced_k_noop;
       ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -260,16 +255,19 @@
                 return user = arguments[1];
               };
             })(),
-            lineno: 114
+            lineno: 127
           }));
           __iced_deferrals._fulfill();
         })(function() {
+          userObj = user.serialize();
+          redis.set(userToken, userObj.id);
           if (err) {
-            res.json({
+            return res.json({
               error: err
             });
           }
-          return __iced_k(res.json(user.serialize()));
+          return res.json(userObj);
+          return __iced_k();
         });
       } else {
         return __iced_k(res.status(403).json({

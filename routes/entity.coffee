@@ -42,30 +42,33 @@ getJSONData = (remoteAddress, cb) ->
         else
             cb("N/A")
 
-hasPermission = (req) ->
+hasPermission = (req, cb) ->
     await
         Entity.get req.params.id, defer(errEntity, entity)
         Utility.getUser req, defer(errUser, user)
 
     err = errUser or errEntity
-    throw "Unable to retrieve from neo4j"
+    return cb(new Error("Unable to retrieve from neo4j"), null) if err
 
     isPrivate = entity._node.data.private
-    if isPrivate is true and not Utility.hasLink(
-        user._node,
-        entity._node,
-        Constants.REL_ACCESS)
-        return false
-    return true
 
-# END --
+    if not user and not isPrivate
+        return cb(null, true)
 
-# TO CHANGE
-exports.permissionRequired = (req, res, cb) ->
-    await Utility.getUser req, defer(err, user)
+    await
+        Utility.hasLink(
+            user._node,
+            entity._node,
+            Constants.REL_ACCESS,
+            "all",
+            defer(err, path))
 
-    if not user
-        return res.status(403).json error: "Permission Denied"
+    if isPrivate and not path
+        cb(null, false)
+    else
+        cb(null, true)
+
+# END -
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
@@ -78,11 +81,12 @@ exports.search = (req, res, next) ->
 # POST /entity
 exports.create = (req, res, next) ->
     await Utility.getUser req, defer(err, user)
-    return next(err) if user
+    return next(err) if err
 
     # anonymous user cannot create private entity
-    if not user
-        req.body['private'] = false
+    req.body['private'] = false if not user
+
+    console.log "Creating Entity: #{req.body}"
 
     errs = []
     tagObjs = []
@@ -98,11 +102,36 @@ exports.create = (req, res, next) ->
     err = err or _und.find(errs, (err) -> err)
     return next(err) if err
 
+    linkData = Link.fillMetaData({})
+
     # "tag" entity
     for tagObj, ind in tagObjs
-        tagObj._node.createRelationshipTo entity._node,
-            Constants.REL_TAG, {},
+        Utility.createLink tagObj._node, entity._node,
+            Constants.REL_TAG,
+            linkData,
             (err, rel) ->
+
+        Utility.createLink user._node, tagObj._node,
+            Constants.REL_TAG,
+            linkData,
+            (err, rel) ->
+
+    # Ownership
+    await
+        Utility.createLink user._node,
+            entity._node,
+            Constants.REL_CREATED,
+            linkData,
+            defer(err, rel)
+
+    # Permission
+    console.log Constants
+    await
+        Utility.createLink user._node,
+            entity._node,
+            Constants.REL_ACCESS,
+            linkData,
+            defer(err, rel)
 
     await entity.serialize defer blob
     res.status(201).json blob
@@ -111,8 +140,13 @@ exports.create = (req, res, next) ->
 exports.show = (req, res, next) ->
     return res.json {} if isNaN req.params.id
 
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+    if not authorized
+        console.log "No Permission"
         return res.status(401).json error: "Permission Denied"
+
+    await Entity.get req.params.id, defer(err, entity)
+    return next err if err
 
     if req.query['attr'] != "false"
         await
@@ -125,7 +159,8 @@ exports.show = (req, res, next) ->
 
 #PUT /entity/:id
 exports.edit = (req, res, next) ->
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+    if not authorized
         return res.status(401).json error: "Permission Denied"
 
     await Entity.put req.params.id, req.body, defer(err, entity)
@@ -143,23 +178,36 @@ exports.edit = (req, res, next) ->
     err = _und.find(errs, (err) -> err)
     return next(err) if err
 
-    #"tag" entity
+    linkData = Link.fillMetaData({})
+
+    # "tag" entity
     for tagObj, ind in tagObjs
-        tagObj._node.createRelationshipTo entity._node,
-            Constants.REL_TAG, {},
-            (err, rel) ->
+        # This is blocking
+        await
+            Utility.hasLink tagObj._node,
+                entity._node,
+                Constants.REL_ATTRIBUTE,
+                "all",
+                defer(err, pathExists)
+
+        if not pathExists
+            Utility.createLink tagObj._node,
+                entity._node,
+                Constants.REL_TAG,
+                linkData,
+                (err, rel) ->
 
     await entity.serialize defer blob
     res.json blob
 
 #DELETE /entity/:id
 exports.del = (req, res, next) ->
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+    if not authorized
         return res.status(401).json error: "Permission Denied"
 
     await Entity.put req.params.id, req.body, defer(err, entity)
     return next(err) if err
-
 
     await Entity.get req.params.id, defer(err, entity)
     return next err if err
@@ -175,7 +223,8 @@ exports.del = (req, res, next) ->
 
 # GET /entity/:id/attribute
 exports.listAttribute = (req, res, next) ->
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+    if not authorized
         return res.status(401).json error: "Permission Denied"
 
     await Entity.get req.params.id, defer(errE, entity)
@@ -212,7 +261,8 @@ exports.listAttribute = (req, res, next) ->
 
 # POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+    if not authorized
         return res.status(401).json error: "Permission Denied"
 
     # Clean Data
@@ -221,11 +271,12 @@ exports.addAttribute = (req, res, next) ->
 
     # Retrieve the 2 entities
     await
+        Utility.getUser req, defer(errU, user)
         Entity.get req.params.id, defer(errE, entity)
         Attribute.getOrCreate data, defer(errA, attr)
 
-    return next(errE) if errE
-    return next(errA) if errA
+    err = errU or errE or errA
+    return next(err) if err
 
     linkData = Link.normalizeData _und.clone(req.body || {})
     linkData['startend'] = Utility.getStartEndIndex(
@@ -239,7 +290,7 @@ exports.addAttribute = (req, res, next) ->
     console.log "__END__"
 
     # hasLink returns the link if it exists
-    path = Utility.hasLink(entity._node, attr._node, Constants.REL_ATTRIBUTE)
+    await Utility.hasLink(entity._node, attr._node, Constants.REL_ATTRIBUTE, "all", defer(err, path))
 
     # If Path already exists
     if path
@@ -258,7 +309,8 @@ exports.addAttribute = (req, res, next) ->
         if existingLinkData.srcURL != linkData.srcURL
             await getJSONData(linkData.srcURL, defer(value))
             linkData.value = value
-            linkData.type = if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
+            linkData.type =
+                if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
 
         linkData = _und.extend existingLinkData, linkData
 
@@ -271,13 +323,16 @@ exports.addAttribute = (req, res, next) ->
     else
         await getJSONData(linkData.srcURL, defer(value))
         linkData.value = value
-        linkData.type = if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
-        linkData = Link.fillMetaData(linkData)
+        linkData.type =
+            if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
 
-        await attr._node.createRelationshipTo entity._node,
+        linkData = Link.fillMetaData(linkData)
+        await Utility.createLink attr._node,
+            entity._node,
             Constants.REL_ATTRIBUTE,
             linkData,
             defer(err, rel)
+
         return next(err) if err
 
     Link.index(rel, linkData)
@@ -288,7 +343,9 @@ exports.addAttribute = (req, res, next) ->
 
 #DELETE /entity/:eId/attribute/:aId
 exports.delAttribute = (req, res, next) -> #TODO
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+
+    if not authorized
         return res.status(401).json error: "Permission Denied"
     res.status(404).json error: "Not Implemented"
 
@@ -300,7 +357,9 @@ exports.delAttribute = (req, res, next) -> #TODO
 
 #GET /entity/:id/attribute/:id
 exports.getAttribute = (req, res, next) ->
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+
+    if not authorized
         return res.status(401).json error: "Permission Denied"
 
     attrId = req.params.aId
@@ -326,7 +385,9 @@ exports.getAttribute = (req, res, next) ->
 
 #PUT /entity/:id/attribute/:id
 exports.updateAttributeLink = (req, res, next) ->
-    if not hasPermission(req)
+    await hasPermission req, defer(err, authorized)
+
+    if not authorized
         return res.status(401).json error: "Permission Denied"
 
     attrId = req.params.aId
@@ -413,25 +474,19 @@ exports.linkEntity = (req, res, next) ->
 
     relation = req.body
 
-    await
-        if relation['src_dst']
-            linkName  = Link.normalizeName(relation['src_dst']['name'])
-            linkData = Link.deserialize(relation['src_dst']['data'])
+    if relation['src_dst']
+        linkName  = Link.normalizeName(relation['src_dst']['name'])
+        linkData = Link.deserialize(relation['src_dst']['data'])
 
-            srcEntity._node.createRelationshipTo dstEntity._node,
-                linkName,
-                linkData,
-                defer(es, src_dstRel)
+        srcToDstLink = Utility.createLink srcEntity._node, dstEntity._node, linkName,
+            linkData
 
-    await
-        if relation['dst_src']
-            linkName  = Link.normalizeName(relation['dst_src']['name'])
-            linkData = Link.deserialize(relation['dst_src']['data'])
+    if relation['dst_src']
+        linkName  = Link.normalizeName(relation['dst_src']['name'])
+        linkData = Link.deserialize(relation['dst_src']['data'])
 
-            dstEntity._node.createRelationshipTo srcEntity._node,
-                linkName,
-                linkData,
-                defer(et, dst_srcRel)
+        dstToSrcLink = Utility.createLink dstEntity._node, srcEntity._node, linkName,
+            linkData
 
     res.status(201).send()
 

@@ -19,6 +19,7 @@
     REL_CONTAINER: '_CONTAINER',
     REL_RESOURCE: '_RESOURCE',
     REL_TAG: '_TAG',
+    REL_ACCESS: '_ACCESS',
     REL_CREATED: '_CREATED',
     REL_MODIFIED: '_MODIFIED',
     ATTR_NUMERIC: "attr_numeric",
@@ -65,5 +66,3 @@
   })();
 
 }).call(this);
-
-//# sourceMappingURL=stdSchema.map
