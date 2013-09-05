@@ -11,7 +11,6 @@
     INDEX_KEY: 'type',
     INDEX_VAL: 'entity',
     REL_LOCATION: '_LOCATION',
-    REL_VOTE: '_VOTE',
     REL_AWARD: '_AWARD',
     REL_ATTRIBUTE: '_ATTRIBUTE',
     REL_PARENT: '_PARENT',
@@ -21,6 +20,8 @@
     REL_TAG: '_TAG',
     REL_ACCESS: '_ACCESS',
     REL_CREATED: '_CREATED',
+    REL_VOTED: '_VOTED',
+    REL_COMMENTED: '_COMMENTED',
     REL_MODIFIED: '_MODIFIED',
     ATTR_NUMERIC: "attr_numeric",
     ATTR_REFERENCE: "attr_ref"

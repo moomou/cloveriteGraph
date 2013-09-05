@@ -57,7 +57,7 @@ exports.getEntityAttributes = (entity, cb) ->
 # Exchange this token for a user unique identifier
 # then return the raw neo4j node of the user
 ###
-exports.getUser = (req, cb) ->
+exports.getUser = getUser = (req, cb) ->
     console.log "getUser"
     accessToken = req.headers['access_token'] ? "none"
 
@@ -79,7 +79,7 @@ exports.getUser = (req, cb) ->
 ###
 # Checks if a particular link type exists between the two node
 ###
-exports.hasLink = (startNode, otherNode, linkType, dir, cb) ->
+exports.hasLink = hasLink = (startNode, otherNode, linkType, dir, cb) ->
     dir ?= "all"
 
     startNode.path otherNode,
@@ -91,16 +91,33 @@ exports.hasLink = (startNode, otherNode, linkType, dir, cb) ->
             return cb(err, null) if err
             if path then cb(null, path) else cb(null, false)
 
-exports.createLink = (startNode, otherNode, linkType, linkData, cb) ->
-    console.log linkType
-    console.log linkData
+exports.createLink = createLink = (startNode, otherNode, linkType, linkData, cb) ->
+    console.log "Creating linkType: #{linkType}"
+
     startNode.createRelationshipTo otherNode,
         linkType,
         linkData,
         (err, link) ->
-            console.log "Ok."
-            cb(new Error("Unable to create link"), null)
-            cb(null, link)
+            return cb(new Error("Unable to create link"), null) if err
+            return cb(null, link)
+
+###
+# Create multiple link with the same linkdata
+###
+exports.createMultipleLinks = createMultipleLinks =
+    (startNode, otherNode, links, linkData, cb) ->
+        errs = []
+        rels = []
+        await
+            for link, ind in links
+                createLink startNode,
+                    otherNode,
+                    link,
+                    linkData,
+                    defer(errs[ind], rels[ind])
+
+        err = _und.find(errs, (err) -> err)
+        cb(err, rels)
 
 ###
 # Permission Related Stuff
@@ -110,6 +127,32 @@ exports.isAdmin = isAdmin = (accessToken, cb) ->
         accessToken,
         (err, res) ->
             cb(err, res)
+
+### High level function
+###
+exports.hasPermission = (user, other, cb) ->
+    # No permission for nonexistant object
+    if not other
+        return cb(null, false)
+
+    isPrivate = other._node.data.private
+
+    if not isPrivate
+        return cb(null, true)
+    if not user
+        return cb(null, false)
+
+    await
+        hasLink user._node,
+            other._node,
+            Constants.REL_ACCESS,
+            "all",
+            defer(err, path)
+
+    if not path
+        cb(null, false)
+    else
+        cb(null, true)
 
 ###
 # Internal API for creating userNode

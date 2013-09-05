@@ -29,6 +29,7 @@
   ];
 
   VoteSchema = {
+    attrId: '',
     tone: '',
     user: '',
     time: '',

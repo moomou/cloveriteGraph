@@ -33,9 +33,10 @@ app.get('/search/:type?', routes.search.searchHandler)
 
 app.post('/user/', routes.createUser)
 
-app.get('/user/created', routes.user.getCreated)
-app.get('/user/voted', routes.user.getCreated)
-app.get('/user/commented', routes.user.getCreated)
+#app.get('/user/:id/recent', routes.user.getRecent)
+app.get('/user/:id/created', routes.user.getCreated)
+app.get('/user/:id/voted', routes.user.getCreated)
+app.get('/user/:id/commented', routes.user.getCreated)
 
 ###
 # Entity Method
@@ -51,6 +52,10 @@ app.get('/entity/:id', routes.entity.show)
 app.put('/entity/:id', routes.entity.edit)
 app.del('/entity/:id', routes.entity.del)
 
+###
+# Entity User Method
+###
+app.get('/entity/:id/users', routes.entity.showUsers)
 
 ###
 # Entity Attribute  Method
@@ -67,15 +72,15 @@ app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute)
 
 app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute)
 
-### TODO
+###
 # Entity Comment Method
 # POST - add comment
 # GET - get all comment
 # DEL - delete a comment
+###
 app.post('/entity/:id/comment', routes.entity.addComment)
 app.get('/entity/:id/comment', routes.entity.listComment)
 app.del('/entity/:id/comment', routes.entity.delComment)
-###
 
 ###
 # Entity Relation

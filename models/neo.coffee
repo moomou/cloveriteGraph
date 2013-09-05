@@ -15,9 +15,17 @@ MetaSchema = {
     version: 0
 }
 
+ToOmitKeys = [
+    'id',
+    'createdAt',
+    'modifiedAt',
+    'version'
+]
+
 module.exports = class Neo
     constructor: (@_node) ->
 
+    # cb should be last!
     serialize: (cb, extraData) ->
         extraData ?= {}
         data = @_node.data
@@ -80,18 +88,15 @@ Neo.index = (node, indexes, reqBody, cb = null) ->
                 cb(null, ind) if cb
 
 Neo.create = (Class, reqBody, indexes, cb) ->
-    # Clean input data
-    data = Class.deserialize(reqBody)
-    omitKeys = _und.union(['id'], _und.keys(MetaSchema))
-    data = _und.omit(data, omitKeys)
-    _und.extend(data, MetaSchema)
+    data = Class.deserialize(reqBody) # Clean input data
+    
+    data = _und.omit(data, ToOmitKeys)
+    _und.defaults(data, MetaSchema)
 
     console.log data
 
     node = db.neo.createNode data
     obj = new Class(node)
-
-    console.log obj
 
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr

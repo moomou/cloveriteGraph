@@ -25,6 +25,7 @@ Indexes = [
 ]
 
 VoteSchema = {
+    attrId: '',     #attr voted on
     tone: '',       #vote type: pos, neg
     user: '',       #username or unknown
     time: '',       #timestamp when vote was registered

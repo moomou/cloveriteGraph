@@ -6,6 +6,7 @@ Logger = require('util')
 
 Neo = require('../models/neo')
 
+User = require('../models/user')
 Entity = require('../models/entity')
 Attribute = require('../models/attribute')
 Tag = require('../models/tag')
@@ -34,6 +35,8 @@ getOutgoingRelsCypherQuery = (startId, relType) ->
 # Remote web service for reading
 # numeric json data
 getJSONData = (remoteAddress, cb) ->
+    if not remoteAddress
+        return cb("N/A")
     rest.get(remoteAddress).on 'complete', (remoteData, remoteRes) ->
         if not remoteRes?
             cb("")
@@ -50,23 +53,7 @@ hasPermission = (req, cb) ->
     err = errUser or errEntity
     return cb(new Error("Unable to retrieve from neo4j"), null) if err
 
-    isPrivate = entity._node.data.private
-
-    if not user and not isPrivate
-        return cb(null, true)
-
-    await
-        Utility.hasLink(
-            user._node,
-            entity._node,
-            Constants.REL_ACCESS,
-            "all",
-            defer(err, path))
-
-    if isPrivate and not path
-        cb(null, false)
-    else
-        cb(null, true)
+    Utility.hasPermission(user, entity, cb)
 
 # END -
 
@@ -84,8 +71,10 @@ exports.create = (req, res, next) ->
     return next(err) if err
 
     # anonymous user cannot create private entity
+    console.log "Before User"
+    console.log req.body
     req.body['private'] = false if not user
-
+    console.log "After User"
     console.log "Creating Entity: #{req.body}"
 
     errs = []
@@ -117,21 +106,11 @@ exports.create = (req, res, next) ->
             (err, rel) ->
 
     # Ownership
-    await
-        Utility.createLink user._node,
-            entity._node,
-            Constants.REL_CREATED,
-            linkData,
-            defer(err, rel)
-
-    # Permission
-    console.log Constants
-    await
-        Utility.createLink user._node,
-            entity._node,
-            Constants.REL_ACCESS,
-            linkData,
-            defer(err, rel)
+    await Utility.createMultipleLinks user._node,
+        entity._node,
+        [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
+        linkData,
+        defer(err, rels)
 
     await entity.serialize defer blob
     res.status(201).json blob
@@ -159,6 +138,8 @@ exports.show = (req, res, next) ->
 
 #PUT /entity/:id
 exports.edit = (req, res, next) ->
+    return res.json {} if isNaN req.params.id
+
     await hasPermission req, defer(err, authorized)
     if not authorized
         return res.status(401).json error: "Permission Denied"
@@ -202,6 +183,8 @@ exports.edit = (req, res, next) ->
 
 #DELETE /entity/:id
 exports.del = (req, res, next) ->
+    return res.json {} if isNaN req.params.id
+
     await hasPermission req, defer(err, authorized)
     if not authorized
         return res.status(401).json error: "Permission Denied"
@@ -216,6 +199,30 @@ exports.del = (req, res, next) ->
 
     return next err if err
     res.status(204).send()
+
+###
+# Entity Use Section
+###
+exports.showUsers = (req, res, next) ->
+    await hasPermission req, defer(err, authorized)
+    if not authorized
+        console.log "No Permission"
+        return res.status(401).json error: "Permission Denied"
+
+    await Entity.get req.params.id, defer(err, entity)
+    return next err if err
+
+    await
+        entity._node.getRelationshipNodes {type: Constants.REL_MODIFIED, direction:'in'},
+            defer(err, nodes)
+
+    return next(err) if err
+    blobs = []
+
+    for node, ind in nodes
+        blobs[ind] = (new User node).serialize()
+
+    res.json(blobs)
 
 ###
 # Entity Attribute Section
@@ -341,19 +348,13 @@ exports.addAttribute = (req, res, next) ->
     _und.extend blob, linkData: linkData
     res.status(201).json blob
 
-#DELETE /entity/:eId/attribute/:aId
-exports.delAttribute = (req, res, next) -> #TODO
+# TODO DELETE /entity/:eId/attribute/:aId
+exports.delAttribute = (req, res, next) ->
     await hasPermission req, defer(err, authorized)
 
     if not authorized
         return res.status(401).json error: "Permission Denied"
     res.status(404).json error: "Not Implemented"
-
-    ###
-    await
-        Entity.get req.params.eId, defer(errE, entity)
-        Attribute.get req.params.aId, defer(errA, attr)
-    ###
 
 #GET /entity/:id/attribute/:id
 exports.getAttribute = (req, res, next) ->
@@ -411,6 +412,7 @@ exports.voteAttribute = (req, res, next) ->
     await
         Entity.get req.params.eId, defer(errE, entity)
         Attribute.get req.params.aId, defer(errA, attr)
+        Utility.getUser req, defer(errUser, user)
 
     err = errA or errE
     return next(err) if err
@@ -420,13 +422,40 @@ exports.voteAttribute = (req, res, next) ->
     voteData.browser = req.useragent.Browser
     voteData.os = req.useragent.OS
     voteData.lang = req.headers['accept-language']
+    voteData.attrId = attr._node.data.id
 
     vote = new Vote voteData
 
-    entity.vote attr, vote, (err, voteTally) ->
+    entity.vote user, attr, vote, (err, voteTally) ->
         return res.status(500) if err
         res.send(voteTally)
 
+###
+# Entity Comment Section
+###
+exports.addComment = (req, res, next) ->
+    return res.json {} if isNaN req.params.id
+
+    await hasPermission req, defer(err, authorized)
+    if not authorized
+        console.log "No Permission"
+        return res.status(401).json error: "Permission Denied"
+
+    # Discussion Key in Redis
+    # entity:id:discussion
+    
+    # TODO move to somewhere
+    # {
+    #   userId: randomId if no username
+    #   ip: location
+    #   comment: 
+    #   date: 
+    # }
+        
+exports.delComment = (req, res, next) ->
+
+exports.listComment = (req, res, next) ->
+    
 ###
 # Entity Relation section
 ###

@@ -13,6 +13,11 @@ Indexes = [
         INDEX_NAME: INDEX_NAME,
         INDEX_KEY: 'reputation',
         INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'userToken',
+        INDEX_VALUE: ''
     }
 ]
 
@@ -20,6 +25,7 @@ UserSchema = {
     createdCount: 0,
     modifiedCount: 0,
     reputation: 'Z',
+    userToken: ''
 }
 
 #Private constructor

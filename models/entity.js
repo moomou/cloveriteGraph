@@ -51,7 +51,7 @@
       Entity.__super__.constructor.call(this, this._node);
     }
 
-    Entity.prototype.vote = function(attr, voteLink, cb) {
+    Entity.prototype.vote = function(user, attr, voteLink, cb) {
       var downVote, err, rel, upVote, voteTally, ___iced_passed_deferral, __iced_deferrals, __iced_k,
         _this = this;
       __iced_k = __iced_k_noop;
@@ -69,8 +69,19 @@
               return rel = arguments[1];
             };
           })(),
-          lineno: 46
+          lineno: 47
         }));
+        if (user) {
+          user._node.createRelationshipTo(_this._node, voteLink.name, voteLink.data, __iced_deferrals.defer({
+            assign_fn: (function() {
+              return function() {
+                err = arguments[0];
+                return rel = arguments[1];
+              };
+            })(),
+            lineno: 53
+          }));
+        }
         __iced_deferrals._fulfill();
       })(function() {
         if (err) {
@@ -90,7 +101,7 @@
                 return upVote = arguments[1];
               };
             })(),
-            lineno: 52
+            lineno: 59
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -107,7 +118,7 @@
                   return downVote = arguments[1];
                 };
               })(),
-              lineno: 53
+              lineno: 60
             }));
             __iced_deferrals._fulfill();
           })(function() {

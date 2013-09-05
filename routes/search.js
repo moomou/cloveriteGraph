@@ -134,7 +134,7 @@
   };
 
   exports.searchHandler = function(req, res, next) {
-    var attrBlobs, blobResults, entity, entitySerialized, err, identified, ind, indX, indY, obj, query, result, results, searchClass, searchClasses, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var attrBlobs, authorized, blobResults, entity, entitySerialized, err, errU, identified, ind, indX, indY, obj, query, result, results, searchClass, searchClasses, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -148,111 +148,157 @@
     }
     results = [];
     (function(__iced_k) {
-      var _i, _len;
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
         filename: "search.coffee",
         funcname: "searchHandler"
       });
-      for (ind = _i = 0, _len = searchClasses.length; _i < _len; ind = ++_i) {
-        searchClass = searchClasses[ind];
-        query = queryAnalyzer(searchClass, req.query['q']);
-        console.log(query);
-        Neo.query(searchClass, query.replace('__indexName__', searchClass.INDEX_NAME), {}, __iced_deferrals.defer({
-          assign_fn: (function(__slot_1, __slot_2) {
-            return function() {
-              err = arguments[0];
-              return __slot_1[__slot_2] = arguments[1];
-            };
-          })(results, ind),
-          lineno: 118
-        }));
-      }
+      Utility.getUser(req, __iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            errU = arguments[0];
+            return user = arguments[1];
+          };
+        })(),
+        lineno: 110
+      }));
       __iced_deferrals._fulfill();
     })(function() {
-      blobResults = [];
-      identified = {};
       (function(__iced_k) {
-        var _i, _len, _ref, _results, _while;
-        _ref = results;
-        _len = _ref.length;
-        indX = 0;
-        _results = [];
-        _while = function(__iced_k) {
-          var _break, _continue, _next;
-          _break = function() {
-            return __iced_k(_results);
-          };
-          _continue = function() {
-            return iced.trampoline(function() {
-              ++indX;
-              return _while(__iced_k);
-            });
-          };
-          _next = function(__iced_next_arg) {
-            _results.push(__iced_next_arg);
-            return _continue();
-          };
-          if (!(indX < _len)) {
-            return _break();
-          } else {
-            result = _ref[indX];
-            (function(__iced_k) {
-              var _j, _len1, _ref1, _results1, _while;
-              _ref1 = result;
-              _len1 = _ref1.length;
-              indY = 0;
-              _results1 = [];
-              _while = function(__iced_k) {
-                var _break, _continue, _next;
-                _break = function() {
-                  return __iced_k(_results1);
-                };
-                _continue = function() {
-                  return iced.trampoline(function() {
-                    ++indY;
-                    return _while(__iced_k);
-                  });
-                };
-                _next = function(__iced_next_arg) {
-                  _results1.push(__iced_next_arg);
-                  return _continue();
-                };
-                if (!(indY < _len1)) {
-                  return _break();
-                } else {
-                  obj = _ref1[indY];
-                  entity = new Entity(obj.result);
-                  (function(__iced_k) {
-                    __iced_deferrals = new iced.Deferrals(__iced_k, {
-                      parent: ___iced_passed_deferral,
-                      filename: "search.coffee",
-                      funcname: "searchHandler"
-                    });
-                    Utility.getEntityAttributes(entity, __iced_deferrals.defer({
-                      assign_fn: (function() {
-                        return function() {
-                          return attrBlobs = arguments[0];
-                        };
-                      })(),
-                      lineno: 128
-                    }));
-                    __iced_deferrals._fulfill();
-                  })(function() {
-                    entitySerialized = entity.serialize(null, {
-                      attributes: attrBlobs
-                    });
-                    return _next(!identified[entitySerialized.id] ? (blobResults.push(entitySerialized), identified[entitySerialized.id] = true) : void 0);
-                  });
-                }
+        var _i, _len;
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "search.coffee",
+          funcname: "searchHandler"
+        });
+        for (ind = _i = 0, _len = searchClasses.length; _i < _len; ind = ++_i) {
+          searchClass = searchClasses[ind];
+          query = queryAnalyzer(searchClass, req.query['q']);
+          console.log(query);
+          Neo.query(searchClass, query.replace('__indexName__', searchClass.INDEX_NAME), {}, __iced_deferrals.defer({
+            assign_fn: (function(__slot_1, __slot_2) {
+              return function() {
+                err = arguments[0];
+                return __slot_1[__slot_2] = arguments[1];
               };
-              _while(__iced_k);
-            })(_next);
-          }
-        };
-        _while(__iced_k);
+            })(results, ind),
+            lineno: 120
+          }));
+        }
+        __iced_deferrals._fulfill();
       })(function() {
-        return res.json(blobResults);
+        blobResults = [];
+        identified = {};
+        (function(__iced_k) {
+          var _i, _len, _ref, _results, _while;
+          _ref = results;
+          _len = _ref.length;
+          indX = 0;
+          _results = [];
+          _while = function(__iced_k) {
+            var _break, _continue, _next;
+            _break = function() {
+              return __iced_k(_results);
+            };
+            _continue = function() {
+              return iced.trampoline(function() {
+                ++indX;
+                return _while(__iced_k);
+              });
+            };
+            _next = function(__iced_next_arg) {
+              _results.push(__iced_next_arg);
+              return _continue();
+            };
+            if (!(indX < _len)) {
+              return _break();
+            } else {
+              result = _ref[indX];
+              (function(__iced_k) {
+                var _j, _len1, _ref1, _results1, _while;
+                _ref1 = result;
+                _len1 = _ref1.length;
+                indY = 0;
+                _results1 = [];
+                _while = function(__iced_k) {
+                  var _break, _continue, _next;
+                  _break = function() {
+                    return __iced_k(_results1);
+                  };
+                  _continue = function() {
+                    return iced.trampoline(function() {
+                      ++indY;
+                      return _while(__iced_k);
+                    });
+                  };
+                  _next = function(__iced_next_arg) {
+                    _results1.push(__iced_next_arg);
+                    return _continue();
+                  };
+                  if (!(indY < _len1)) {
+                    return _break();
+                  } else {
+                    obj = _ref1[indY];
+                    entity = new Entity(obj.result);
+                    (function(__iced_k) {
+                      __iced_deferrals = new iced.Deferrals(__iced_k, {
+                        parent: ___iced_passed_deferral,
+                        filename: "search.coffee",
+                        funcname: "searchHandler"
+                      });
+                      Utility.hasPermission(user, entity, __iced_deferrals.defer({
+                        assign_fn: (function() {
+                          return function() {
+                            err = arguments[0];
+                            return authorized = arguments[1];
+                          };
+                        })(),
+                        lineno: 129
+                      }));
+                      __iced_deferrals._fulfill();
+                    })(function() {
+                      (function(__iced_k) {
+                        if (!authorized) {
+                          (function(__iced_k) {
+_continue()
+                          })(__iced_k);
+                        } else {
+                          return __iced_k();
+                        }
+                      })(function() {
+                        (function(__iced_k) {
+                          __iced_deferrals = new iced.Deferrals(__iced_k, {
+                            parent: ___iced_passed_deferral,
+                            filename: "search.coffee",
+                            funcname: "searchHandler"
+                          });
+                          Utility.getEntityAttributes(entity, __iced_deferrals.defer({
+                            assign_fn: (function() {
+                              return function() {
+                                return attrBlobs = arguments[0];
+                              };
+                            })(),
+                            lineno: 132
+                          }));
+                          __iced_deferrals._fulfill();
+                        })(function() {
+                          entitySerialized = entity.serialize(null, {
+                            attributes: attrBlobs
+                          });
+                          return _next(!identified[entitySerialized.id] ? (blobResults.push(entitySerialized), identified[entitySerialized.id] = true) : void 0);
+                        });
+                      });
+                    });
+                  }
+                };
+                _while(__iced_k);
+              })(_next);
+            }
+          };
+          _while(__iced_k);
+        })(function() {
+          return res.json(blobResults);
+        });
       });
     });
   };

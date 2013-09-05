@@ -51,7 +51,7 @@ queryAnalyzer = (searchClass, query) ->
     relQuery = remainder.split(' ')
         .map((item) -> item.trim())
         .filter((item) -> item unless not item) unless not remainder
-    
+
     return cypherQueryConstructor(searchClass, mainQuery, attrQuery, relQuery)
 
 cypherQueryConstructor = (searchClass, name = '', attrMatches = [], relMatches = []) ->
@@ -69,7 +69,7 @@ cypherQueryConstructor = (searchClass, name = '', attrMatches = [], relMatches =
     #potential injection attack
     startNodeQ = "START n=node:__indexName__('name:#{name}~0.65')"
     endQ = 'RETURN DISTINCT n AS result;'
-    
+
     attrMatchQ = []
     relMatchQ = []
 
@@ -99,7 +99,7 @@ luceneQueryContructor = (query) ->
 # GET /search/:type
 exports.searchHandler = (req, res, next) ->
     #generic searching if no type specified
-    return res.json {} unless req.query['q'] 
+    return res.json {} unless req.query['q']
 
     if req.params.type
         searchClasses = [searchableClass[req.params.type]]
@@ -107,6 +107,8 @@ exports.searchHandler = (req, res, next) ->
         searchClasses = _und.values searchableClass
 
     results = []
+
+    await Utility.getUser req, defer(errU, user)
 
     #serial searches, continue only if no result
     await
@@ -125,9 +127,10 @@ exports.searchHandler = (req, res, next) ->
         for obj, indY in result #always return entity results
             entity = (new Entity obj.result)
 
-            await
-                Utility.getEntityAttributes(entity, defer(attrBlobs))
+            await Utility.hasPermission user, entity, defer(err, authorized)
+            continue if not authorized
 
+            await Utility.getEntityAttributes(entity, defer(attrBlobs))
             entitySerialized = entity.serialize(null, attributes: attrBlobs)
 
             if not identified[entitySerialized.id] #do not duplicate result
@@ -135,5 +138,4 @@ exports.searchHandler = (req, res, next) ->
                 identified[entitySerialized.id] = true
 
     #cache results?
-     
     res.json(blobResults)

@@ -38,14 +38,21 @@ module.exports = class Entity extends Neo
     constructor: (@_node) ->
         super @_node
 
-    vote: (attr, voteLink, cb) ->
+    vote: (user, attr, voteLink, cb) ->
         #Add a vote link between entity node and attr node
         #Records the vote in redis
-        await @_node.createRelationshipTo attr._node,
-            voteLink.name,
-            voteLink.data,
-            defer(err, rel)
-    
+        await
+            @_node.createRelationshipTo attr._node,
+                voteLink.name,
+                voteLink.data,
+                defer(err, rel)
+
+            if user
+                user._node.createRelationshipTo @_node,
+                    voteLink.name,
+                    voteLink.data,
+                    defer(err, rel)
+
         return cb err if err
 
         redis.incr "entity:#{@_node.id}::attr:#{attr._node.id}::#{voteLink.data.type}"
@@ -59,7 +66,7 @@ module.exports = class Entity extends Neo
         }
 
         cb null, voteTally
-    
+
     unlinkEntity: (other, relation, cb) ->
         @_node.getRelationships relation, (err, rels) ->
             return cb err if err
@@ -79,7 +86,7 @@ Entity.Indexes = Indexes
 
 Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data
- 
+
 Entity.create = (reqBody, cb) ->
     Neo.create Entity, reqBody, Indexes, cb
 
