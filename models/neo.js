@@ -82,6 +82,15 @@
 
   Neo.MetaSchema = MetaSchema;
 
+  Neo.fillMetaData = function(data) {
+    var cData;
+    cData = _und.clone(data);
+    _und.extend(cData, MetaSchema);
+    cData.createdAt = cData.modifiedAt = new Date().getTime() / 1000;
+    cData.version += 1;
+    return cData;
+  };
+
   Neo.fillIndex = function(indexes, data) {
     var result;
     result = _und.clone(indexes);
@@ -145,7 +154,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 100
+        lineno: 110
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -201,7 +210,7 @@
                   return saveErr = arguments[0];
                 };
               })(),
-              lineno: 128
+              lineno: 138
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -268,7 +277,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 165
+        lineno: 175
       }));
       __iced_deferrals._fulfill();
     })(function() {

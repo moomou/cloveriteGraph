@@ -1,0 +1,12 @@
+{
+    "nodeIndex": [
+        "nEntity",
+        "nTag",
+        "nAttribute",
+        "nUser"
+    ],
+    "relIndex": [
+        "rVote",
+        "rLink"
+    ]
+}

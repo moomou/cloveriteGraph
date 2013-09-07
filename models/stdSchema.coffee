@@ -1,10 +1,6 @@
 _und = require('underscore')
 
 exports.Constants = Constants = {
-    INDEX_NAME: 'node',
-    INDEX_KEY: 'type',
-    INDEX_VAL: 'entity',
-
     # Generic Relation
     REL_LOCATION: '_LOCATION',
     REL_AWARD: '_AWARD',

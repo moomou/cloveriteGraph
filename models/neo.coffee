@@ -59,6 +59,16 @@ module.exports = class Neo
 
 Neo.MetaSchema = MetaSchema
 
+Neo.fillMetaData = (data) ->
+    cData = _und.clone(data)
+    _und.extend(cData, MetaSchema)
+
+    cData.createdAt =
+        cData.modifiedAt = new Date().getTime() / 1000
+
+    cData.version += 1
+    cData
+
 Neo.fillIndex = (indexes, data) ->
     result = _und.clone indexes
     _und.map(result,

@@ -1,6 +1,6 @@
 #entity.coffee
 _und = require 'underscore'
-Logger = require('util')
+Logger = require 'util'
 
 Setup = require './setup'
 Neo = require './neo'

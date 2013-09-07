@@ -13,6 +13,7 @@ Tag = require('../models/tag')
 
 Vote = require('../models/vote')
 Link = require('../models/link')
+Comment = require('../models/comment')
 
 StdSchema = require('../models/stdSchema')
 
@@ -20,6 +21,8 @@ Constants = StdSchema.Constants
 Response = StdSchema
 
 Utility = require('./utility')
+
+redis = require('../models/setup').db.redis
 
 # Support Functions
 getOutgoingRelsCypherQuery = (startId, relType) ->
@@ -45,17 +48,37 @@ getJSONData = (remoteAddress, cb) ->
         else
             cb("N/A")
 
-hasPermission = (req, cb) ->
+hasPermission = (req, res, next, cb) ->
+    cb true, res.status(400).json(error: "Missing param id") if isNaN req.params.id
+
     await
         Entity.get req.params.id, defer(errEntity, entity)
         Utility.getUser req, defer(errUser, user)
 
     err = errUser or errEntity
-    return cb(new Error("Unable to retrieve from neo4j"), null) if err
+    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j") if err
 
-    Utility.hasPermission(user, entity, cb)
+    await Utility.hasPermission user, entity, defer(err, authorized)
+
+    if not authorized
+        return cb true, res.status(401).json(error: "Permission Denied")
+
+    return cb false, null
+
+getDiscussionId = (entityId) ->
+    "entity:#{entityId}:discussion"
 
 # END -
+
+exports.authenticate = (req, res, next, cb) ->
+    return res.json {} if isNaN req.params.id
+
+    await hasPermission req, defer(err, authorized)
+
+    if not authorized
+        return res.status(401).json error: "Permission Denied"
+
+    cb(req, res, next)
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
@@ -117,13 +140,11 @@ exports.create = (req, res, next) ->
 
 # GET /entity/:id
 exports.show = (req, res, next) ->
-    return res.json {} if isNaN req.params.id
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _show(req, res, next)
 
-    await hasPermission req, defer(err, authorized)
-    if not authorized
-        console.log "No Permission"
-        return res.status(401).json error: "Permission Denied"
-
+_show = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return next err if err
 
@@ -136,14 +157,13 @@ exports.show = (req, res, next) ->
 
     res.json entityBlob
 
-#PUT /entity/:id
+# PUT /entity/:id
 exports.edit = (req, res, next) ->
-    return res.json {} if isNaN req.params.id
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _edit(req, res, next)
 
-    await hasPermission req, defer(err, authorized)
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
-
+_edit = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(err, entity)
     return next(err) if err
 
@@ -181,14 +201,13 @@ exports.edit = (req, res, next) ->
     await entity.serialize defer blob
     res.json blob
 
-#DELETE /entity/:id
+# DELETE /entity/:id
 exports.del = (req, res, next) ->
-    return res.json {} if isNaN req.params.id
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _del(req, res, next)
 
-    await hasPermission req, defer(err, authorized)
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
-
+_del = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(err, entity)
     return next(err) if err
 
@@ -204,11 +223,11 @@ exports.del = (req, res, next) ->
 # Entity Use Section
 ###
 exports.showUsers = (req, res, next) ->
-    await hasPermission req, defer(err, authorized)
-    if not authorized
-        console.log "No Permission"
-        return res.status(401).json error: "Permission Denied"
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _showUsers(req, res, next)
 
+_showUsers = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return next err if err
 
@@ -230,10 +249,11 @@ exports.showUsers = (req, res, next) ->
 
 # GET /entity/:id/attribute
 exports.listAttribute = (req, res, next) ->
-    await hasPermission req, defer(err, authorized)
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _listAttribute(req, res, next)
 
+_listAttribute = (req, res, next) ->
     await Entity.get req.params.id, defer(errE, entity)
     return next(err) if err
 
@@ -268,10 +288,11 @@ exports.listAttribute = (req, res, next) ->
 
 # POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
-    await hasPermission req, defer(err, authorized)
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _addAttribute(req, res, next)
 
+_addAttribute = (req, res, next) ->
     # Clean Data
     data = _und.clone req.body
     delete data['id']
@@ -350,21 +371,24 @@ exports.addAttribute = (req, res, next) ->
 
 # TODO DELETE /entity/:eId/attribute/:aId
 exports.delAttribute = (req, res, next) ->
-    await hasPermission req, defer(err, authorized)
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _delAttribute(req, res, next)
 
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
-    res.status(404).json error: "Not Implemented"
+_delAttribute = (req, res, next) ->
+    res.status(503).json error: "Not Implemented"
 
 #GET /entity/:id/attribute/:id
 exports.getAttribute = (req, res, next) ->
-    await hasPermission req, defer(err, authorized)
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _getAttribute(req, res, next)
 
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
-
-    attrId = req.params.aId
+_getAttribute =(req, res, next) ->
     entityId = req.params.eId
+    attrId = req.params.aId
+
+    return res.status(401).json error: "Missing attribute id" if not attrId
 
     startendVal = Utility.getStartEndIndex(attrId,
         Constants.REL_ATTRIBUTE,
@@ -386,14 +410,16 @@ exports.getAttribute = (req, res, next) ->
 
 #PUT /entity/:id/attribute/:id
 exports.updateAttributeLink = (req, res, next) ->
-    await hasPermission req, defer(err, authorized)
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _updateAttributeLink(req, res, next)
 
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
-
-    attrId = req.params.aId
+_updateAttributeLink = (req, res, next) ->
     entityId = req.params.eId
+    attrId = req.params.aId
     linkData = _und.clone(req.body['linkData'] || {})
+
+    return res.status(401).json error: "Missing attribute id" if not attrId
 
     await
         Attribute.get attrId, defer(errAttr, attr)
@@ -407,7 +433,7 @@ exports.updateAttributeLink = (req, res, next) ->
 
     res.json blob
 
-#POST /entity/:id/attribute/:id/vote
+# POST /entity/:id/attribute/:id/vote
 exports.voteAttribute = (req, res, next) ->
     await
         Entity.get req.params.eId, defer(errE, entity)
@@ -433,29 +459,58 @@ exports.voteAttribute = (req, res, next) ->
 ###
 # Entity Comment Section
 ###
+
+# POST /entity/:id/comment
 exports.addComment = (req, res, next) ->
-    return res.json {} if isNaN req.params.id
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _addComment(req, res, next)
 
-    await hasPermission req, defer(err, authorized)
-    if not authorized
-        console.log "No Permission"
-        return res.status(401).json error: "Permission Denied"
+_addComment = (req, res, next) ->
+    return res.status(400).json error: "Empty Comment" if not req.body.comment
 
-    # Discussion Key in Redis
-    # entity:id:discussion
-    
-    # TODO move to somewhere
-    # {
-    #   userId: randomId if no username
-    #   ip: location
-    #   comment: 
-    #   date: 
-    # }
-        
-exports.delComment = (req, res, next) ->
+    cleanedComment = Comment.fillMetaData Comment.deserialize req.body
+    cleanedComment.userId = req.headers['access_token']
+    cleanedComment.location =
+        req.header['x-forwarded-for'] or req.connection.remoteAddress
 
+    discussionId = getDiscussionId req.params.id
+    commentObjJson = JSON.stringify(cleanedComment)
+
+    await
+        redis.lpush discussionId, commentObjJson, defer(err, result)
+
+    return res.status(500).json error: "Unable to save comment" if err
+    return res.json(cleanedComment) if result
+
+# GET /entity/:id/comment
 exports.listComment = (req, res, next) ->
-    
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _listComment(req, res, next)
+
+_listComment = (req, res, next) ->
+    startIndex = req.params.start ? 0
+    discussionId = getDiscussionId req.params.id
+
+    await
+        redis.lrange discussionId, startIndex, startIndex + 25, defer(err, comments)
+
+    blobs = []
+    for comment, ind in comments
+        blobs[ind] = JSON.parse(comment)
+
+    res.json(blobs)
+
+# DELETE /entity/:id/comment
+exports.delComment = (req, res, next) ->
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    _delComment(req, res, next)
+
+_delComment = (req, res, next) ->
+    res.status(503).json error: "Not Implemented"
+
 ###
 # Entity Relation section
 ###
