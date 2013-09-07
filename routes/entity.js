@@ -122,6 +122,11 @@
         }));
         __iced_deferrals._fulfill();
       })(function() {
+        if (err) {
+          return cb(true, res.status(500).json({
+            error: "Permission check failed"
+          }));
+        }
         if (!authorized) {
           return cb(true, res.status(401).json({
             error: "Permission Denied"
@@ -1666,6 +1671,10 @@
     });
   };
 
-  exports.unlinkEntity = function(req, res, next) {};
+  exports.unlinkEntity = function(req, res, next) {
+    return res.status(503).json({
+      error: "Not Implemented"
+    });
+  };
 
 }).call(this);

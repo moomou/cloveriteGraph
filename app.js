@@ -49,9 +49,9 @@
 
   app.get('/user/:id/created', routes.user.getCreated);
 
-  app.get('/user/:id/voted', routes.user.getCreated);
+  app.get('/user/:id/voted', routes.user.getVoted);
 
-  app.get('/user/:id/commented', routes.user.getCreated);
+  app.get('/user/:id/commented', routes.user.getCommented);
 
 
   /*

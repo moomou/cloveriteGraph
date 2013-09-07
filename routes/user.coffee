@@ -21,84 +21,57 @@ Response = StdSchema
 
 Utility = require('./utility')
 
-hasPermission = (req, cb) ->
+hasPermission = (req, res, next, cb) ->
     await
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
-    
+
     err = errUser or errOther
-    return cb(new Error("Unable to retrieve from neo4j"), null) if err
+    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j") if err
 
     # Cannot access nonexistant user
-    if not other
-        return cb(null, false)
+    return cb true, res.status(401).json(error: "Unable to retrieve from neo4j") if not other
 
     # If the user are the same, of course grant permission
-    if other._node.data.id == other._node.data.id
-        return cb(null, true)
+    return cb false, null if other._node.data.id == other._node.data.id
 
-    Utility.hasPermission(user, other, cb)
+    await Utility.hasPermission user, other, defer(err, authorized)
 
-# TODO: Factor out common code
+    return cb true, res.status(500).json(error: "Permission check failed") if err
+    return cb true, res.status(401).json(error: "Permission Denied") if not authorized
+    return cb false, null
+
+getLinkType= (req, res, next, linkType) ->
+    await Utility.getUser req, defer(errUser, user)
+    return next(errUser) if errUser or not user
+
+    Logger.debug "Getting linkType: #{linkType}"
+    
+    await
+        user._node.getRelationshipNodes {type: linkType, direction:'out'},
+            defer(errGetRelationship, nodes)
+    return next(errGetRelationship) if errGetRelationship
+
+    blobs = []
+    for node, ind in nodes
+        blobs[ind] = (new Entity node).serialize()
+
+    res.json(blobs)
+
+# GET /user/:id/created
 exports.getCreated = (req, res, next) ->
-    await
-        hasPermission req, defer(err, authorized)
-        Utility.getUser req, defer(errUser, user)
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    getLinkType(req, res, next, Constants.REL_CREATED)
 
-    if not authorized
-        console.log "No Permission"
-        return res.status(401).json error: "Permission Denied"
-
-    await
-        user._node.getRelationshipNodes {type: Constants.REL_CREATED, direction:'out'},
-            defer(err, nodes)
-
-    return next(err) if err
-    blobs = []
-
-    for node, ind in nodes
-        blobs[ind] = (new Entity node).serialize()
-
-    res.json(blobs)
-
+# GET /user/:id/voted
 exports.getVoted = (req, res, next) ->
-    await
-        hasPermission req, defer(err, authorized)
-        Utility.getUser req, defer(errUser, user)
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    getLinkType(req, res, next, Constants.REL_VOTED)
 
-    if not authorized
-        console.log "No Permission"
-        return res.status(401).json error: "Permission Denied"
-
-    await
-        user._node.getRelationshipNodes {type: Constants.REL_VOTED, direction:'out'},
-            defer(err, nodes)
-
-    return next(err) if err
-    blobs = []
-
-    for node, ind in nodes
-        blobs[ind] = (new Entity node).serialize()
-
-    res.json(blobs)
-
+# GET /user/:id/commented
 exports.getCommented = (req, res, next) ->
-    await
-        hasPermission req, defer(err, authorized)
-        Utility.getUser req, defer(errUser, user)
-
-    if not authorized
-        console.log "No Permission"
-        return res.status(401).json error: "Permission Denied"
-
-    await
-        user._node.getRelationshipNodes {type: Constants.REL_COMMENTED, direction:'out'},
-            defer(err, nodes)
-
-    return next(err) if err
-    blobs = []
-
-    for node, ind in nodes
-        blobs[ind] = (new Entity node).serialize()
-
-    res.json(blobs)
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    getLinkType(req, res, next, Constants.REL_COMMENTED)

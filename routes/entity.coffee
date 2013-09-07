@@ -60,8 +60,8 @@ hasPermission = (req, res, next, cb) ->
 
     await Utility.hasPermission user, entity, defer(err, authorized)
 
-    if not authorized
-        return cb true, res.status(401).json(error: "Permission Denied")
+    return cb true, res.status(500).json(error: "Permission check failed") if err
+    return cb true, res.status(401).json(error: "Permission Denied") if not authorized
 
     return cb false, null
 
@@ -576,3 +576,4 @@ exports.linkEntity = (req, res, next) ->
 
 # TODO Implement
 exports.unlinkEntity = (req, res, next) ->
+    res.status(503).json error: "Not Implemented"

@@ -33,10 +33,10 @@ app.get('/search/:type?', routes.search.searchHandler)
 
 app.post('/user/', routes.createUser)
 
-#app.get('/user/:id/recent', routes.user.getRecent)
+# app.get('/user/:id/recent', routes.user.getRecent)
 app.get('/user/:id/created', routes.user.getCreated)
-app.get('/user/:id/voted', routes.user.getCreated)
-app.get('/user/:id/commented', routes.user.getCreated)
+app.get('/user/:id/voted', routes.user.getVoted)
+app.get('/user/:id/commented', routes.user.getCommented)
 
 ###
 # Entity Method

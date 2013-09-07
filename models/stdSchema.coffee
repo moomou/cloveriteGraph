@@ -11,14 +11,13 @@ exports.Constants = Constants = {
     REL_RESOURCE: '_RESOURCE',
 
     REL_TAG: '_TAG',
-
     REL_ACCESS: '_ACCESS',
-    REL_CREATED: '_CREATED',
 
     # Action 
     # User to Entity, Attribute, or User
     REL_VOTED: '_VOTED',
     REL_COMMENTED: '_COMMENTED',
+    REL_CREATED: '_CREATED',
 
     # this is a generic relationship
     # that indicate a user has done
