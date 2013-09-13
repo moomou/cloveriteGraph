@@ -58,7 +58,6 @@ exports.getEntityAttributes = (entity, cb) ->
 # then return the raw neo4j node of the user
 ###
 exports.getUser = getUser = (req, cb) ->
-    console.log "getUser"
     accessToken = req.headers['access_token'] ? "none"
 
     # Access token, after user logs in
@@ -161,6 +160,8 @@ exports.createUser = (req, res, next) ->
     console.log "In Create user"
     accessToken = req.headers['access_token']
     console.log accessToken
+
+    # unique user id
     userToken = req.body.userToken
     console.log userToken
 
@@ -168,12 +169,11 @@ exports.createUser = (req, res, next) ->
     # points to the neo4j userNode Id
     isAdmin accessToken, (err, isSuperAwesome) ->
         if isSuperAwesome
-            await User.create defer(err, user)
+            await User.create req.body, defer(err, user)
             userObj = user.serialize()
 
-            redis.set userToken, userObj.id
-
-            return res.json error: err if err
-            return res.json userObj
+            redis.set userToken, userObj.id, (err, res) ->
+                return res.json error: err if err
+                return res.json userObj
         else
             res.status(403).json error: "Permission Denied"

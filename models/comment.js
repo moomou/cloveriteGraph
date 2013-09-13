@@ -14,7 +14,7 @@
 
   CommentSchema = {
     comment: '',
-    userId: '',
+    username: '',
     location: ''
   };
 

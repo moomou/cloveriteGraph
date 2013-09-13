@@ -18,10 +18,22 @@ Indexes = [
         INDEX_NAME: INDEX_NAME,
         INDEX_KEY: 'userToken',
         INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'lastName',
+        INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'firstName',
+        INDEX_VALUE: ''
     }
 ]
 
 UserSchema = {
+    firstName: '',
+    lastName: '',
     createdCount: 0,
     modifiedCount: 0,
     reputation: 'Z',
@@ -40,8 +52,8 @@ User.Indexes = Indexes
 User.deserialize = (data) ->
     Neo.deserialize UserSchema, data
  
-User.create = (cb) ->
-    Neo.create User, UserSchema, Indexes, cb
+User.create = (reqBody, cb) ->
+    Neo.create User, reqBody, Indexes, cb
 
 User.get = (id, cb) ->
     Neo.get User, id, cb

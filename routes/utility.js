@@ -133,7 +133,6 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
-    console.log("getUser");
     accessToken = (_ref = req.headers['access_token']) != null ? _ref : "none";
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -148,7 +147,7 @@
             return neoUserId = arguments[1];
           };
         })(),
-        lineno: 65
+        lineno: 64
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -171,7 +170,7 @@
               return user = arguments[1];
             };
           })(),
-          lineno: 73
+          lineno: 72
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -242,7 +241,7 @@
               return __slot_3[__slot_4] = arguments[1];
             };
           })(errs, ind, rels, ind),
-          lineno: 116
+          lineno: 115
         }));
       }
       __iced_deferrals._fulfill();
@@ -297,7 +296,7 @@
             return path = arguments[1];
           };
         })(),
-        lineno: 149
+        lineno: 148
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -332,26 +331,26 @@
             parent: ___iced_passed_deferral,
             filename: "utility.coffee"
           });
-          User.create(__iced_deferrals.defer({
+          User.create(req.body, __iced_deferrals.defer({
             assign_fn: (function() {
               return function() {
                 err = arguments[0];
                 return user = arguments[1];
               };
             })(),
-            lineno: 170
+            lineno: 171
           }));
           __iced_deferrals._fulfill();
         })(function() {
           userObj = user.serialize();
-          redis.set(userToken, userObj.id);
-          if (err) {
-            return res.json({
-              error: err
-            });
-          }
-          return res.json(userObj);
-          return __iced_k();
+          return __iced_k(redis.set(userToken, userObj.id, function(err, res) {
+            if (err) {
+              return res.json({
+                error: err
+              });
+            }
+            return res.json(userObj);
+          }));
         });
       } else {
         return __iced_k(res.status(403).json({

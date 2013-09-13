@@ -7,7 +7,7 @@ Neo = require './neo'
 
 CommentSchema = {
     comment: '',
-    userId: '', # unique id that identify user; randomId if not authenticated
+    username: '', # unique id that identify user; anonymous if not authenticated
     location: ''  # unique ip address
 }
 

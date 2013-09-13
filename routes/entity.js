@@ -64,7 +64,7 @@
   };
 
   hasPermission = function(req, res, next, cb) {
-    var authorized, entity, err, errEntity, errUser, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var authorized, entity, err, errEntity, errUser, reqWithUser, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -132,47 +132,16 @@
             error: "Permission Denied"
           }));
         }
-        return cb(false, null);
+        reqWithUser = _und.extend(_und.clone(req), {
+          user: user
+        });
+        return cb(false, null, reqWithUser);
       });
     });
   };
 
   getDiscussionId = function(entityId) {
     return "entity:" + entityId + ":discussion";
-  };
-
-  exports.authenticate = function(req, res, next, cb) {
-    var authorized, err, ___iced_passed_deferral, __iced_deferrals, __iced_k,
-      _this = this;
-    __iced_k = __iced_k_noop;
-    ___iced_passed_deferral = iced.findDeferral(arguments);
-    if (isNaN(req.params.id)) {
-      return res.json({});
-    }
-    (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        filename: "entity.coffee",
-        funcname: "authenticate"
-      });
-      hasPermission(req, __iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            err = arguments[0];
-            return authorized = arguments[1];
-          };
-        })(),
-        lineno: 75
-      }));
-      __iced_deferrals._fulfill();
-    })(function() {
-      if (!authorized) {
-        return res.status(401).json({
-          error: "Permission Denied"
-        });
-      }
-      return cb(req, res, next);
-    });
   };
 
   exports.search = function(req, res, next) {
@@ -202,7 +171,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 92
+        lineno: 84
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -234,7 +203,7 @@
               return entity = arguments[1];
             };
           })(),
-          lineno: 108
+          lineno: 100
         }));
         for (ind = _i = 0, _len = tags.length; _i < _len; ind = ++_i) {
           tagName = tags[ind];
@@ -245,7 +214,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, tagObjs, ind),
-            lineno: 111
+            lineno: 103
           }));
         }
         __iced_deferrals._fulfill();
@@ -276,7 +245,7 @@
                 return rels = arguments[1];
               };
             })(),
-            lineno: 135
+            lineno: 127
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -292,7 +261,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 137
+              lineno: 129
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -304,7 +273,7 @@
   };
 
   exports.show = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -318,17 +287,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 142
+        lineno: 134
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _show(req, res, next);
+      return _show(augReq, res, next);
     });
   };
 
@@ -350,7 +320,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 147
+        lineno: 139
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -371,7 +341,7 @@
                   return attrBlobs = arguments[0];
                 };
               })(),
-              lineno: 152
+              lineno: 144
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -389,7 +359,7 @@
   };
 
   exports.edit = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -403,17 +373,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 161
+        lineno: 153
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _edit(req, res, next);
+      return _edit(augReq, res, next);
     });
   };
 
@@ -435,7 +406,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 166
+        lineno: 158
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -462,7 +433,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, tagObjs, ind),
-            lineno: 176
+            lineno: 168
           }));
         }
         __iced_deferrals._fulfill();
@@ -512,7 +483,7 @@
                       return pathExists = arguments[1];
                     };
                   })(),
-                  lineno: 191
+                  lineno: 183
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -534,7 +505,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 200
+              lineno: 192
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -546,7 +517,7 @@
   };
 
   exports.del = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -560,17 +531,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 205
+        lineno: 197
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _del(req, res, next);
+      return _del(augReq, res, next);
     });
   };
 
@@ -592,7 +564,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 210
+        lineno: 202
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -612,7 +584,7 @@
               return entity = arguments[1];
             };
           })(),
-          lineno: 213
+          lineno: 205
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -631,7 +603,7 @@
                 return err = arguments[0];
               };
             })(),
-            lineno: 216
+            lineno: 208
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -650,7 +622,7 @@
   */
 
   exports.showUsers = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -664,10 +636,11 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 225
+        lineno: 217
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -696,7 +669,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 230
+        lineno: 222
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -719,7 +692,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 235
+          lineno: 227
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -743,7 +716,7 @@
   */
 
   exports.listAttribute = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -757,17 +730,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 251
+        lineno: 243
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _listAttribute(req, res, next);
+      return _listAttribute(augReq, res, next);
     });
   };
 
@@ -789,7 +763,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 256
+        lineno: 248
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -812,7 +786,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 261
+          lineno: 253
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -838,7 +812,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(rels, ind),
-              lineno: 275
+              lineno: 267
             }));
             (new Attribute(node)).serialize(__iced_deferrals.defer({
               assign_fn: (function(__slot_1, __slot_2) {
@@ -846,7 +820,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(blobs, ind),
-              lineno: 276
+              lineno: 268
             }), entity._node.id);
           }
           __iced_deferrals._fulfill();
@@ -872,7 +846,7 @@
   };
 
   exports.addAttribute = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -886,17 +860,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 290
+        lineno: 282
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _addAttribute(req, res, next);
+      return _addAttribute(augReg, res, next);
     });
   };
 
@@ -920,7 +895,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 301
+        lineno: 293
       }));
       Entity.get(req.params.id, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -929,7 +904,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 302
+        lineno: 294
       }));
       Attribute.getOrCreate(data, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -938,7 +913,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 303
+        lineno: 295
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -964,7 +939,7 @@
               return path = arguments[1];
             };
           })(),
-          lineno: 320
+          lineno: 312
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -985,7 +960,7 @@
                     return link = arguments[1];
                   };
                 })(),
-                lineno: 328
+                lineno: 320
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -1007,7 +982,7 @@
                           return value = arguments[0];
                         };
                       })(),
-                      lineno: 337
+                      lineno: 329
                     }));
                     __iced_deferrals._fulfill();
                   })(function() {
@@ -1039,7 +1014,7 @@
                     return value = arguments[0];
                   };
                 })(),
-                lineno: 351
+                lineno: 343
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -1059,7 +1034,7 @@
                       return rel = arguments[1];
                     };
                   })(),
-                  lineno: 361
+                  lineno: 353
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -1084,7 +1059,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 367
+              lineno: 359
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -1099,7 +1074,7 @@
   };
 
   exports.delAttribute = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -1113,17 +1088,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 373
+        lineno: 365
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _delAttribute(req, res, next);
+      return _delAttribute(augReq, res, next);
     });
   };
 
@@ -1134,7 +1110,7 @@
   };
 
   exports.getAttribute = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -1148,17 +1124,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 382
+        lineno: 374
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _getAttribute(req, res, next);
+      return _getAttribute(augReq, res, next);
     });
   };
 
@@ -1188,7 +1165,7 @@
             return rel = arguments[1];
           };
         })(),
-        lineno: 398
+        lineno: 390
       }));
       Attribute.get(attrId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1197,7 +1174,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 399
+        lineno: 391
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1218,7 +1195,7 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 405
+          lineno: 397
         }), entityId);
         __iced_deferrals._fulfill();
       })(function() {
@@ -1231,7 +1208,7 @@
   };
 
   exports.updateAttributeLink = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -1245,17 +1222,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 412
+        lineno: 404
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _updateAttributeLink(req, res, next);
+      return _updateAttributeLink(augReq, res, next);
     });
   };
 
@@ -1285,7 +1263,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 424
+        lineno: 416
       }));
       Link.put(linkData['id'], linkData, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1294,7 +1272,7 @@
             return rel = arguments[1];
           };
         })(),
-        lineno: 425
+        lineno: 417
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1328,7 +1306,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 438
+        lineno: 430
       }));
       Attribute.get(req.params.aId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1337,7 +1315,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 439
+        lineno: 431
       }));
       Utility.getUser(req, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1346,7 +1324,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 440
+        lineno: 432
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1376,7 +1354,7 @@
   */
 
   exports.addComment = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -1390,17 +1368,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 464
+        lineno: 456
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _addComment(req, res, next);
+      return _addComment(augReq, res, next);
     });
   };
 
@@ -1415,7 +1394,7 @@
       });
     }
     cleanedComment = Comment.fillMetaData(Comment.deserialize(req.body));
-    cleanedComment.userId = req.headers['access_token'];
+    cleanedComment.username = Utility.getUser(req.headers['access_token']);
     cleanedComment.location = req.header['x-forwarded-for'] || req.connection.remoteAddress;
     discussionId = getDiscussionId(req.params.id);
     commentObjJson = JSON.stringify(cleanedComment);
@@ -1432,7 +1411,7 @@
             return result = arguments[1];
           };
         })(),
-        lineno: 480
+        lineno: 473
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1448,7 +1427,7 @@
   };
 
   exports.listComment = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -1462,17 +1441,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 487
+        lineno: 480
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _listComment(req, res, next);
+      return _listComment(augReq, res, next);
     });
   };
 
@@ -1496,7 +1476,7 @@
             return comments = arguments[1];
           };
         })(),
-        lineno: 496
+        lineno: 489
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1511,7 +1491,7 @@
   };
 
   exports.delComment = function(req, res, next) {
-    var err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -1525,17 +1505,18 @@
         assign_fn: (function() {
           return function() {
             err = arguments[0];
-            return errRes = arguments[1];
+            errRes = arguments[1];
+            return augReq = arguments[2];
           };
         })(),
-        lineno: 506
+        lineno: 499
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return errRes;
       }
-      return _delComment(req, res, next);
+      return _delComment(augReq, res, next);
     });
   };
 
@@ -1571,7 +1552,7 @@
             return rels = arguments[1];
           };
         })(),
-        lineno: 525
+        lineno: 518
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1601,7 +1582,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(blobs, ind),
-            lineno: 544
+            lineno: 537
           }), extraData);
         }
         __iced_deferrals._fulfill();
@@ -1637,7 +1618,7 @@
             return srcEntity = arguments[1];
           };
         })(),
-        lineno: 552
+        lineno: 545
       }));
       Entity.get(req.params.dstId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1646,7 +1627,7 @@
             return dstEntity = arguments[1];
           };
         })(),
-        lineno: 553
+        lineno: 546
       }));
       __iced_deferrals._fulfill();
     })(function() {

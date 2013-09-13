@@ -63,22 +63,14 @@ hasPermission = (req, res, next, cb) ->
     return cb true, res.status(500).json(error: "Permission check failed") if err
     return cb true, res.status(401).json(error: "Permission Denied") if not authorized
 
-    return cb false, null
+    # Returns a new shallow copy of req with user if authenticated
+    reqWithUser = _und.extend _und.clone(req), user: user
+    return cb false, null, reqWithUser
 
 getDiscussionId = (entityId) ->
     "entity:#{entityId}:discussion"
 
 # END -
-
-exports.authenticate = (req, res, next, cb) ->
-    return res.json {} if isNaN req.params.id
-
-    await hasPermission req, defer(err, authorized)
-
-    if not authorized
-        return res.status(401).json error: "Permission Denied"
-
-    cb(req, res, next)
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
@@ -140,9 +132,9 @@ exports.create = (req, res, next) ->
 
 # GET /entity/:id
 exports.show = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _show(req, res, next)
+    _show(augReq, res, next)
 
 _show = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
@@ -159,9 +151,9 @@ _show = (req, res, next) ->
 
 # PUT /entity/:id
 exports.edit = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _edit(req, res, next)
+    _edit(augReq, res, next)
 
 _edit = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(err, entity)
@@ -203,9 +195,9 @@ _edit = (req, res, next) ->
 
 # DELETE /entity/:id
 exports.del = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _del(req, res, next)
+    _del(augReq, res, next)
 
 _del = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(err, entity)
@@ -223,7 +215,7 @@ _del = (req, res, next) ->
 # Entity Use Section
 ###
 exports.showUsers = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
     _showUsers(req, res, next)
 
@@ -249,9 +241,9 @@ _showUsers = (req, res, next) ->
 
 # GET /entity/:id/attribute
 exports.listAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _listAttribute(req, res, next)
+    _listAttribute(augReq, res, next)
 
 _listAttribute = (req, res, next) ->
     await Entity.get req.params.id, defer(errE, entity)
@@ -288,9 +280,9 @@ _listAttribute = (req, res, next) ->
 
 # POST /entity/:id/attribute
 exports.addAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _addAttribute(req, res, next)
+    _addAttribute(augReg, res, next)
 
 _addAttribute = (req, res, next) ->
     # Clean Data
@@ -371,18 +363,18 @@ _addAttribute = (req, res, next) ->
 
 # TODO DELETE /entity/:eId/attribute/:aId
 exports.delAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _delAttribute(req, res, next)
+    _delAttribute(augReq, res, next)
 
 _delAttribute = (req, res, next) ->
     res.status(503).json error: "Not Implemented"
 
 #GET /entity/:id/attribute/:id
 exports.getAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _getAttribute(req, res, next)
+    _getAttribute(augReq, res, next)
 
 _getAttribute =(req, res, next) ->
     entityId = req.params.eId
@@ -410,9 +402,9 @@ _getAttribute =(req, res, next) ->
 
 #PUT /entity/:id/attribute/:id
 exports.updateAttributeLink = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _updateAttributeLink(req, res, next)
+    _updateAttributeLink(augReq, res, next)
 
 _updateAttributeLink = (req, res, next) ->
     entityId = req.params.eId
@@ -462,15 +454,16 @@ exports.voteAttribute = (req, res, next) ->
 
 # POST /entity/:id/comment
 exports.addComment = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _addComment(req, res, next)
+    _addComment(augReq, res, next)
 
 _addComment = (req, res, next) ->
     return res.status(400).json error: "Empty Comment" if not req.body.comment
 
     cleanedComment = Comment.fillMetaData Comment.deserialize req.body
-    cleanedComment.userId = req.headers['access_token']
+    cleanedComment.username = Utility.getUser req.headers['access_token']
+
     cleanedComment.location =
         req.header['x-forwarded-for'] or req.connection.remoteAddress
 
@@ -485,9 +478,9 @@ _addComment = (req, res, next) ->
 
 # GET /entity/:id/comment
 exports.listComment = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _listComment(req, res, next)
+    _listComment(augReq, res, next)
 
 _listComment = (req, res, next) ->
     startIndex = req.params.start ? 0
@@ -504,9 +497,9 @@ _listComment = (req, res, next) ->
 
 # DELETE /entity/:id/comment
 exports.delComment = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
+    await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _delComment(req, res, next)
+    _delComment(augReq, res, next)
 
 _delComment = (req, res, next) ->
     res.status(503).json error: "Not Implemented"
