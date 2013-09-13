@@ -1336,7 +1336,7 @@
         return next(err);
       }
       voteData = _und.clone(req.body);
-      voteData.ipAddr = req.header['x-forwarded-for'] || req.connection.remoteAddress;
+      voteData.ipAddr = req.header['x-real-ip'] || req.connection.remoteAddress;
       voteData.browser = req.useragent.Browser;
       voteData.os = req.useragent.OS;
       voteData.lang = req.headers['accept-language'];
@@ -1398,7 +1398,7 @@
     }
     cleanedComment = Comment.fillMetaData(Comment.deserialize(req.body));
     cleanedComment.username = req.user ? req.user.firstName + " " + req.user.lastName : "Anonymous";
-    cleanedComment.location = req.header['x-forwarded-for'] || req.connection.remoteAddress;
+    cleanedComment.location = req.header['x-real-ip'] || req.connection.remoteAddress;
     discussionId = getDiscussionId(req.params.id);
     commentObjJson = JSON.stringify(cleanedComment);
     console.log(commentObjJson);

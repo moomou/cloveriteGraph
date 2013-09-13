@@ -439,7 +439,7 @@ exports.voteAttribute = (req, res, next) ->
     return next(err) if err
 
     voteData = _und.clone req.body
-    voteData.ipAddr = req.header['x-forwarded-for'] or req.connection.remoteAddress
+    voteData.ipAddr = req.header['x-real-ip'] or req.connection.remoteAddress
     voteData.browser = req.useragent.Browser
     voteData.os = req.useragent.OS
     voteData.lang = req.headers['accept-language']
@@ -469,7 +469,7 @@ _addComment = (req, res, next) ->
     cleanedComment.username =
         if req.user then req.user.firstName + " " + req.user.lastName else "Anonymous"
     cleanedComment.location =
-        req.header['x-forwarded-for'] or req.connection.remoteAddress
+        req.header['x-real-ip'] or req.connection.remoteAddress
 
     discussionId = getDiscussionId req.params.id
     commentObjJson = JSON.stringify(cleanedComment)
