@@ -58,6 +58,9 @@ hasPermission = (req, res, next, cb) ->
     err = errUser or errEntity
     return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), null if err
 
+    # Return authorized if not private and user is anonymous
+    return cb false, null, req if not entity._node.data.private and not user
+
     await Utility.hasPermission user, entity, defer(err, authorized)
 
     return cb true, res.status(500).json(error: "Permission check failed"), null if err
@@ -455,20 +458,23 @@ exports.voteAttribute = (req, res, next) ->
 # POST /entity/:id/comment
 exports.addComment = (req, res, next) ->
     await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
+    # TODO - anonymous user should be able to to add comment
+    return next(errRes) if err
     _addComment(augReq, res, next)
 
 _addComment = (req, res, next) ->
     return res.status(400).json error: "Empty Comment" if not req.body.comment
 
     cleanedComment = Comment.fillMetaData Comment.deserialize req.body
-    cleanedComment.username = Utility.getUser req.headers['access_token']
-
+    cleanedComment.username =
+        if req.user then req.user.firstName + " " + req.user.lastName else "Anonymous"
     cleanedComment.location =
         req.header['x-forwarded-for'] or req.connection.remoteAddress
 
     discussionId = getDiscussionId req.params.id
     commentObjJson = JSON.stringify(cleanedComment)
+
+    console.log commentObjJson
 
     await
         redis.lpush discussionId, commentObjJson, defer(err, result)
