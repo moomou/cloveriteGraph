@@ -49,19 +49,19 @@ getJSONData = (remoteAddress, cb) ->
             cb("N/A")
 
 hasPermission = (req, res, next, cb) ->
-    cb true, res.status(400).json(error: "Missing param id") if isNaN req.params.id
+    cb true, res.status(400).json(error: "Missing param id"), null if isNaN req.params.id
 
     await
         Entity.get req.params.id, defer(errEntity, entity)
         Utility.getUser req, defer(errUser, user)
 
     err = errUser or errEntity
-    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j") if err
+    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), null if err
 
     await Utility.hasPermission user, entity, defer(err, authorized)
 
-    return cb true, res.status(500).json(error: "Permission check failed") if err
-    return cb true, res.status(401).json(error: "Permission Denied") if not authorized
+    return cb true, res.status(500).json(error: "Permission check failed"), null if err
+    return cb true, res.status(401).json(error: "Permission Denied"), null if not authorized
 
     # Returns a new shallow copy of req with user if authenticated
     reqWithUser = _und.extend _und.clone(req), user: user

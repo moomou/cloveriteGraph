@@ -71,7 +71,7 @@
     if (isNaN(req.params.id)) {
       cb(true, res.status(400).json({
         error: "Missing param id"
-      }));
+      }), null);
     }
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -103,7 +103,7 @@
       if (err) {
         return cb(true, res.status(500).json({
           error: "Unable to retrieve from neo4j"
-        }));
+        }), null);
       }
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -125,12 +125,12 @@
         if (err) {
           return cb(true, res.status(500).json({
             error: "Permission check failed"
-          }));
+          }), null);
         }
         if (!authorized) {
           return cb(true, res.status(401).json({
             error: "Permission Denied"
-          }));
+          }), null);
         }
         reqWithUser = _und.extend(_und.clone(req), {
           user: user
