@@ -152,7 +152,7 @@
   };
 
   exports.search = function(req, res, next) {
-    return res.redirect("/search/?q=" + req.query['q']);
+    return res.redirect("/" + Constants.API_VERSION + "/search/?q=" + req.query['q']);
   };
 
 

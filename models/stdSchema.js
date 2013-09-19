@@ -60,6 +60,7 @@
   };
 
   exports.Constants = Constants = {
+    API_VERSION: 'v0',
     REL_LOCATION: '_LOCATION',
     REL_AWARD: '_AWARD',
     REL_ATTRIBUTE: '_ATTRIBUTE',

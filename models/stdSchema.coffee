@@ -33,6 +33,8 @@ exports.optional= () ->
     validationSchema false, arguments
 
 exports.Constants = Constants = {
+    API_VERSION: 'v0',
+
     # Generic Relation
     REL_LOCATION: '_LOCATION',
     REL_AWARD: '_AWARD',

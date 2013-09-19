@@ -79,7 +79,7 @@ hasPermission = (req, res, next, cb) ->
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
-    res.redirect "/search/?q=#{req.query['q']}"
+    res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
 
 ###
 # Entity section
