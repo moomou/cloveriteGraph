@@ -16,31 +16,46 @@ Indexes = [
     },
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'userToken',
+        INDEX_KEY: 'accessToken',
         INDEX_VALUE: ''
     },
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'lastName',
+        INDEX_KEY: 'lastname',
         INDEX_VALUE: ''
     },
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'firstName',
+        INDEX_KEY: 'firstname',
+        INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'username',
+        INDEX_VALUE: ''
+    },
+    {
+        INDEX_NAME: INDEX_NAME,
+        INDEX_KEY: 'email',
         INDEX_VALUE: ''
     }
 ]
 
 UserSchema = {
-    firstName: '',
-    lastName: '',
+    # Configured Values
+    email: '',
+    username: '',
+    firstname: '',
+    lastname: '',
+
+    # Calculated Values
+    accessToken: ''
+    reputation: 'Z',
     createdCount: 0,
     modifiedCount: 0,
-    reputation: 'Z',
-    userToken: ''
 }
 
-#Private constructor
+# Private constructor
 module.exports = class User extends Neo
     constructor: (@_node) ->
         super @_node
@@ -63,3 +78,6 @@ User.getOrCreate = (reqBody, cb) ->
 
 User.put = (nodeId, reqBody, cb) ->
     Neo.put User, nodeId, reqBody, cb
+
+User.find = (key, value, cb) ->
+    Neo.find User, User.INDEX_NAME, key, value, cb

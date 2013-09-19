@@ -1,6 +1,5 @@
 #attribute.coffee
 #Routes to CRUD entities
-
 require('source-map-support').install()
 _und = require('underscore')
 
@@ -8,8 +7,9 @@ Neo = require('../models/neo')
 Entity = require('../models/entity')
 Attribute = require('../models/attribute')
 Tag = require('../models/tag')
-StdSchema = require('../models/stdSchema')
-Constants = StdSchema.Constants
+
+SchemaUtil = require('../models/stdSchema')
+Constants = SchemaUtil.Constants
 
 # GET /attribute/search/
 exports.search = (req, res, next) ->

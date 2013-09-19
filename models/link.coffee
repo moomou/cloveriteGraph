@@ -6,11 +6,10 @@ Neo = require './neo'
 redis = Setup.db.redis
 db = Setup.db
 
-StdSchema = require './stdSchema'
-Contants = StdSchema.Contants
+SchemaUtil = require './stdSchema'
+Contants = SchemaUtil.Contants
 
 INDEX_NAME = 'rLink'
-
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
@@ -32,6 +31,11 @@ LinkSchema = {
     # calculated value
     value: '',       #data value: string, number, and boolean
     veracity: 0      #whehter this link is factual or not
+}
+
+SchemaValidation = {
+    srcURL: SchemaUtil.required('string'), #link to data source
+    description: SchemaUtil.optional('string'), #link to data source
 }
 
 module.exports = class Link extends Neo

@@ -1,4 +1,5 @@
-#comment.coffee
+#request.coffee
+
 _und = require 'underscore'
 Logger = require 'util'
 
@@ -7,23 +8,19 @@ Neo = require './neo'
 
 SchemaUtil = require './stdSchema'
 
-CommentSchema = {
-    # Configured Values
-    comment: '',
-
-    # Calculated Values
-    username: '', # unique id that identify user; anonymous if not authenticated
-    location: ''  # unique ip address
+RequestSchema = {
+    to: '',
+    from: '',
+    request: ''
 }
 
 SchemaValidation = {
-    comment: SchemaUtil.required('string')
 }
 
 module.exports =
     validateSchema: (data) ->
         SchemaUtil.validate SchemaValidation, data
     deserialize: (data) ->
-        Neo.deserialize CommentSchema, data
+        Neo.deserialize RequestSchema, data
     fillMetaData: (data) ->
         Neo.fillMetaData data

@@ -15,10 +15,8 @@ Vote = require('../models/vote')
 Link = require('../models/link')
 Comment = require('../models/comment')
 
-StdSchema = require('../models/stdSchema')
-
-Constants = StdSchema.Constants
-Response = StdSchema
+SchemaUtil = require('../models/stdSchema')
+Constants = SchemaUtil.Constants
 
 Utility = require('./utility')
 
@@ -48,6 +46,13 @@ getJSONData = (remoteAddress, cb) ->
         else
             cb("N/A")
 
+getDiscussionId = (entityId) ->
+    "entity:#{entityId}:discussion"
+
+getRelationId = (path) ->
+    splits = path.relationships[0]._data.self.split('/')
+    splits[splits.length - 1]
+
 hasPermission = (req, res, next, cb) ->
     cb true, res.status(400).json(error: "Missing param id"), null if isNaN req.params.id
 
@@ -70,9 +75,6 @@ hasPermission = (req, res, next, cb) ->
     reqWithUser = _und.extend _und.clone(req), user: user
     return cb false, null, reqWithUser
 
-getDiscussionId = (entityId) ->
-    "entity:#{entityId}:discussion"
-
 # END -
 
 # GET /entity/search/
@@ -86,13 +88,10 @@ exports.search = (req, res, next) ->
 # POST /entity
 exports.create = (req, res, next) ->
     await Utility.getUser req, defer(err, user)
-    return next(err) if err
+    return next err if err
 
     # anonymous user cannot create private entity
-    console.log "Before User"
-    console.log req.body
     req.body['private'] = false if not user
-    console.log "After User"
     console.log "Creating Entity: #{req.body}"
 
     errs = []
@@ -123,12 +122,13 @@ exports.create = (req, res, next) ->
             linkData,
             (err, rel) ->
 
-    # Ownership
-    await Utility.createMultipleLinks user._node,
-        entity._node,
-        [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
-        linkData,
-        defer(err, rels)
+    # User is not defined for anonymous users
+    if user
+        await Utility.createMultipleLinks user._node,
+            entity._node,
+            [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
+            linkData,
+            defer(err, rels)
 
     await entity.serialize defer blob
     res.status(201).json blob
@@ -159,8 +159,8 @@ exports.edit = (req, res, next) ->
     _edit(augReq, res, next)
 
 _edit = (req, res, next) ->
-    await Entity.put req.params.id, req.body, defer(err, entity)
-    return next(err) if err
+    await Entity.put req.params.id, req.body, defer(errMsg, entity)
+    return res.status(400).json error: errMsg, input: req.body if errMsg
 
     # Need to refactor later
     errs = []
@@ -285,20 +285,22 @@ _listAttribute = (req, res, next) ->
 exports.addAttribute = (req, res, next) ->
     await hasPermission req, res, next, defer(err, errRes, augReq)
     return errRes if err
-    _addAttribute(augReg, res, next)
+    _addAttribute augReq, res, next
 
 _addAttribute = (req, res, next) ->
+    valid = Attribute.validateSchema req.body
+    return res.status(400).json error: "Invalid input", input: req.body if not valid
+
     # Clean Data
     data = _und.clone req.body
     delete data['id']
 
     # Retrieve the 2 entities
     await
-        Utility.getUser req, defer(errU, user)
         Entity.get req.params.id, defer(errE, entity)
         Attribute.getOrCreate data, defer(errA, attr)
 
-    err = errU or errE or errA
+    err = errE or errA
     return next(err) if err
 
     linkData = Link.normalizeData _und.clone(req.body || {})
@@ -313,12 +315,15 @@ _addAttribute = (req, res, next) ->
     console.log "__END__"
 
     # hasLink returns the link if it exists
-    await Utility.hasLink(entity._node, attr._node, Constants.REL_ATTRIBUTE, "all", defer(err, path))
+    await Utility.hasLink entity._node,
+        attr._node,
+        Constants.REL_ATTRIBUTE,
+        "all",
+        defer(err, path)
 
     # If Path already exists
     if path
-        splits = path.relationships[0]._data.self.split('/')
-        relId = splits[splits.length - 1]
+        relId = getRelationId path
 
         await
             Link.get relId, defer(err, link)
@@ -458,12 +463,12 @@ exports.voteAttribute = (req, res, next) ->
 # POST /entity/:id/comment
 exports.addComment = (req, res, next) ->
     await hasPermission req, res, next, defer(err, errRes, augReq)
-    # TODO - anonymous user should be able to to add comment
     return next(errRes) if err
     _addComment(augReq, res, next)
 
 _addComment = (req, res, next) ->
-    return res.status(400).json error: "Empty Comment" if not req.body.comment
+    valid = Comment.validateSchema req.body
+    return res.status(400).json error: "Invalid input", input: req.body if not valid
 
     cleanedComment = Comment.fillMetaData Comment.deserialize req.body
     cleanedComment.username =

@@ -16,8 +16,8 @@ app.use(useragent.express())
 app.use(app.router)
 
 #development only
-if ('development' == app.get('env'))
-  app.use(express.errorHandler())
+if 'development' == app.get('env')
+    app.use(express.errorHandler())
 
 ###
 # Routes
@@ -28,12 +28,17 @@ app.get('/search/:type?', routes.search.searchHandler)
 
 ###
 # User Method
-# GET
 ###
+app.post('/user/', routes.createUser) # admin only function
+app.get('/user/:id', routes.user.getSelf)
 
-app.post('/user/', routes.createUser)
+#app.get('/user/:id/discussion', routes.user.getDiscussion)
+app.get('/user/:id/request', routes.user.getRequest)
+app.get('/user/:id/recommendation', routes.user.getRecommendation)
+app.post('/user/:id/request', routes.user.sendRequest)
+app.post('/user/:id/recommendation', routes.user.sendRecommendation)
 
-# app.get('/user/:id/recent', routes.user.getRecent)
+
 app.get('/user/:id/created', routes.user.getCreated)
 app.get('/user/:id/voted', routes.user.getVoted)
 app.get('/user/:id/commented', routes.user.getCommented)
@@ -49,7 +54,7 @@ app.get('/entity/search', routes.entity.search)
 
 app.post('/entity', routes.entity.create)
 app.get('/entity/:id', routes.entity.show)
-app.put('/entity/:id', routes.entity.edit)
+app.put('/entity/:id', routes.entity.edit, () -> console.log ("HI I am Error"))
 app.del('/entity/:id', routes.entity.del)
 
 ###
@@ -120,5 +125,8 @@ app.del('/attribute/:id', routes.attribute.del)
 ###
 app.get('/attribute/:id/entity', routes.attribute.listEntity)
 
-http.createServer(app).listen(app.get('port'), ->
-    console.log('Express server listening on port ' + app.get('port')))
+server = http.createServer(app)
+server.listen(app.get('port'), -> console.log('Express server listening on port ' + app.get('port')))
+
+# Create IO Server
+# ioServer = require('./socketServer')(server)

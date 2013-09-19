@@ -1,5 +1,37 @@
 _und = require('underscore')
 
+_validator = (valid, validate, input) ->
+    return [false, input] if not valid
+    valid = validate input
+    [valid, input]
+
+Validators = {
+    string: (state, input) -> _validator(state, _und.isString, input),
+    number: (state, input) -> _validator(state, _und.isNumber, input),
+    array: (state, input) -> _validator(state, _und.isArray, input),
+}
+
+validationSchema = (required, validator) ->
+    if not _und.isFunction(validator)
+        validator = Validators[(_und.values validator)[0]]
+    required: required, validator: validator
+
+# TODO improve
+# Does not check for required vs optional
+exports.validate = (schemaValidation, input) ->
+    result = _und.map input, (value, key) ->
+        if schemaValidation[key]
+            [valid, _] = schemaValidation[key].validator(true, value)
+            valid
+    return false if _und.contains(result, false)
+    return true
+
+exports.required = () ->
+    validationSchema true, arguments
+
+exports.optional= () ->
+    validationSchema false, arguments
+
 exports.Constants = Constants = {
     # Generic Relation
     REL_LOCATION: '_LOCATION',
@@ -13,7 +45,7 @@ exports.Constants = Constants = {
     REL_TAG: '_TAG',
     REL_ACCESS: '_ACCESS',
 
-    # Action 
+    # Action
     # User to Entity, Attribute, or User
     REL_VOTED: '_VOTED',
     REL_COMMENTED: '_COMMENTED',
@@ -32,7 +64,6 @@ exports.Constants = Constants = {
     ATTR_NUMERIC: "attr_numeric",
     ATTR_REFERENCE: "attr_ref"
 }
-
 ###
     Relationship Schema
 ###
@@ -47,13 +78,3 @@ exports.ErrorResponse = class ErrorResponse
             message: @msg,
             solution: @fix
         }
-
-class AttrLink
-    constructor: (
-    ) ->
-
-class Link
-    constructor: (
-        @linkName
-        @linkData
-    ) ->

@@ -25,26 +25,36 @@
       INDEX_VALUE: ''
     }, {
       INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'userToken',
+      INDEX_KEY: 'accessToken',
       INDEX_VALUE: ''
     }, {
       INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'lastName',
+      INDEX_KEY: 'lastname',
       INDEX_VALUE: ''
     }, {
       INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'firstName',
+      INDEX_KEY: 'firstname',
+      INDEX_VALUE: ''
+    }, {
+      INDEX_NAME: INDEX_NAME,
+      INDEX_KEY: 'username',
+      INDEX_VALUE: ''
+    }, {
+      INDEX_NAME: INDEX_NAME,
+      INDEX_KEY: 'email',
       INDEX_VALUE: ''
     }
   ];
 
   UserSchema = {
-    firstName: '',
-    lastName: '',
-    createdCount: 0,
-    modifiedCount: 0,
+    email: '',
+    username: '',
+    firstname: '',
+    lastname: '',
+    accessToken: '',
     reputation: 'Z',
-    userToken: ''
+    createdCount: 0,
+    modifiedCount: 0
   };
 
   module.exports = User = (function(_super) {
@@ -83,6 +93,10 @@
 
   User.put = function(nodeId, reqBody, cb) {
     return Neo.put(User, nodeId, reqBody, cb);
+  };
+
+  User.find = function(key, value, cb) {
+    return Neo.find(User, User.INDEX_NAME, key, value, cb);
   };
 
 }).call(this);

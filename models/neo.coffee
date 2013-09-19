@@ -5,8 +5,8 @@ Setup = require './setup'
 db = Setup.db
 
 ###
-#Normal values related to transaction; 
-#Permission not implemented here
+# Normal values related to transaction; 
+# Permission not implemented here
 ###
 MetaSchema = {
     createdAt: -1,    #time created
@@ -35,15 +35,20 @@ module.exports = class Neo
         return cb(data) if cb
         return data
 
+    # Returns error message if unsuccessful
     update: (newData) ->
         console.log "Data VER: " + @_node.data.version
         console.log "New VER: " + newData.version
 
         if newData.version != @_node.data.version
-            console.log "Invalid Update Requested"
-            return false
+            return "Version number behind"
+
+        # Cannot take a public entity and set it to private
+        if not @_node.data.private and newData.private
+            return "Cannot take a public entity and set it to private"
+
         _und.extend @_node.data, newData
-        return true
+        return false
 
     save: (cb) ->
         @_node.data.modifiedAt = new Date().getTime() / 1000
@@ -133,14 +138,15 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
 
     Class.get nodeId, (err, obj) ->
         return cb(err, null) if err
-        valid = obj.update(data)
+        errMsg = obj.update(data)
 
-        if valid
+        if not errMsg
             await obj.save defer(saveErr)
             Neo.index(obj._node, Class.Indexes, reqBody)
             return cb(saveErr, null) if saveErr
-
-        return cb(null, obj)
+            return cb(null, obj)
+        else
+            return cb(errMsg, obj)
 
 Neo.findRel = (Class, indexName, key, value, cb) ->
     db.neo.getIndexedRelationship indexName,
@@ -152,7 +158,10 @@ Neo.findRel = (Class, indexName, key, value, cb) ->
             return cb(null, null)
 
 Neo.find = (Class, indexName, key, value, cb) ->
-    Logger.debug("Neo Find: " + indexName)
+    Logger.debug("Neo Find Index: " + indexName)
+    Logger.debug("Neo Find Key: " + key)
+    Logger.debug("Neo Find Key: " + value)
+
     db.neo.getIndexedNode indexName,
         key,
         value,

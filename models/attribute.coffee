@@ -8,6 +8,8 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
+SchemaUtil = require './stdSchema'
+
 INDEX_NAME = 'nAttribute'
 Indexes = [
     {
@@ -31,6 +33,12 @@ AttributeSchema = {
     name: 'Name of attribute',
     type: '',            #data, quality, norm
     tone: 'positive'     #defaults to positive
+}
+
+SchemaValidation = {
+    name: SchemaUtil.required('string'),
+    type: SchemaUtil.optional('string'),
+    tone: SchemaUtil.optional('string')
 }
 
 #Private constructor
@@ -60,6 +68,9 @@ Static Method
 Attribute.Name = 'nAttribute'
 Attribute.INDEX_NAME = INDEX_NAME
 Attribute.Indexes = Indexes
+
+Attribute.validateSchema = (data) ->
+    SchemaUtil.validate SchemaValidation, data
 
 Attribute.deserialize = (data) ->
     Neo.deserialize AttributeSchema, data

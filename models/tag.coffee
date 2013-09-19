@@ -6,6 +6,8 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
+SchemaUtil = require './stdSchema'
+
 INDEX_NAME = 'nTag'
 Indexes = [
     {
@@ -15,10 +17,12 @@ Indexes = [
     }
 ]
 
-# $ for general tag, 
-# # for specific item tag
 TagSchema = {
     name: 'Name of Tag',
+}
+
+SchemaValidation = {
+    name: SchemaUtil.required('string')
 }
 
 module.exports = class Tag extends Neo

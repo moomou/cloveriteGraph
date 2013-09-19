@@ -1,7 +1,6 @@
 #entity.coffee
 #Routes to CRUD entities
 _und = require('underscore')
-rest = require('restler')
 Logger = require('util')
 
 Neo = require('../models/neo')
@@ -11,15 +10,15 @@ Entity = require('../models/entity')
 Attribute = require('../models/attribute')
 Tag = require('../models/tag')
 
-Vote = require('../models/vote')
-Link = require('../models/link')
+Request = require('../models/request')
+Recommendation = require('../models/recommendation')
 
-StdSchema = require('../models/stdSchema')
-
-Constants = StdSchema.Constants
-Response = StdSchema
+SchemaUtil = require('../models/stdSchema')
+Constants = SchemaUtil.Constants
 
 Utility = require('./utility')
+
+redis = require('../models/setup').db.redis
 
 hasPermission = (req, res, next, cb) ->
     await
@@ -32,21 +31,21 @@ hasPermission = (req, res, next, cb) ->
     # Cannot access nonexistant user
     return cb true, res.status(401).json(error: "Unable to retrieve from neo4j") if not other
 
+    user = user.serialize() if user
+    other = other.serialize() if other
+
     # If the user are the same, of course grant permission
-    return cb false, null if other._node.data.id == other._node.data.id
+    return cb false, null if user and other and other.id == user.id
 
-    await Utility.hasPermission user, other, defer(err, authorized)
+    # No Permission
+    return cb true, res.status(401).json(error: "Unauthorized")
 
-    return cb true, res.status(500).json(error: "Permission check failed") if err
-    return cb true, res.status(401).json(error: "Permission Denied") if not authorized
-    return cb false, null
-
-getLinkType= (req, res, next, linkType) ->
+getLinkType = (req, res, next, linkType) ->
     await Utility.getUser req, defer(errUser, user)
     return next(errUser) if errUser or not user
 
     Logger.debug "Getting linkType: #{linkType}"
-    
+
     await
         user._node.getRelationshipNodes {type: linkType, direction:'out'},
             defer(errGetRelationship, nodes)
@@ -57,6 +56,77 @@ getLinkType= (req, res, next, linkType) ->
         blobs[ind] = (new Entity node).serialize()
 
     res.json(blobs)
+
+getFeed = (userId, feedType, cb) ->
+    # Retrieve latest request feed
+    feedId = "user:#{userId}:#{feedType}"
+    await redis.lrange feedId, 0, -1, defer(err, feeds)
+    return cb true, null if err
+    return cb null, _und.map feeds, (feed) -> JSON.parse(feed)
+
+addToFeed = (userId, newFeed, feedType, cb) ->
+    feedId = "user:#{userId}:#{feedType}"
+    await redis.lpush feedId, JSON.stringify(newFeed), defer(err, result)
+    return cb true, null if not result
+    return cb null, newFeed
+
+# GET /user/:id/discussion
+exports.getDiscussion = (req, res, next) ->
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    await getFeed req.params.id, "discussionFeed", defer(err, discussionFeed)
+    return res.status(500).json(error: "get discussion failed") if err
+    return res.json discussionFeed
+
+# GET /user/:id/recommendation
+exports.getRecommendation = (req, res, next) ->
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    await getFeed req.params.id, "recommendationFeed", defer(err, recommendationFeed)
+    return res.status(500).json(error: "get recommendationFeed failed") if err
+    res.json recommendationFeed
+
+# GET /user/:id/request
+exports.getRequest = (req, res, next) ->
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    await getFeed req.params.id, "requestFeed", defer(err, requestFeed)
+    return res.status(500).json(error: "get requestFeed") if err
+    res.json requestFeed
+
+# POST  /user/:id/recommendation
+exports.sendRecommendation = (req, res, next) ->
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+
+    cleanedRecommendation = Recommendation.fillMetaData Recommendation.deserialize req.body
+
+    console.log cleanedRecommendation
+    await User.find "username", cleanedRecommendation.to, defer(err, receiver)
+    return res.status(400).json(error: "No such user exist") if err
+
+    receiver = receiver.serialize()
+
+    await addToFeed receiver, cleanedRecommendation, "recommendationFeed", defer(err, result)
+    return res.status(500).json(error: "post recommendationFeed") if err
+    res.status(201).json({})
+
+# POST /user/:id/request
+exports.sendRequest = (req, res, next) ->
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+
+    cleanedRequest = Request.fillMetaData Request.deserialize req.body
+
+    console.log cleanedRequest
+    await User.find "username", cleanedRequest.to, defer(err, receiver)
+    return res.status(400).json(error: "No such user exist") if err
+
+    receiver = receiver.serialize()
+
+    await addToFeed receiver.id, cleanedRequest, "requestFeed", defer(err, result)
+    return res.status(500).json(error: "post requestFeed") if err
+    res.status(201).json({})
 
 # GET /user/:id/created
 exports.getCreated = (req, res, next) ->
@@ -75,3 +145,12 @@ exports.getCommented = (req, res, next) ->
     await hasPermission req, res, next, defer(err, errRes)
     return errRes if err
     getLinkType(req, res, next, Constants.REL_COMMENTED)
+
+# GET /user/:id/
+exports.getSelf = (req, res, next) ->
+    await hasPermission req, res, next, defer(err, errRes)
+    return errRes if err
+    await User.get req.params.id, defer(err, user)
+    res.json user.serialize()
+
+######################################

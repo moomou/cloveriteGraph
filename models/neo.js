@@ -15,8 +15,8 @@
 
 
   /*
-  #Normal values related to transaction; 
-  #Permission not implemented here
+  # Normal values related to transaction; 
+  # Permission not implemented here
   */
 
   MetaSchema = {
@@ -52,11 +52,13 @@
       console.log("Data VER: " + this._node.data.version);
       console.log("New VER: " + newData.version);
       if (newData.version !== this._node.data.version) {
-        console.log("Invalid Update Requested");
-        return false;
+        return "Version number behind";
+      }
+      if (!this._node.data["private"] && newData["private"]) {
+        return "Cannot take a public entity and set it to private";
       }
       _und.extend(this._node.data, newData);
-      return true;
+      return false;
     };
 
     Neo.prototype.save = function(cb) {
@@ -154,7 +156,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 110
+        lineno: 115
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -189,43 +191,41 @@
     var data;
     data = Class.deserialize(reqBody);
     return Class.get(nodeId, function(err, obj) {
-      var saveErr, valid, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      var errMsg, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
         _this = this;
       __iced_k = __iced_k_noop;
       ___iced_passed_deferral = iced.findDeferral(arguments);
       if (err) {
         return cb(err, null);
       }
-      valid = obj.update(data);
-      (function(__iced_k) {
-        if (valid) {
-          (function(__iced_k) {
-            __iced_deferrals = new iced.Deferrals(__iced_k, {
-              parent: ___iced_passed_deferral,
-              filename: "neo.coffee"
-            });
-            obj.save(__iced_deferrals.defer({
-              assign_fn: (function() {
-                return function() {
-                  return saveErr = arguments[0];
-                };
-              })(),
-              lineno: 138
-            }));
-            __iced_deferrals._fulfill();
-          })(function() {
-            Neo.index(obj._node, Class.Indexes, reqBody);
-            if (saveErr) {
-              return cb(saveErr, null);
-            }
-            return __iced_k();
+      errMsg = obj.update(data);
+      if (!errMsg) {
+        (function(__iced_k) {
+          __iced_deferrals = new iced.Deferrals(__iced_k, {
+            parent: ___iced_passed_deferral,
+            filename: "neo.coffee"
           });
-        } else {
+          obj.save(__iced_deferrals.defer({
+            assign_fn: (function() {
+              return function() {
+                return saveErr = arguments[0];
+              };
+            })(),
+            lineno: 143
+          }));
+          __iced_deferrals._fulfill();
+        })(function() {
+          Neo.index(obj._node, Class.Indexes, reqBody);
+          if (saveErr) {
+            return cb(saveErr, null);
+          }
+          return cb(null, obj);
           return __iced_k();
-        }
-      })(function() {
-        return cb(null, obj);
-      });
+        });
+      } else {
+        return cb(errMsg, obj);
+        return __iced_k();
+      }
     });
   };
 
@@ -242,7 +242,9 @@
   };
 
   Neo.find = function(Class, indexName, key, value, cb) {
-    Logger.debug("Neo Find: " + indexName);
+    Logger.debug("Neo Find Index: " + indexName);
+    Logger.debug("Neo Find Key: " + key);
+    Logger.debug("Neo Find Key: " + value);
     return db.neo.getIndexedNode(indexName, key, value, function(err, node) {
       if (err) {
         return cb(err, null);
@@ -277,7 +279,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 175
+        lineno: 184
       }));
       __iced_deferrals._fulfill();
     })(function() {

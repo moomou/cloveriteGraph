@@ -9,9 +9,8 @@ Vote = require('../models/vote')
 Attribute = require('../models/attribute')
 Tag = require('../models/tag')
 
-StdSchema = require('../models/stdSchema')
-Constants = StdSchema.Constants
-Response = StdSchema
+SchemaUtil = require('../models/stdSchema')
+Constants = SchemaUtil.Constants
 
 Utility = require('./utility')
 

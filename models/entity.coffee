@@ -6,8 +6,9 @@ Setup = require './setup'
 Neo = require './neo'
 redis = Setup.db.redis
 
-INDEX_NAME = 'nEntity'
+SchemaUtil = require './stdSchema'
 
+INDEX_NAME = 'nEntity'
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
@@ -27,11 +28,20 @@ Indexes = [
 ]
 
 EntitySchema = {
+    # Cconfigured Values
     imgURL: '',
     name: 'Name of entity',
     description: '',
     type: '',
     tags: ['']
+}
+
+SchemaValidation = {
+    imgURL: SchemaUtil.optional('string'),
+    name: SchemaUtil.required('string'),
+    description: SchemaUtil.optional('string'),
+    type: SchemaUtil.optional('string'),
+    tags: SchemaUtil.optional('array') #'string')
 }
 
 module.exports = class Entity extends Neo
@@ -83,6 +93,9 @@ Static Method
 Entity.Name = 'nEntity'
 Entity.INDEX_NAME = INDEX_NAME
 Entity.Indexes = Indexes
+
+Entity.validateSchema = (data) ->
+    SchemaUtil.validate SchemaValidation, data
 
 Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data

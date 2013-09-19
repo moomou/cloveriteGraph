@@ -1,8 +1,8 @@
 _und = require('underscore')
+crypto = require('crypto')
 
-StdSchema = require('../models/stdSchema')
-Constants = StdSchema.Constants
-Response = StdSchema
+SchemaUtil = require('../models/stdSchema')
+Constants = SchemaUtil.Constants
 
 User = require('../models/user')
 Entity = require('../models/entity')
@@ -159,11 +159,11 @@ exports.hasPermission = (user, other, cb) ->
 exports.createUser = (req, res, next) ->
     console.log "In Create user"
     accessToken = req.headers['access_token']
-    console.log accessToken
 
     # unique user id
-    userToken = req.body.userToken
-    console.log userToken
+    await crypto.randomBytes 16, defer(ex, buf)
+    userToken = buf.toString('hex')
+    userToken = req.body.accessToken = "user_#{userToken}"
 
     # Access token, after user logs in
     # points to the neo4j userNode Id
@@ -172,7 +172,7 @@ exports.createUser = (req, res, next) ->
             await User.create req.body, defer(err, user)
             userObj = user.serialize()
 
-            redis.set userToken, userObj.id, (err, res) ->
+            redis.set userToken, userObj.id, (err, result) ->
                 return res.json error: err if err
                 return res.json userObj
         else
