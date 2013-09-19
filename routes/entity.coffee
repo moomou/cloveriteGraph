@@ -18,6 +18,7 @@ Comment = require('../models/comment')
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
 
+Search = require('./search')
 Utility = require('./utility')
 
 redis = require('../models/setup').db.redis
@@ -79,7 +80,8 @@ hasPermission = (req, res, next, cb) ->
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
-    res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
+    search.searchHandler(req, res, next)
+    #res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
 
 ###
 # Entity section

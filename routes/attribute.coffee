@@ -11,9 +11,12 @@ Tag = require('../models/tag')
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
 
+Search = require('search')
+
 # GET /attribute/search/
 exports.search = (req, res, next) ->
-    res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
+    search.searchHandler(req, res, next)
+    #res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
 
 # POST /attribute
 exports.create = (req, res, next) ->
