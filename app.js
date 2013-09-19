@@ -12,6 +12,8 @@
 
   routes = require('./routes');
 
+  require('express-namespace');
+
   app = express();
 
   app.set('port', process.env.PORT || 3000);
@@ -32,142 +34,45 @@
     app.use(express.errorHandler());
   }
 
-
-  /*
-  # Routes
-  */
-
-  app.get('/search/:type?', routes.search.searchHandler);
-
-
-  /*
-  # User Method
-  */
-
-  app.post('/user/', routes.createUser);
-
-  app.get('/user/:id', routes.user.getSelf);
-
-  app.get('/user/:id/request', routes.user.getRequest);
-
-  app.get('/user/:id/recommendation', routes.user.getRecommendation);
-
-  app.post('/user/:id/request', routes.user.sendRequest);
-
-  app.post('/user/:id/recommendation', routes.user.sendRecommendation);
-
-  app.get('/user/:id/created', routes.user.getCreated);
-
-  app.get('/user/:id/voted', routes.user.getVoted);
-
-  app.get('/user/:id/commented', routes.user.getCommented);
-
-
-  /*
-  # Entity Method
-  # POST
-  # GET
-  # DEL
-  # PUT
-  */
-
-  app.get('/entity/search', routes.entity.search);
-
-  app.post('/entity', routes.entity.create);
-
-  app.get('/entity/:id', routes.entity.show);
-
-  app.put('/entity/:id', routes.entity.edit, function() {
-    return console.log("HI I am Error");
+  app.namespace('/v0', function() {
+    app.get('/search/:type?', routes.search.searchHandler);
+    app.post('/user/', routes.createUser);
+    app.get('/user/:id', routes.user.getSelf);
+    app.get('/user/:id/request', routes.user.getRequest);
+    app.get('/user/:id/recommendation', routes.user.getRecommendation);
+    app.post('/user/:id/request', routes.user.sendRequest);
+    app.post('/user/:id/recommendation', routes.user.sendRecommendation);
+    app.get('/user/:id/created', routes.user.getCreated);
+    app.get('/user/:id/voted', routes.user.getVoted);
+    app.get('/user/:id/commented', routes.user.getCommented);
+    app.get('/entity/search', routes.entity.search);
+    app.post('/entity', routes.entity.create);
+    app.get('/entity/:id', routes.entity.show);
+    app.put('/entity/:id', routes.entity.edit, function() {
+      return console.log("HI I am Error");
+    });
+    app.del('/entity/:id', routes.entity.del);
+    app.get('/entity/:id/users', routes.entity.showUsers);
+    app.post('/entity/:id/attribute', routes.entity.addAttribute);
+    app.get('/entity/:id/attribute', routes.entity.listAttribute);
+    app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute);
+    app.put('/entity/:eId/attribute/:aId', routes.entity.updateAttributeLink);
+    app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute);
+    app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute);
+    app.post('/entity/:id/comment', routes.entity.addComment);
+    app.get('/entity/:id/comment', routes.entity.listComment);
+    app.del('/entity/:id/comment', routes.entity.delComment);
+    app.get('/entity/:id/:relation', routes.entity.listRelation);
+    app.get('/entity/:id/relation', routes.entity.listRelation);
+    app.post('/entity/:srcId/relation/entity/:dstId', routes.entity.linkEntity);
+    app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity);
+    app.get('/attribute/search', routes.attribute.search);
+    app.post('/attribute', routes.attribute.create);
+    app.get('/attribute/:id', routes.attribute.show);
+    app.put('/attribute/:id', routes.attribute.edit);
+    app.del('/attribute/:id', routes.attribute.del);
+    return app.get('/attribute/:id/entity', routes.attribute.listEntity);
   });
-
-  app.del('/entity/:id', routes.entity.del);
-
-
-  /*
-  # Entity User Method
-  */
-
-  app.get('/entity/:id/users', routes.entity.showUsers);
-
-
-  /*
-  # Entity Attribute  Method
-  # POST - add attribute
-  # GET - get all attribute
-  # DEL - delete an attribute
-  # PUT - update Attribute
-  */
-
-  app.post('/entity/:id/attribute', routes.entity.addAttribute);
-
-  app.get('/entity/:id/attribute', routes.entity.listAttribute);
-
-  app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute);
-
-  app.put('/entity/:eId/attribute/:aId', routes.entity.updateAttributeLink);
-
-  app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute);
-
-  app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute);
-
-
-  /*
-  # Entity Comment Method
-  # POST - add comment
-  # GET - get all comment
-  # DEL - delete a comment
-  */
-
-  app.post('/entity/:id/comment', routes.entity.addComment);
-
-  app.get('/entity/:id/comment', routes.entity.listComment);
-
-  app.del('/entity/:id/comment', routes.entity.delComment);
-
-
-  /*
-  # Entity Relation
-  # Entity Comment Method
-  # GET - get relation
-  # POST - add relation
-  # DEL - delete a comment
-  */
-
-  app.get('/entity/:id/:relation', routes.entity.listRelation);
-
-  app.get('/entity/:id/relation', routes.entity.listRelation);
-
-  app.post('/entity/:srcId/relation/entity/:dstId', routes.entity.linkEntity);
-
-  app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity);
-
-
-  /*
-  # Attribute
-  # POST
-  # GET
-  # DEL
-  # PUT
-  */
-
-  app.get('/attribute/search', routes.attribute.search);
-
-  app.post('/attribute', routes.attribute.create);
-
-  app.get('/attribute/:id', routes.attribute.show);
-
-  app.put('/attribute/:id', routes.attribute.edit);
-
-  app.del('/attribute/:id', routes.attribute.del);
-
-
-  /*
-  # Attribute Entity
-  # GET - get all entity who have this attribute
-  */
-
-  app.get('/attribute/:id/entity', routes.attribute.listEntity);
 
   server = http.createServer(app);
 

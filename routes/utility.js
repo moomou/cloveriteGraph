@@ -133,7 +133,7 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
-    accessToken = (_ref = req.headers['access_token']) != null ? _ref : "none";
+    accessToken = (_ref = req.headers['access-token']) != null ? _ref : "none";
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -319,7 +319,7 @@
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     console.log("In Create user");
-    accessToken = req.headers['access_token'];
+    accessToken = req.headers['access-token'];
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,

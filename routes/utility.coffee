@@ -58,7 +58,7 @@ exports.getEntityAttributes = (entity, cb) ->
 # then return the raw neo4j node of the user
 ###
 exports.getUser = getUser = (req, cb) ->
-    accessToken = req.headers['access_token'] ? "none"
+    accessToken = req.headers['access-token'] ? "none"
 
     # Access token, after user logs in
     # points to the neo4j userNode Id
@@ -158,7 +158,7 @@ exports.hasPermission = (user, other, cb) ->
 ###
 exports.createUser = (req, res, next) ->
     console.log "In Create user"
-    accessToken = req.headers['access_token']
+    accessToken = req.headers['access-token']
 
     # unique user id
     await crypto.randomBytes 16, defer(ex, buf)

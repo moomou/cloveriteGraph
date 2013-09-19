@@ -114,6 +114,17 @@
       "version": "0.0.7-1",
       "from": "express-useragent@"
     },
+    "express-namespace": {
+      "version": "0.1.1",
+      "from": "express-namespace@",
+      "resolved": "https://registry.npmjs.org/express-namespace/-/express-namespace-0.1.1.tgz",
+      "dependencies": {
+        "methods": {
+          "version": "0.0.1",
+          "from": "methods@0.0.1"
+        }
+      }
+    },
     "iced-coffee-script": {
       "version": "1.6.2-d",
       "from": "iced-coffee-script@",
