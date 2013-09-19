@@ -368,7 +368,7 @@
                   error: err
                 });
               }
-              return res.json(userObj);
+              return res.status(201).json(userObj);
             }));
           });
         } else {

@@ -174,6 +174,6 @@ exports.createUser = (req, res, next) ->
 
             redis.set userToken, userObj.id, (err, result) ->
                 return res.json error: err if err
-                return res.json userObj
+                return res.status(201).json userObj
         else
             res.status(403).json error: "Permission Denied"
