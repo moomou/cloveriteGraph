@@ -21,7 +21,7 @@
 
   Constants = SchemaUtil.Constants;
 
-  Search = require('search');
+  Search = require('./search');
 
   exports.search = function(req, res, next) {
     return search.searchHandler(req, res, next);

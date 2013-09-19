@@ -11,7 +11,7 @@ Tag = require('../models/tag')
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
 
-Search = require('search')
+Search = require('./search')
 
 # GET /attribute/search/
 exports.search = (req, res, next) ->
