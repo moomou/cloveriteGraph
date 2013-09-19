@@ -15,7 +15,7 @@ Search = require('./search')
 
 # GET /attribute/search/
 exports.search = (req, res, next) ->
-    search.searchHandler(req, res, next)
+    Search.searchHandler(req, res, next)
     #res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
 
 # POST /attribute

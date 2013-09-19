@@ -154,7 +154,7 @@
   };
 
   exports.search = function(req, res, next) {
-    return search.searchHandler(req, res, next);
+    return Search.searchHandler(req, res, next);
   };
 
 

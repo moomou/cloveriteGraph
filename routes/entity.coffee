@@ -80,7 +80,7 @@ hasPermission = (req, res, next, cb) ->
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
-    search.searchHandler(req, res, next)
+    Search.searchHandler(req, res, next)
     #res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
 
 ###
