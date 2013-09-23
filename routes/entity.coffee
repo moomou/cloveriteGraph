@@ -87,7 +87,7 @@ exports.search = (req, res, next) ->
 # Entity section
 ###
 
-# POST /entity
+# POST /entity - Please note, permission NOT required
 exports.create = (req, res, next) ->
     await Utility.getUser req, defer(err, user)
     return next err if err
@@ -112,6 +112,8 @@ exports.create = (req, res, next) ->
 
     linkData = Link.fillMetaData({})
 
+    console.log "Tags LInk Ok"
+
     # "tag" entity
     for tagObj, ind in tagObjs
         Utility.createLink tagObj._node, entity._node,
@@ -119,10 +121,11 @@ exports.create = (req, res, next) ->
             linkData,
             (err, rel) ->
 
-        Utility.createLink user._node, tagObj._node,
-            Constants.REL_TAG,
-            linkData,
-            (err, rel) ->
+        if user
+            Utility.createLink user._node, tagObj._node,
+                Constants.REL_TAG,
+                linkData,
+                (err, rel) ->
 
     # User is not defined for anonymous users
     if user
