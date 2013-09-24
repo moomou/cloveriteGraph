@@ -34,6 +34,7 @@ exports.optional= () ->
 
 exports.Constants = Constants = {
     API_VERSION: 'v0',
+    TAG_GLOBAL: '__global__',
 
     # Generic Relation
     REL_LOCATION: '_LOCATION',

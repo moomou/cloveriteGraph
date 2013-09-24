@@ -7,6 +7,7 @@ Neo = require './neo'
 redis = Setup.db.redis
 
 SchemaUtil = require './stdSchema'
+Constants = SchemaUtil.Constants
 
 INDEX_NAME = 'nEntity'
 Indexes = [
@@ -101,6 +102,10 @@ Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data
 
 Entity.create = (reqBody, cb) ->
+    tags = reqBody.tags or []
+    reqBody.tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
+    reqBody.tags.push Constants.TAG_GLOBAL
+
     Neo.create Entity, reqBody, Indexes, cb
 
 Entity.get = (id, cb) ->

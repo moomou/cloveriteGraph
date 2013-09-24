@@ -195,6 +195,10 @@
       errs = [];
       tagObjs = [];
       tags = (_ref = req.body['tags']) != null ? _ref : [];
+      tags = _und.filter(tags, function(tag) {
+        return tag && _und.isString(tag);
+      });
+      tags.push(Constants.TAG_GLOBAL);
       (function(__iced_k) {
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -209,7 +213,7 @@
               return entity = arguments[1];
             };
           })(),
-          lineno: 104
+          lineno: 107
         }));
         for (ind = _i = 0, _len = tags.length; _i < _len; ind = ++_i) {
           tagName = tags[ind];
@@ -220,7 +224,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, tagObjs, ind),
-            lineno: 107
+            lineno: 110
           }));
         }
         __iced_deferrals._fulfill();
@@ -233,7 +237,6 @@
           return next(err);
         }
         linkData = Link.fillMetaData({});
-        console.log("Tags LInk Ok");
         for (ind = _i = 0, _len = tagObjs.length; _i < _len; ind = ++_i) {
           tagObj = tagObjs[ind];
           Utility.createLink(tagObj._node, entity._node, Constants.REL_TAG, linkData, function(err, rel) {});
@@ -256,7 +259,7 @@
                     return rels = arguments[1];
                   };
                 })(),
-                lineno: 135
+                lineno: 136
               }));
               __iced_deferrals._fulfill();
             })(__iced_k);
@@ -276,7 +279,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 137
+              lineno: 138
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -306,7 +309,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 142
+        lineno: 143
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -335,7 +338,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 147
+        lineno: 148
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -356,7 +359,7 @@
                   return attrBlobs = arguments[0];
                 };
               })(),
-              lineno: 152
+              lineno: 153
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -392,7 +395,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 161
+        lineno: 162
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -421,7 +424,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 166
+        lineno: 167
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -435,6 +438,9 @@
       errs = [];
       tagObjs = [];
       tags = (_ref = req.body['tags']) != null ? _ref : [];
+      tags = _und.filter(tags, function(tag) {
+        return tag && _und.isString(tag);
+      });
       (function(__iced_k) {
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -451,7 +457,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, tagObjs, ind),
-            lineno: 176
+            lineno: 179
           }));
         }
         __iced_deferrals._fulfill();
@@ -501,7 +507,7 @@
                       return pathExists = arguments[1];
                     };
                   })(),
-                  lineno: 191
+                  lineno: 194
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -523,7 +529,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 200
+              lineno: 203
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -553,7 +559,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 205
+        lineno: 208
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -582,7 +588,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 210
+        lineno: 213
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -602,7 +608,7 @@
               return entity = arguments[1];
             };
           })(),
-          lineno: 213
+          lineno: 216
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -621,7 +627,7 @@
                 return err = arguments[0];
               };
             })(),
-            lineno: 216
+            lineno: 219
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -658,7 +664,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 225
+        lineno: 228
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -687,7 +693,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 230
+        lineno: 233
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -710,7 +716,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 235
+          lineno: 238
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -752,7 +758,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 251
+        lineno: 254
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -781,7 +787,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 256
+        lineno: 259
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -804,7 +810,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 261
+          lineno: 264
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -830,7 +836,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(rels, ind),
-              lineno: 275
+              lineno: 278
             }));
             (new Attribute(node)).serialize(__iced_deferrals.defer({
               assign_fn: (function(__slot_1, __slot_2) {
@@ -838,7 +844,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(blobs, ind),
-              lineno: 276
+              lineno: 279
             }), entity._node.id);
           }
           __iced_deferrals._fulfill();
@@ -882,7 +888,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 290
+        lineno: 293
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -920,7 +926,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 304
+        lineno: 307
       }));
       Attribute.getOrCreate(data, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -929,7 +935,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 305
+        lineno: 308
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -955,7 +961,7 @@
               return path = arguments[1];
             };
           })(),
-          lineno: 326
+          lineno: 329
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -975,7 +981,7 @@
                     return link = arguments[1];
                   };
                 })(),
-                lineno: 333
+                lineno: 336
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -997,7 +1003,7 @@
                           return value = arguments[0];
                         };
                       })(),
-                      lineno: 342
+                      lineno: 345
                     }));
                     __iced_deferrals._fulfill();
                   })(function() {
@@ -1029,7 +1035,7 @@
                     return value = arguments[0];
                   };
                 })(),
-                lineno: 356
+                lineno: 359
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -1049,7 +1055,7 @@
                       return rel = arguments[1];
                     };
                   })(),
-                  lineno: 366
+                  lineno: 369
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -1074,7 +1080,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 372
+              lineno: 375
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -1107,7 +1113,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 378
+        lineno: 381
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1143,7 +1149,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 387
+        lineno: 390
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1180,7 +1186,7 @@
             return rel = arguments[1];
           };
         })(),
-        lineno: 403
+        lineno: 406
       }));
       Attribute.get(attrId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1189,7 +1195,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 404
+        lineno: 407
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1210,7 +1216,7 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 410
+          lineno: 413
         }), entityId);
         __iced_deferrals._fulfill();
       })(function() {
@@ -1241,7 +1247,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 417
+        lineno: 420
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1278,7 +1284,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 429
+        lineno: 432
       }));
       Link.put(linkData['id'], linkData, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1287,7 +1293,7 @@
             return rel = arguments[1];
           };
         })(),
-        lineno: 430
+        lineno: 433
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1321,7 +1327,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 443
+        lineno: 446
       }));
       Attribute.get(req.params.aId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1330,7 +1336,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 444
+        lineno: 447
       }));
       Utility.getUser(req, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1339,7 +1345,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 445
+        lineno: 448
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1387,7 +1393,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 469
+        lineno: 472
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1429,7 +1435,7 @@
             return result = arguments[1];
           };
         })(),
-        lineno: 489
+        lineno: 492
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1463,7 +1469,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 496
+        lineno: 499
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1494,7 +1500,7 @@
             return comments = arguments[1];
           };
         })(),
-        lineno: 505
+        lineno: 508
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1527,7 +1533,7 @@
             return augReq = arguments[2];
           };
         })(),
-        lineno: 515
+        lineno: 518
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1570,7 +1576,7 @@
             return rels = arguments[1];
           };
         })(),
-        lineno: 534
+        lineno: 537
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1600,7 +1606,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(blobs, ind),
-            lineno: 553
+            lineno: 556
           }), extraData);
         }
         __iced_deferrals._fulfill();
@@ -1636,7 +1642,7 @@
             return srcEntity = arguments[1];
           };
         })(),
-        lineno: 561
+        lineno: 564
       }));
       Entity.get(req.params.dstId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1645,7 +1651,7 @@
             return dstEntity = arguments[1];
           };
         })(),
-        lineno: 562
+        lineno: 565
       }));
       __iced_deferrals._fulfill();
     })(function() {

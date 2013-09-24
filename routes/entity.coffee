@@ -98,8 +98,11 @@ exports.create = (req, res, next) ->
 
     errs = []
     tagObjs = []
-    tags = req.body['tags'] ? []
 
+    tags = req.body['tags'] ? []
+    tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
+    tags.push Constants.TAG_GLOBAL
+        
     # Create Entity and Tags
     await
         Entity.create req.body, defer(err, entity)
@@ -111,8 +114,6 @@ exports.create = (req, res, next) ->
     return next(err) if err
 
     linkData = Link.fillMetaData({})
-
-    console.log "Tags LInk Ok"
 
     # "tag" entity
     for tagObj, ind in tagObjs
@@ -170,7 +171,9 @@ _edit = (req, res, next) ->
     # Need to refactor later
     errs = []
     tagObjs = []
+
     tags = req.body['tags'] ? []
+    tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
 
     await
         for tagName, ind in tags
