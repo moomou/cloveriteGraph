@@ -21,6 +21,8 @@ if 'development' == app.get('env')
     app.use(express.errorHandler())
 
 app.namespace('/v0', () ->
+# First
+    
 # Search Handler for multiple resource
     app.get('/search/:type?', routes.search.searchHandler)
 

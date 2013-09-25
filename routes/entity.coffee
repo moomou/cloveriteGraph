@@ -137,6 +137,10 @@ exports.create = (req, res, next) ->
             defer(err, rels)
 
     await entity.serialize defer blob
+
+    res.header('Access-Control-Allow-Origin', req.headers.origin)
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With')
     res.status(201).json blob
 
 # GET /entity/:id
