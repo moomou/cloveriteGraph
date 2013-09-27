@@ -28,6 +28,9 @@ app.namespace(app.version, () ->
         res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer")
         res.header('Access-Control-Allow-Credentials', 'true')
 
+        console.log req.headers
+        console.log "-_-"
+
         next()
     )
 
