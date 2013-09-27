@@ -1,10 +1,9 @@
 express = require('express')
-http = require('http')
 useragent = require('express-useragent')
+require('express-namespace')
 
 routes = require('./routes')
 
-require('express-namespace')
 app = express()
 
 app.set('port', process.env.PORT || 3000)
@@ -13,16 +12,23 @@ app.use(express.query())
 app.use(express.bodyParser())
 app.use(express.methodOverride())
 app.use(useragent.express())
-
 app.use(app.router)
 
 #development only
 if 'development' == app.get('env')
     app.use(express.errorHandler())
 
-app.namespace('/v0', () ->
+app.version = '/v0'
+app.namespace(app.version, () ->
+
 # First
-    
+    app.get('/*', (req, res, next) ->
+        res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host)
+        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With')
+        next()
+    )
+
 # Search Handler for multiple resource
     app.get('/search/:type?', routes.search.searchHandler)
 
@@ -105,8 +111,5 @@ app.namespace('/v0', () ->
     app.get('/attribute/:id/entity', routes.attribute.listEntity)
 )
 
-server = http.createServer(app)
-server.listen(app.get('port'), -> console.log('Express server listening on port ' + app.get('port')))
+exports.app = app
 
-# Create IO Server
-# ioServer = require('./socketServer')(server)
