@@ -38,7 +38,8 @@
     app.get('/*', function(req, res, next) {
       res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host);
       res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+      res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer");
+      res.header('Access-Control-Allow-Credentials', 'true');
       return next();
     });
     app.get('/search/:type?', routes.search.searchHandler);
