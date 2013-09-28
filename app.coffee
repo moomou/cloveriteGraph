@@ -19,20 +19,25 @@ if 'development' == app.get('env')
     app.use(express.errorHandler())
 
 app.version = '/v0'
+
+addCORSHeaders = (req, res, next) ->
+    res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host)
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer")
+    res.header('Access-Control-Allow-Credentials', 'true')
+
+    console.log req.headers
+    console.log "-_-"
+
+    next()
+
 app.namespace(app.version, () ->
 
-# First
-    app.get('/*', (req, res, next) ->
-        res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host)
-        res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer")
-        res.header('Access-Control-Allow-Credentials', 'true')
-
-        console.log req.headers
-        console.log "-_-"
-
-        next()
-    )
+# CORS
+    app.get('/*', addCORSHeaders)
+    app.post('/*', addCORSHeaders)
+    app.put('/*', addCORSHeaders)
+    app.delete('/*', addCORSHeaders)
 
 # Search Handler for multiple resource
     app.get('/search/:type?', routes.search.searchHandler)
