@@ -3,6 +3,8 @@
 require('source-map-support').install()
 
 _und = require('underscore')
+trim = require('../misc/stringUtil').trim
+
 Neo = require('../models/neo')
 Entity = require('../models/entity')
 Vote = require('../models/vote')
@@ -100,6 +102,8 @@ exports.searchHandler = (req, res, next) ->
     #generic searching if no type specified
     return res.json {} unless req.query['q']
 
+    cleanedQuery = encodeURIComponent trim req.query.q
+
     if req.params.type
         searchClasses = [searchableClass[req.params.type]]
     else
@@ -112,7 +116,7 @@ exports.searchHandler = (req, res, next) ->
     #serial searches, continue only if no result
     await
         for searchClass, ind in searchClasses
-            query = queryAnalyzer(searchClass, req.query['q'])
+            query = queryAnalyzer(searchClass, cleanedQuery)
             console.log query
             Neo.query searchClass,
                 query.replace('__indexName__', searchClass.INDEX_NAME),

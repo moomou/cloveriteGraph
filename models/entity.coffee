@@ -20,11 +20,6 @@ Indexes = [
         INDEX_NAME: INDEX_NAME,
         INDEX_KEY: 'description',
         INDEX_VALUE: ''
-    },
-    {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'description',
-        INDEX_VALUE: ''
     }
 ]
 

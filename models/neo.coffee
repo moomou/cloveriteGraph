@@ -1,4 +1,6 @@
 _und = require 'underscore'
+trim = require('../misc/stringUtil').trim
+
 Logger = require 'util'
 
 Setup = require './setup'
@@ -76,11 +78,13 @@ Neo.fillMetaData = (data) ->
 
 Neo.fillIndex = (indexes, data) ->
     result = _und.clone indexes
+
     _und.map(result,
         (index) ->
-            index['INDEX_VALUE'] = data[index['INDEX_KEY']]
+            index['INDEX_VALUE'] = encodeURIComponent trim data[index['INDEX_KEY']]
     )
-    return result
+
+    _und.filter(result, (index) -> not _und.isUndefined index['INDEX_VALUE'])
 
 Neo.deserialize = (ClassSchema, data) ->
     data = _und.clone data
@@ -93,6 +97,7 @@ Neo.deserialize = (ClassSchema, data) ->
     return _und.pick(data, validKeys)
 
 Neo.index = (node, indexes, reqBody, cb = null) ->
+    console.log "~~~Indexing~~~"
     for index, i in Neo.fillIndex(indexes, reqBody)
         console.log index
         node.index index.INDEX_NAME,

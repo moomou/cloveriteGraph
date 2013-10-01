@@ -32,10 +32,6 @@
       INDEX_NAME: INDEX_NAME,
       INDEX_KEY: 'description',
       INDEX_VALUE: ''
-    }, {
-      INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'description',
-      INDEX_VALUE: ''
     }
   ];
 
@@ -81,7 +77,7 @@
               return rel = arguments[1];
             };
           })(),
-          lineno: 58
+          lineno: 53
         }));
         if (user) {
           user._node.createRelationshipTo(_this._node, voteLink.name, voteLink.data, __iced_deferrals.defer({
@@ -91,7 +87,7 @@
                 return rel = arguments[1];
               };
             })(),
-            lineno: 64
+            lineno: 59
           }));
         }
         __iced_deferrals._fulfill();
@@ -113,7 +109,7 @@
                 return upVote = arguments[1];
               };
             })(),
-            lineno: 70
+            lineno: 65
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -130,7 +126,7 @@
                   return downVote = arguments[1];
                 };
               })(),
-              lineno: 71
+              lineno: 66
             }));
             __iced_deferrals._fulfill();
           })(function() {
