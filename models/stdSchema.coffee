@@ -47,6 +47,8 @@ exports.Constants = Constants = {
 
     REL_TAG: '_TAG',
     REL_ACCESS: '_ACCESS',
+    REL_RANK: '_RANK',
+    REL_RANKING: '_RANKING',
 
     # Action
     # User to Entity, Attribute, or User

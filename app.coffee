@@ -23,17 +23,13 @@ app.version = '/v0'
 addCORSHeaders = (req, res, next) ->
     res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host)
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer")
+    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,X-access-token")
     res.header('Access-Control-Allow-Credentials', 'true')
-
-    console.log req.headers
-    console.log "-_-"
-
     next()
 
 app.namespace(app.version, () ->
 
-# CORS
+# Adding CORS
     app.get('/*', addCORSHeaders)
     app.post('/*', addCORSHeaders)
     app.put('/*', addCORSHeaders)
@@ -47,10 +43,15 @@ app.namespace(app.version, () ->
 
 #app.get('/user/:id/discussion', routes.user.getDiscussion)
     app.get('/user/:id/request', routes.user.getRequest)
-    app.get('/user/:id/recommendation', routes.user.getRecommendation)
     app.post('/user/:id/request', routes.user.sendRequest)
-    app.post('/user/:id/recommendation', routes.user.sendRecommendation)
 
+    app.get('/user/:id/recommendation', routes.user.getRecommendation)
+    app.post('/user/:id/recommendation', routes.user.sendRecommendation)
+    
+    app.get '/user/:id/ranking', routes.ranking.show
+    app.post '/user/:id/ranking', routes.ranking.create
+    app.post '/user/:id/ranking/:rankingId', routes.ranking.addNew
+    #app.delete '/user/:id/ranking/:rankingId', routes.ranking.delete
 
     app.get('/user/:id/created', routes.user.getCreated)
     app.get('/user/:id/voted', routes.user.getVoted)
@@ -67,11 +68,7 @@ app.namespace(app.version, () ->
 # Entity User Method
     app.get('/entity/:id/users', routes.entity.showUsers)
 
-# Entity Attribute  Method
-# POST - add attribute
-# GET - get all attribute
-# DEL - delete an attribute
-# PUT - update Attribute
+# Entity Attribute Method
     app.post('/entity/:id/attribute', routes.entity.addAttribute)
     app.get('/entity/:id/attribute', routes.entity.listAttribute)
     app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute)
@@ -81,33 +78,21 @@ app.namespace(app.version, () ->
     app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute)
 
 # Entity Comment Method
-# POST - add comment
-# GET - get all comment
-# DEL - delete a comment
     app.post('/entity/:id/comment', routes.entity.addComment)
     app.get('/entity/:id/comment', routes.entity.listComment)
     app.del('/entity/:id/comment', routes.entity.delComment)
 
 # Entity Relation
-# Entity Comment Method
-# GET - get relation
-# POST - add relation
-# DEL - delete a comment
-
-#return entity connected by relation, can be prefix or exact match
+    # return entity connected by relation, can be prefix or exact match
     app.get('/entity/:id/:relation', routes.entity.listRelation)
 
-#returns all relationship
+    # returns all relationship
     app.get('/entity/:id/relation', routes.entity.listRelation)
 
     app.post('/entity/:srcId/relation/entity/:dstId', routes.entity.linkEntity)
     app.del('/entity/:srcId/relation/entity/:dstId', routes.entity.unlinkEntity)
 
 # Attribute
-# POST
-# GET
-# DEL
-# PUT
     app.get('/attribute/search', routes.attribute.search)
 
     app.post('/attribute', routes.attribute.create)
@@ -122,4 +107,3 @@ app.namespace(app.version, () ->
 )
 
 exports.app = app
-

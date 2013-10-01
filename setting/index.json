@@ -3,10 +3,12 @@
         "nEntity",
         "nTag",
         "nAttribute",
-        "nUser"
+        "nUser",
+        "nRank"
     ],
     "relIndex": [
         "rVote",
-        "rLink"
+        "rLink",
+        "rRanking"
     ]
 }

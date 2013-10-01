@@ -31,6 +31,7 @@ Indexes = [
 
 AttributeSchema = {
     name: 'Name of attribute',
+    description: '',
     type: '',            #data, quality, norm
     tone: 'positive'     #defaults to positive
 }

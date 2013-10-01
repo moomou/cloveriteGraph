@@ -1,5 +1,4 @@
 #entity.coffee
-#Routes to CRUD entities
 _und = require('underscore')
 Logger = require('util')
 

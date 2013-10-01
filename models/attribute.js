@@ -39,6 +39,7 @@
 
   AttributeSchema = {
     name: 'Name of attribute',
+    description: '',
     type: '',
     tone: 'positive'
   };
@@ -78,7 +79,7 @@
               return upVote = arguments[1];
             };
           })(),
-          lineno: 54
+          lineno: 55
         }));
         redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::negative", __iced_deferrals.defer({
           assign_fn: (function() {
@@ -87,7 +88,7 @@
               return downVote = arguments[1];
             };
           })(),
-          lineno: 55
+          lineno: 56
         }));
         __iced_deferrals._fulfill();
       })(function() {

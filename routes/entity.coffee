@@ -28,7 +28,7 @@ getOutgoingRelsCypherQuery = (startId, relType) ->
     cypher = "START n=node(#{startId}) MATCH n-[r]->other "
 
     if relType == "relation"
-        cypher += "WHERE type(r) <> '_VOTE'"
+        cypher += "WHERE type(r) <> #{Constants.REL_VOTED} "
     else
         cypher += "WHERE type(r) = '#{Link.normalizeName relType}'"
 

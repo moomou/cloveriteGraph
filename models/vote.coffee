@@ -5,21 +5,20 @@ StdSchema = require './stdSchema'
 Contants = StdSchema.Contants
 
 INDEX_NAME = 'rVote'
-
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'name',
+        INDEX_KEY: 'user',
         INDEX_VALUE: ''
     },
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'description',
+        INDEX_KEY: 'os',
         INDEX_VALUE: ''
     },
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'description',
+        INDEX_KEY: 'lang',
         INDEX_VALUE: ''
     }
 ]
@@ -38,7 +37,7 @@ VoteSchema = {
 
 module.exports = class Vote
     constructor: (voteData) ->
-        @name = '_VOTE'
+        @name = Contants.REL_VOTED
 
         data = _und.clone voteData
         _und.defaults data, VoteSchema
