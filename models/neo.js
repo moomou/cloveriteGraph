@@ -17,7 +17,7 @@
 
 
   /*
-  # Normal values related to transaction; 
+  # Normal values related to transaction;
   # Permission not implemented here
   */
 
@@ -37,6 +37,7 @@
 
     Neo.prototype.serialize = function(cb, extraData) {
       var data;
+      console.log("Serializing");
       if (extraData == null) {
         extraData = {};
       }
@@ -121,6 +122,7 @@
       cb = null;
     }
     console.log("~~~Indexing~~~");
+    console.log(reqBody);
     _ref = Neo.fillIndex(indexes, reqBody);
     _results = [];
     for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
@@ -146,7 +148,6 @@
     data = Class.deserialize(reqBody);
     data = _und.omit(data, ToOmitKeys);
     _und.defaults(data, MetaSchema);
-    console.log(data);
     node = db.neo.createNode(data);
     obj = new Class(node);
     (function(__iced_k) {
@@ -161,14 +162,15 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 120
+        lineno: 121
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (saveErr) {
         return cb(saveErr, null);
       }
-      Neo.index(node, indexes, reqBody);
+      console.log("Starting to index");
+      Neo.index(node, Class.Indexes, obj.serialize());
       console.log("CREATED: " + Class.Name);
       return cb(null, obj);
     });
@@ -195,6 +197,7 @@
   Neo.put = function(Class, nodeId, reqBody, cb) {
     var data;
     data = Class.deserialize(reqBody);
+    console.log("ID: " + nodeId);
     return Class.get(nodeId, function(err, obj) {
       var errMsg, saveErr, ___iced_passed_deferral, __iced_deferrals, __iced_k,
         _this = this;
@@ -216,11 +219,11 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 148
+            lineno: 151
           }));
           __iced_deferrals._fulfill();
         })(function() {
-          Neo.index(obj._node, Class.Indexes, reqBody);
+          Neo.index(obj._node, Class.Indexes, obj.serialize());
           if (saveErr) {
             return cb(saveErr, null);
           }
@@ -284,7 +287,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 189
+        lineno: 192
       }));
       __iced_deferrals._fulfill();
     })(function() {

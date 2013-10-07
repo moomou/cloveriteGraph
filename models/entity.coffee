@@ -54,6 +54,7 @@ module.exports = class Entity extends Neo
                 defer(err, rel)
 
             if user
+                voteLink.data.attribute = attr.serialize().name
                 user._node.createRelationshipTo @_node,
                     voteLink.name,
                     voteLink.data,
@@ -61,10 +62,13 @@ module.exports = class Entity extends Neo
 
         return cb err if err
 
-        redis.incr "entity:#{@_node.id}::attr:#{attr._node.id}::#{voteLink.data.type}"
+        redis.incr "entity:#{@_node.id}::attr:#{attr._node.id}::#{voteLink.data.tone}"
 
-        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::positive", defer(err, upVote)
-        await redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::negative", defer(err, downVote)
+        await
+            redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::positive", defer(errP, upVote)
+            redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::negative", defer(errN, downVote)
+
+        return cb null, null if errP or errN
 
         voteTally = {
             upVote: parseInt(upVote) or 0
@@ -100,7 +104,6 @@ Entity.create = (reqBody, cb) ->
     tags = reqBody.tags or []
     reqBody.tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
     reqBody.tags.push Constants.TAG_GLOBAL
-
     Neo.create Entity, reqBody, Indexes, cb
 
 Entity.get = (id, cb) ->
@@ -111,4 +114,6 @@ Entity.getOrCreate = (reqBody, cb) ->
     Neo.getOrCreate Entity, reqBody, cb
 
 Entity.put = (nodeId, reqBody, cb) ->
+    tags = reqBody.tags or []
+    reqBody.tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
     Neo.put Entity, nodeId, reqBody, cb

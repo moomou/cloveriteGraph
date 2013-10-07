@@ -1,8 +1,9 @@
 #vote.coffee
 
 _und = require 'underscore'
-StdSchema = require './stdSchema'
-Contants = StdSchema.Contants
+
+SchemaUtil = require './stdSchema'
+Constants = SchemaUtil.Constants
 
 INDEX_NAME = 'rVote'
 Indexes = [
@@ -25,6 +26,7 @@ Indexes = [
 
 VoteSchema = {
     attrId: '',     #attr voted on
+    attrName: '',   #attr voted on
     tone: '',       #vote type: pos, neg
     user: '',       #username or unknown
     time: '',       #timestamp when vote was registered
@@ -37,11 +39,14 @@ VoteSchema = {
 
 module.exports = class Vote
     constructor: (voteData) ->
-        @name = Contants.REL_VOTED
+        @name = Constants.REL_VOTED
 
+        console.log "Cleaning..."
         data = _und.clone voteData
-        _und.defaults data, VoteSchema
-        _und.pick data, (_und.keys VoteSchema)
+        data = _und.defaults data, VoteSchema
+        data = _und.pick data, _und.keys VoteSchema
+
+        console.log data
 
         @data = data
 

@@ -7,7 +7,7 @@ Setup = require './setup'
 db = Setup.db
 
 ###
-# Normal values related to transaction; 
+# Normal values related to transaction;
 # Permission not implemented here
 ###
 MetaSchema = {
@@ -29,6 +29,7 @@ module.exports = class Neo
 
     # cb should be last!
     serialize: (cb, extraData) ->
+        console.log "Serializing"
         extraData ?= {}
         data = @_node.data
 
@@ -81,7 +82,7 @@ Neo.fillIndex = (indexes, data) ->
 
     _und.map(result,
         (index) ->
-            index['INDEX_VALUE'] = encodeURIComponent trim data[index['INDEX_KEY']]
+            index['INDEX_VALUE'] = encodeURIComponent(trim(data[index['INDEX_KEY']]))
     )
 
     _und.filter(result, (index) -> not _und.isUndefined index['INDEX_VALUE'])
@@ -98,6 +99,8 @@ Neo.deserialize = (ClassSchema, data) ->
 
 Neo.index = (node, indexes, reqBody, cb = null) ->
     console.log "~~~Indexing~~~"
+    console.log reqBody
+
     for index, i in Neo.fillIndex(indexes, reqBody)
         console.log index
         node.index index.INDEX_NAME,
@@ -108,12 +111,10 @@ Neo.index = (node, indexes, reqBody, cb = null) ->
                 cb(null, ind) if cb
 
 Neo.create = (Class, reqBody, indexes, cb) ->
-    data = Class.deserialize(reqBody) # Clean input data
-    
+    # Clean input data
+    data = Class.deserialize(reqBody)
     data = _und.omit(data, ToOmitKeys)
     _und.defaults(data, MetaSchema)
-
-    console.log data
 
     node = db.neo.createNode data
     obj = new Class(node)
@@ -121,7 +122,8 @@ Neo.create = (Class, reqBody, indexes, cb) ->
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr
 
-    Neo.index(node, indexes, reqBody)
+    console.log "Starting to index"
+    Neo.index(node, Class.Indexes, obj.serialize())
 
     console.log "CREATED: " + Class.Name
     return cb(null, obj)
@@ -140,6 +142,7 @@ Neo.get = (Class, id, cb) ->
 
 Neo.put = (Class, nodeId, reqBody, cb) ->
     data = Class.deserialize(reqBody)
+    console.log "ID: " + nodeId
 
     Class.get nodeId, (err, obj) ->
         return cb(err, null) if err
@@ -147,7 +150,7 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
 
         if not errMsg
             await obj.save defer(saveErr)
-            Neo.index(obj._node, Class.Indexes, reqBody)
+            Neo.index(obj._node, Class.Indexes, obj.serialize())
             return cb(saveErr, null) if saveErr
             return cb(null, obj)
         else
@@ -178,7 +181,7 @@ Neo.find = (Class, indexName, key, value, cb) ->
 Neo.getOrCreate = (Class, reqBody, cb) ->
     if reqBody['id']
         return Class.get reqBody['id'], cb
-    
+
     Logger.debug 'Neo Get or Create'
     Logger.debug Class
 
@@ -196,7 +199,7 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
     #Not found, create
     return Class.create(reqBody, cb)
 
-#Cypher 
+#Cypher
 Neo.query = (Class, query, params, cb) ->
     db.neo.query query,
         params,

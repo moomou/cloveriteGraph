@@ -4,11 +4,11 @@
         "nTag",
         "nAttribute",
         "nUser",
-        "nRank"
+        "nRanking"
     ],
     "relIndex": [
         "rVote",
         "rLink",
-        "rRanking"
+        "rRank"
     ]
 }

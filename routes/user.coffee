@@ -1,5 +1,6 @@
 #entity.coffee
 _und = require('underscore')
+crypto = require('crypto')
 Logger = require('util')
 
 Neo = require('../models/neo')
@@ -68,6 +69,34 @@ addToFeed = (userId, newFeed, feedType, cb) ->
     await redis.lpush feedId, JSON.stringify(newFeed), defer(err, result)
     return cb true, null if not result
     return cb null, newFeed
+
+###
+# Internal API for creating userNode
+###
+exports.createUser = (req, res, next) ->
+    console.log "In Create user"
+    valid = User.validateSchema req.body
+    return res.status(400).json error: "Invalid input", input: req.body if not valid
+
+    accessToken = req.headers['x-access-token'] ? "none"
+
+    # unique user id
+    await crypto.randomBytes 16, defer(ex, buf)
+    userToken = buf.toString('hex')
+    userToken = req.body.accessToken = "user_#{userToken}"
+
+    # Access token, after user logs in
+    # points to the neo4j userNode Id
+    Utility.isAdmin accessToken, (err, isSuperAwesome) ->
+        if isSuperAwesome
+            await User.create req.body, defer(err, user)
+            userObj = user.serialize()
+
+            redis.set userToken, userObj.id, (err, result) ->
+                return res.json error: err if err
+                return res.status(201).json userObj
+        else
+            res.status(403).json error: "Permission Denied"
 
 # GET /user/:id/discussion
 exports.getDiscussion = (req, res, next) ->

@@ -48,7 +48,7 @@
     app.put('/*', addCORSHeaders);
     app["delete"]('/*', addCORSHeaders);
     app.get('/search/:type?', routes.search.searchHandler);
-    app.post('/user/', routes.createUser);
+    app.post('/user/', routes.user.createUser);
     app.get('/user/:id', routes.user.getSelf);
     app.get('/user/:id/request', routes.user.getRequest);
     app.post('/user/:id/request', routes.user.sendRequest);
@@ -56,16 +56,14 @@
     app.post('/user/:id/recommendation', routes.user.sendRecommendation);
     app.get('/user/:id/ranking', routes.ranking.show);
     app.post('/user/:id/ranking', routes.ranking.create);
-    app.post('/user/:id/ranking/:rankingId', routes.ranking.addNew);
+    app.put('/user/:id/ranking/:rankingId', routes.ranking.edit);
     app.get('/user/:id/created', routes.user.getCreated);
     app.get('/user/:id/voted', routes.user.getVoted);
     app.get('/user/:id/commented', routes.user.getCommented);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
     app.get('/entity/:id', routes.entity.show);
-    app.put('/entity/:id', routes.entity.edit, function() {
-      return console.log("HI I am Error");
-    });
+    app.put('/entity/:id', routes.entity.edit);
     app.del('/entity/:id', routes.entity.del);
     app.get('/entity/:id/users', routes.entity.showUsers);
     app.post('/entity/:id/attribute', routes.entity.addAttribute);

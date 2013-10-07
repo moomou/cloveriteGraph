@@ -60,7 +60,7 @@
     }
 
     Entity.prototype.vote = function(user, attr, voteLink, cb) {
-      var downVote, err, rel, upVote, voteTally, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      var downVote, err, errN, errP, rel, upVote, voteTally, ___iced_passed_deferral, __iced_deferrals, __iced_k,
         _this = this;
       __iced_k = __iced_k_noop;
       ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -80,6 +80,7 @@
           lineno: 53
         }));
         if (user) {
+          voteLink.data.attribute = attr.serialize().name;
           user._node.createRelationshipTo(_this._node, voteLink.name, voteLink.data, __iced_deferrals.defer({
             assign_fn: (function() {
               return function() {
@@ -87,7 +88,7 @@
                 return rel = arguments[1];
               };
             })(),
-            lineno: 59
+            lineno: 60
           }));
         }
         __iced_deferrals._fulfill();
@@ -95,7 +96,7 @@
         if (err) {
           return cb(err);
         }
-        redis.incr("entity:" + _this._node.id + "::attr:" + attr._node.id + "::" + voteLink.data.type);
+        redis.incr("entity:" + _this._node.id + "::attr:" + attr._node.id + "::" + voteLink.data.tone);
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
@@ -105,37 +106,31 @@
           redis.get("entity:" + _this._node.id + "::attr:" + attr._node.id + "::positive", __iced_deferrals.defer({
             assign_fn: (function() {
               return function() {
-                err = arguments[0];
+                errP = arguments[0];
                 return upVote = arguments[1];
               };
             })(),
-            lineno: 65
+            lineno: 67
+          }));
+          redis.get("entity:" + _this._node.id + "::attr:" + attr._node.id + "::negative", __iced_deferrals.defer({
+            assign_fn: (function() {
+              return function() {
+                errN = arguments[0];
+                return downVote = arguments[1];
+              };
+            })(),
+            lineno: 68
           }));
           __iced_deferrals._fulfill();
         })(function() {
-          (function(__iced_k) {
-            __iced_deferrals = new iced.Deferrals(__iced_k, {
-              parent: ___iced_passed_deferral,
-              filename: "entity.coffee",
-              funcname: "Entity.vote"
-            });
-            redis.get("entity:" + _this._node.id + "::attr:" + attr._node.id + "::negative", __iced_deferrals.defer({
-              assign_fn: (function() {
-                return function() {
-                  err = arguments[0];
-                  return downVote = arguments[1];
-                };
-              })(),
-              lineno: 66
-            }));
-            __iced_deferrals._fulfill();
-          })(function() {
-            voteTally = {
-              upVote: parseInt(upVote) || 0,
-              downVote: parseInt(downVote) || 0
-            };
-            return cb(null, voteTally);
-          });
+          if (errP || errN) {
+            return cb(null, null);
+          }
+          voteTally = {
+            upVote: parseInt(upVote) || 0,
+            downVote: parseInt(downVote) || 0
+          };
+          return cb(null, voteTally);
         });
       });
     };
@@ -211,6 +206,11 @@
   };
 
   Entity.put = function(nodeId, reqBody, cb) {
+    var tags;
+    tags = reqBody.tags || [];
+    reqBody.tags = _und.filter(tags, function(tag) {
+      return tag && _und.isString(tag);
+    });
     return Neo.put(Entity, nodeId, reqBody, cb);
   };
 

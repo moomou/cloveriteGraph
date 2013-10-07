@@ -37,21 +37,16 @@
       INDEX_VALUE: ''
     }, {
       INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'description',
-      INDEX_VALUE: ''
-    }, {
-      INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'type',
+      INDEX_KEY: 'tone',
       INDEX_VALUE: ''
     }
   ];
 
   RankingSchema = {
     name: 'New Ranking',
-    description: '',
-    type: '',
+    ranks: [-1],
     tone: 'positive',
-    next: 1
+    createdBy: 'username'
   };
 
   SchemaValidation = {};

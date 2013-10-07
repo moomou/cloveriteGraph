@@ -6,8 +6,10 @@ Neo = require './neo'
 Setup = require './setup'
 redis = Setup.db.redis
 
-INDEX_NAME = 'nUser'
+SchemaUtil = require './stdSchema'
+Constants = SchemaUtil.Constants
 
+INDEX_NAME = 'nUser'
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
@@ -55,6 +57,13 @@ UserSchema = {
     modifiedCount: 0,
 }
 
+SchemaValidation = {
+    email: SchemaUtil.required('string'),
+    username: SchemaUtil.required('string'),
+    firstname: SchemaUtil.required('string'),
+    lastname: SchemaUtil.required('string'),
+}
+
 # Private constructor
 module.exports = class User extends Neo
     constructor: (@_node) ->
@@ -63,6 +72,9 @@ module.exports = class User extends Neo
 User.Name = 'nUser'
 User.INDEX_NAME = INDEX_NAME
 User.Indexes = Indexes
+
+User.validateSchema = (data) ->
+    SchemaUtil.validate SchemaValidation, data
 
 User.deserialize = (data) ->
     Neo.deserialize UserSchema, data

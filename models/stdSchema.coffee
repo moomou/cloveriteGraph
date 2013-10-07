@@ -19,10 +19,20 @@ validationSchema = (required, validator) ->
 # TODO improve
 # Does not check for required vs optional
 exports.validate = (schemaValidation, input) ->
-    result = _und.map input, (value, key) ->
-        if schemaValidation[key]
-            [valid, _] = schemaValidation[key].validator(true, value)
+    result = _und.map schemaValidation, (value, key) ->
+        console.log key
+        if value.required
+            console.log "REQUIRED"
+            return false if not input[key]
+            [valid, _] = value.validator(true, input[key])
             valid
+        else if key in input
+            console.log "OPTIONAL"
+            [valid, _] = value.validator(true, input[key])
+            valid
+        else
+            true
+    console.log result
     return false if _und.contains(result, false)
     return true
 

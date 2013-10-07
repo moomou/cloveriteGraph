@@ -38,7 +38,7 @@ app.namespace(app.version, () ->
 # Search Handler for multiple resource
     app.get('/search/:type?', routes.search.searchHandler)
 
-    app.post('/user/', routes.createUser)
+    app.post('/user/', routes.user.createUser)
     app.get('/user/:id', routes.user.getSelf)
 
 #app.get('/user/:id/discussion', routes.user.getDiscussion)
@@ -50,7 +50,7 @@ app.namespace(app.version, () ->
     
     app.get '/user/:id/ranking', routes.ranking.show
     app.post '/user/:id/ranking', routes.ranking.create
-    app.post '/user/:id/ranking/:rankingId', routes.ranking.addNew
+    app.put '/user/:id/ranking/:rankingId', routes.ranking.edit
     #app.delete '/user/:id/ranking/:rankingId', routes.ranking.delete
 
     app.get('/user/:id/created', routes.user.getCreated)
@@ -62,7 +62,7 @@ app.namespace(app.version, () ->
 
     app.post('/entity', routes.entity.create)
     app.get('/entity/:id', routes.entity.show)
-    app.put('/entity/:id', routes.entity.edit, () -> console.log ("HI I am Error"))
+    app.put('/entity/:id', routes.entity.edit)
     app.del('/entity/:id', routes.entity.del)
 
 # Entity User Method

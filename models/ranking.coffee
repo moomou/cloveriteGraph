@@ -25,22 +25,16 @@ Indexes = [
     },
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'description',
-        INDEX_VALUE: ''
-    },
-    {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'type',
+        INDEX_KEY: 'tone',
         INDEX_VALUE: ''
     }
 ]
 
 RankingSchema = {
     name: 'New Ranking',
-    description: '',
-    type: '',          #data, quality, norm
+    ranks: [-1],
     tone: 'positive',  #defaults to positive
-    next: 1 # next label
+    createdBy: 'username'
 }
 
 SchemaValidation = {

@@ -94,20 +94,17 @@ exports.create = (req, res, next) ->
 
     # anonymous user cannot create private entity
     req.body['private'] = false if not user
-    console.log "Creating Entity: #{req.body}"
+    console.log "Creating Entity"
 
     errs = []
     tagObjs = []
 
-    tags = req.body['tags'] ? []
-    tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
-    tags.push Constants.TAG_GLOBAL
-        
     # Create Entity and Tags
     await
         Entity.create req.body, defer(err, entity)
 
-        for tagName, ind in tags
+    await
+        for tagName, ind in entity.serialize().tags
             Tag.getOrCreate tagName, defer(errs[ind], tagObjs[ind])
 
     err = err or _und.find(errs, (err) -> err)
@@ -168,15 +165,11 @@ _edit = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(errMsg, entity)
     return res.status(400).json error: errMsg, input: req.body if errMsg
 
-    # Need to refactor later
     errs = []
     tagObjs = []
 
-    tags = req.body['tags'] ? []
-    tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
-
     await
-        for tagName, ind in tags
+        for tagName, ind in entity.serialize().tags
             Tag.getOrCreate tagName, defer(errs[ind], tagObjs[ind])
 
     err = _und.find(errs, (err) -> err)
@@ -456,9 +449,11 @@ exports.voteAttribute = (req, res, next) ->
     voteData.browser = req.useragent.Browser
     voteData.os = req.useragent.OS
     voteData.lang = req.headers['accept-language']
-    voteData.attrId = attr._node.data.id
+    voteData.attrId = attr.serialize().id
+    voteData.attrName = attr.serialize().name
 
     vote = new Vote voteData
+    console.log vote
 
     entity.vote user, attr, vote, (err, voteTally) ->
         return res.status(500) if err
@@ -589,3 +584,4 @@ exports.linkEntity = (req, res, next) ->
 # TODO Implement
 exports.unlinkEntity = (req, res, next) ->
     res.status(503).json error: "Not Implemented"
+@

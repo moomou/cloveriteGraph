@@ -16,8 +16,8 @@ Constants = SchemaUtil.Constants
 
 Utility = require('./utility')
 
-attrSplit = /\bwith\b/
-relSplit = /\bat\b/
+OTHER_SPLIT_REGEX = /\bwith\b/
+REL_SPLIT_REGEX = /\bvia\b/
 
 searchableClass = {
     entity: Entity,
@@ -32,62 +32,55 @@ searchFunc = {
 
 queryAnalyzer = (searchClass, query) ->
     #Splits the query into relationship cypher queries
-    mainQuery = attrQuery = relQuery = ''
+    mainQuery = otherQuery = relQuery = ''
 
     console.log "query: #{query}"
-    [mainQuery, remainder] = query.split(attrSplit)
+    [mainQuery, remainder] = query.split(OTHER_SPLIT_REGEX)
 
-    console.log "mQuery: #{mainQuery}"
-    [attrQuery, remainder] = remainder.split(relSplit) if remainder
+    console.log "mainQuery: #{mainQuery}"
+    [otherQuery, remainder] = remainder.split(REL_SPLIT_REGEX) if remainder
 
-    console.log "attrQuery: #{attrQuery}"
+    console.log "otherQuery: #{otherQuery}"
     console.log "relQuery: #{remainder}"
 
-    mainQuery = mainQuery.trim() unless not mainQuery
+    mainQuery = encodeURIComponent _und.escape mainQuery.trim() unless not mainQuery
 
-    attrQuery = attrQuery.split(' ')
-        .map((item) -> item.trim())
-        .filter((item) -> item unless not item) unless not attrQuery
+    otherQuery = otherQuery.split(',')
+        .map((item) -> encodeURIComponent _und.escape item.trim())
+        .filter((item) -> item unless not item) unless not otherQuery
 
-    relQuery = remainder.split(' ')
-        .map((item) -> item.trim())
+    relQuery = remainder.split(',')
+        .map((item) -> encodeURIComponent _und.escape item.trim())
         .filter((item) -> item unless not item) unless not remainder
 
-    return cypherQueryConstructor(searchClass, mainQuery, attrQuery, relQuery)
+    return cypherQueryConstructor(searchClass, mainQuery, otherQuery, relQuery)
 
-cypherQueryConstructor = (searchClass, name = '', attrMatches = [], relMatches = []) ->
+cypherQueryConstructor = (searchClass, name = '', otherMatches = [], relMatches = []) ->
     console.log "name: #{name}"
-    console.log "attrMatches: #{attrMatches}"
-    console.log "relMatches: #{relMatches}"
-
-    name = name.replace(' ', encodeURIComponent(' '))
-
-    attrMatches = _und.map(attrMatches,
-        (attrMatch) => attrMatch.replace(' ', encodeURIComponent(' ')))
-    relMatches = _und.map(relMatches,
-        (relMatch) => relMatch.replace(' ', encodeURIComponent(' ')))
+    console.log "otherMatches: #{otherMatches}"
+    console.log "relationMatches: #{relMatches}"
 
     #potential injection attack
     startNodeQ = "START n=node:__indexName__('name:#{name}~0.65')"
     endQ = 'RETURN DISTINCT n AS result;'
 
-    attrMatchQ = []
-    relMatchQ = []
+    otherMatchQ = []
 
-    for attrName, ind in attrMatches
-        attrMatchQ.push("MATCH (n)<-[:_ATTRIBUTE]-(attribute) WHERE attribute.name=~'(?i)#{attrName}'")
-    attrMatchQ = attrMatchQ.join(' WITH n as n ')
+    for otherName, ind in otherMatches
+        if ind < relMatches.length
+            relationship = relMatches[ind]
+        else
+            relationship = Constants.REL_ATTRIBUTE
+        otherMatchQ.push("MATCH (n)<-[:#{relationship}]-(other) WHERE other.name=~'(?i)#{decodeURIComponent otherName}'")
 
-    for relName, ind in relMatches
-        relMatchQ.push("MATCH (n)-[r]->(related) WHERE related.name=~'(?i)#{relName}'")
-    relMatchQ = relMatchQ.join(' WITH n as n ')
+    otherMatchQ = otherMatchQ.join(' WITH n as n ')
 
     switch searchClass
         when Tag
-            return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", attrMatchQ,"WITH n as n", relMatchQ,endQ].join('\n')
+            return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", otherMatchQ, "WITH n as n", endQ].join('\n')
         when Attribute
-            return [startNodeQ, "MATCH (n)-[:_ATTRIBUTE]->(entity) WITH entity as n", attrMatchQ,"WITH n as n", relMatchQ,endQ].join('\n')
-        else [startNodeQ,attrMatchQ,"WITH n as n", relMatchQ, endQ].join('\n')
+            return [startNodeQ, "MATCH (n)-[:_ATTRIBUTE]->(entity) WITH entity as n", otherMatchQ, "WITH n as n", endQ].join('\n')
+        else [startNodeQ, otherMatchQ, "WITH n as n", endQ].join('\n')
 
 luceneQueryContructor = (query) ->
     queryString = []
@@ -102,7 +95,7 @@ exports.searchHandler = (req, res, next) ->
     #generic searching if no type specified
     return res.json {} unless req.query['q']
 
-    cleanedQuery = encodeURIComponent trim req.query.q
+    cleanedQuery = trim req.query.q
 
     if req.params.type
         searchClasses = [searchableClass[req.params.type]]
@@ -110,18 +103,22 @@ exports.searchHandler = (req, res, next) ->
         searchClasses = _und.values searchableClass
 
     results = []
-
-    await Utility.getUser req, defer(errU, user)
+    errs = []
 
     #serial searches, continue only if no result
     await
+        Utility.getUser req, defer(errU, user)
+
         for searchClass, ind in searchClasses
             query = queryAnalyzer(searchClass, cleanedQuery)
             console.log query
             Neo.query searchClass,
                 query.replace('__indexName__', searchClass.INDEX_NAME),
                 {},
-                defer(err, results[ind])
+                defer(errs[ind], results[ind])
+
+    err = _und.find errs, (err) -> err
+    return res.status(500).json err: "Unable to execute query. Please wait" if err or errU
 
     blobResults = []
     identified = {}

@@ -1,5 +1,5 @@
+#Utility.coffee
 _und = require('underscore')
-crypto = require('crypto')
 
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
@@ -58,7 +58,7 @@ exports.getEntityAttributes = (entity, cb) ->
 # then return the raw neo4j node of the user
 ###
 exports.getUser = getUser = (req, cb) ->
-    accessToken = req.headers['access-token'] ? "none"
+    accessToken = req.headers['x-access-token'] ? "none"
 
     # Access token, after user logs in
     # points to the neo4j userNode Id
@@ -78,6 +78,10 @@ exports.getUser = getUser = (req, cb) ->
 ###
 # Checks if a particular link type exists between the two node
 ###
+exports.getRelationId = getRelationId = (path) ->
+    splits = path.relationships[0]._data.self.split('/')
+    splits[splits.length - 1]
+
 exports.hasLink = hasLink = (startNode, otherNode, linkType, dir, cb) ->
     dir ?= "all"
 
@@ -87,18 +91,72 @@ exports.hasLink = hasLink = (startNode, otherNode, linkType, dir, cb) ->
         1,              # depth
         'shortestPath', #algo - cannot change?
         (err, path) ->
+            console.log "hasLink finished"
             return cb(err, null) if err
             if path then cb(null, path) else cb(null, false)
 
 exports.createLink = createLink = (startNode, otherNode, linkType, linkData, cb) ->
     console.log "Creating linkType: #{linkType}"
-
     startNode.createRelationshipTo otherNode,
         linkType,
         linkData,
         (err, link) ->
             return cb(new Error("Unable to create link"), null) if err
             return cb(null, link)
+
+exports.getOrCreateLink = getOrCreateLink = (startNode, otherNode, linkType, linkData, cb) ->
+    await
+        hasLink startNode,
+            otherNode,
+            linkType,
+            "out",
+            defer(err, path)
+    console.log "Path"
+    if not path
+        createLink startNode,
+            otherNode
+            linkType,
+            linkData,
+            cb
+    else
+        relId = getRelationId path
+        Link.get relId, cb
+
+exports.updateLink = updateLink = (startNode, otherNode, linkType, linkData, cb) ->
+    await
+        hasLink startNode,
+            otherNode,
+            linkType,
+            "out",
+            defer(err, path)
+
+    if not path
+        return cb("Link does not exist", null)
+    else if err
+        return cb("Unable to retrieve link", null)
+
+    relId = getRelationId path
+    Link.put relId, linkData, cb
+
+exports.deleteLink = deleteLink = (startNode, otherNode, linkType, cb) ->
+    await
+        hasLink startNode,
+            otherNode,
+            linkType,
+            "out",
+            defer(err, path)
+
+    if not path
+        return cb(null, null)
+    else if err
+        return cb("Unable to retrieve link", null)
+
+    relId = getRelationId path
+
+    await
+        Link.get relId, linkData, defer(err, link)
+
+    link.delete()
 
 ###
 # Create multiple link with the same linkdata
@@ -152,28 +210,3 @@ exports.hasPermission = (user, other, cb) ->
         cb(null, false)
     else
         cb(null, true)
-
-###
-# Internal API for creating userNode
-###
-exports.createUser = (req, res, next) ->
-    console.log "In Create user"
-    accessToken = req.headers['access-token']
-
-    # unique user id
-    await crypto.randomBytes 16, defer(ex, buf)
-    userToken = buf.toString('hex')
-    userToken = req.body.accessToken = "user_#{userToken}"
-
-    # Access token, after user logs in
-    # points to the neo4j userNode Id
-    isAdmin accessToken, (err, isSuperAwesome) ->
-        if isSuperAwesome
-            await User.create req.body, defer(err, user)
-            userObj = user.serialize()
-
-            redis.set userToken, userObj.id, (err, result) ->
-                return res.json error: err if err
-                return res.status(201).json userObj
-        else
-            res.status(403).json error: "Permission Denied"
