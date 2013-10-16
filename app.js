@@ -54,9 +54,10 @@
     app.post('/user/:id/request', routes.user.sendRequest);
     app.get('/user/:id/recommendation', routes.user.getRecommendation);
     app.post('/user/:id/recommendation', routes.user.sendRecommendation);
-    app.get('/user/:id/ranking', routes.ranking.show);
+    app.get('/user/:id/ranking/:rankingId', routes.ranking.show);
     app.post('/user/:id/ranking', routes.ranking.create);
     app.put('/user/:id/ranking/:rankingId', routes.ranking.edit);
+    app["delete"]('/user/:id/ranking/:rankingId', routes.ranking["delete"]);
     app.get('/user/:id/created', routes.user.getCreated);
     app.get('/user/:id/voted', routes.user.getVoted);
     app.get('/user/:id/commented', routes.user.getCommented);

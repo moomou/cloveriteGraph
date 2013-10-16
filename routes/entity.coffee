@@ -76,6 +76,7 @@ hasPermission = (req, res, next, cb) ->
     reqWithUser = _und.extend _und.clone(req), user: user
     return cb false, null, reqWithUser
 
+basicAuthentication = Utility.authCurry hasPermission
 # END -
 
 # GET /entity/search/
@@ -137,11 +138,6 @@ exports.create = (req, res, next) ->
     res.status(201).json blob
 
 # GET /entity/:id
-exports.show = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _show(augReq, res, next)
-
 _show = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return next err if err
@@ -155,12 +151,9 @@ _show = (req, res, next) ->
 
     res.json entityBlob
 
-# PUT /entity/:id
-exports.edit = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _edit(augReq, res, next)
+exports.show = basicAuthentication _show
 
+# PUT /entity/:id
 _edit = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(errMsg, entity)
     return res.status(400).json error: errMsg, input: req.body if errMsg
@@ -197,12 +190,9 @@ _edit = (req, res, next) ->
     await entity.serialize defer blob
     res.json blob
 
-# DELETE /entity/:id
-exports.del = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _del(augReq, res, next)
+exports.edit = basicAuthentication _edit
 
+# DELETE /entity/:id
 _del = (req, res, next) ->
     await Entity.put req.params.id, req.body, defer(err, entity)
     return next(err) if err
@@ -215,14 +205,11 @@ _del = (req, res, next) ->
     return next err if err
     res.status(204).send()
 
+exports.del = basicAuthentication _del
+
 ###
 # Entity Use Section
 ###
-exports.showUsers = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _showUsers(req, res, next)
-
 _showUsers = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return next err if err
@@ -239,16 +226,13 @@ _showUsers = (req, res, next) ->
 
     res.json(blobs)
 
+exports.showUsers = basicAuthentication _showUsers
+
 ###
 # Entity Attribute Section
 ###
 
 # GET /entity/:id/attribute
-exports.listAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _listAttribute(augReq, res, next)
-
 _listAttribute = (req, res, next) ->
     await Entity.get req.params.id, defer(errE, entity)
     return next(err) if err
@@ -282,12 +266,9 @@ _listAttribute = (req, res, next) ->
 
     res.json(blobs)
 
-# POST /entity/:id/attribute
-exports.addAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _addAttribute augReq, res, next
+exports.listAttribute = basicAuthentication _listAttribute
 
+# POST /entity/:id/attribute
 _addAttribute = (req, res, next) ->
     valid = Attribute.validateSchema req.body
     return res.status(400).json error: "Invalid input", input: req.body if not valid
@@ -370,21 +351,15 @@ _addAttribute = (req, res, next) ->
     _und.extend blob, linkData: linkData
     res.status(201).json blob
 
-# TODO DELETE /entity/:eId/attribute/:aId
-exports.delAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _delAttribute(augReq, res, next)
+exports.addAttribute = basicAuthentication _addAttribute
 
+# TODO DELETE /entity/:eId/attribute/:aId
 _delAttribute = (req, res, next) ->
     res.status(503).json error: "Not Implemented"
 
-#GET /entity/:id/attribute/:id
-exports.getAttribute = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _getAttribute(augReq, res, next)
+exports.delAttribute = basicAuthentication _delAttribute
 
+#GET /entity/:id/attribute/:id
 _getAttribute =(req, res, next) ->
     entityId = req.params.eId
     attrId = req.params.aId
@@ -409,12 +384,9 @@ _getAttribute =(req, res, next) ->
     _und.extend(blob, linkData: rel.serialize())
     res.json blob
 
-#PUT /entity/:id/attribute/:id
-exports.updateAttributeLink = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _updateAttributeLink(augReq, res, next)
+exports.getAttribute = basicAuthentication _getAttribute
 
+#PUT /entity/:id/attribute/:id
 _updateAttributeLink = (req, res, next) ->
     entityId = req.params.eId
     attrId = req.params.aId
@@ -433,6 +405,8 @@ _updateAttributeLink = (req, res, next) ->
     _und.extend blob, linkData: rel.serialize()
 
     res.json blob
+
+exports.updateAttributeLink = basicAuthentication _updateAttributeLink
 
 # POST /entity/:id/attribute/:id/vote
 exports.voteAttribute = (req, res, next) ->
@@ -464,11 +438,6 @@ exports.voteAttribute = (req, res, next) ->
 ###
 
 # POST /entity/:id/comment
-exports.addComment = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return next(errRes) if err
-    _addComment(augReq, res, next)
-
 _addComment = (req, res, next) ->
     valid = Comment.validateSchema req.body
     return res.status(400).json error: "Invalid input", input: req.body if not valid
@@ -490,12 +459,9 @@ _addComment = (req, res, next) ->
     return res.status(500).json error: "Unable to save comment" if err
     return res.json(cleanedComment) if result
 
-# GET /entity/:id/comment
-exports.listComment = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _listComment(augReq, res, next)
+exports.addComment = basicAuthentication _addComment
 
+# GET /entity/:id/comment
 _listComment = (req, res, next) ->
     startIndex = req.params.start ? 0
     discussionId = getDiscussionId req.params.id
@@ -509,14 +475,13 @@ _listComment = (req, res, next) ->
 
     res.json(blobs)
 
-# DELETE /entity/:id/comment
-exports.delComment = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _delComment(augReq, res, next)
+exports.listComment = basicAuthentication _listComment
 
+# DELETE /entity/:id/comment
 _delComment = (req, res, next) ->
     res.status(503).json error: "Not Implemented"
+
+exports.delComment = basicAuthentication _delComment
 
 ###
 # Entity Relation section
@@ -584,4 +549,3 @@ exports.linkEntity = (req, res, next) ->
 # TODO Implement
 exports.unlinkEntity = (req, res, next) ->
     res.status(503).json error: "Not Implemented"
-@

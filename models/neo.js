@@ -25,10 +25,11 @@
     createdAt: -1,
     modifiedAt: -1,
     "private": false,
-    version: 0
+    version: 0,
+    nodeType: ''
   };
 
-  ToOmitKeys = ['id', 'createdAt', 'modifiedAt', 'version'];
+  ToOmitKeys = ['id', 'createdAt', 'modifiedAt', 'version', 'nodeType'];
 
   module.exports = Neo = (function() {
     function Neo(_node) {
@@ -52,10 +53,10 @@
     };
 
     Neo.prototype.update = function(newData) {
-      console.log("Data VER: " + this._node.data.version);
-      console.log("New VER: " + newData.version);
+      console.log("Current Data VER: " + this._node.data.version);
+      console.log("Input Data VER: " + newData.version);
       if (newData.version !== this._node.data.version) {
-        return "Version number behind";
+        return "Version number incorrect";
       }
       if (!this._node.data["private"] && newData["private"]) {
         return "Cannot take a public entity and set it to private";
@@ -65,6 +66,9 @@
     };
 
     Neo.prototype.save = function(cb) {
+      if (cb == null) {
+        cb = function() {};
+      }
       this._node.data.modifiedAt = new Date().getTime() / 1000;
       if (this._node.data.createdAt < 0) {
         this._node.data.createdAt = new Date().getTime() / 1000;
@@ -76,6 +80,9 @@
     };
 
     Neo.prototype.del = function(cb) {
+      if (cb == null) {
+        cb = function() {};
+      }
       return this._node.del(function(err) {
         return cb(err, true);
       });
@@ -162,7 +169,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 121
+        lineno: 125
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -208,6 +215,7 @@
       }
       errMsg = obj.update(data);
       if (!errMsg) {
+        console.log("Saving...");
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
@@ -219,7 +227,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 151
+            lineno: 156
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -231,9 +239,48 @@
           return __iced_k();
         });
       } else {
+        console.log("Failed");
         return cb(errMsg, obj);
         return __iced_k();
       }
+    });
+  };
+
+  Neo.putRel = function(Class, relId, reqBody, cb) {
+    var data;
+    data = Class.deserialize(reqBody);
+    return Class.get(relId, function(err, obj) {
+      var err, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+        _this = this;
+      __iced_k = __iced_k_noop;
+      ___iced_passed_deferral = iced.findDeferral(arguments);
+      if (err) {
+        return cb(err, null);
+      }
+      obj._node.data = data;
+      (function(__iced_k) {
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "neo.coffee"
+        });
+        obj._node.save(__iced_deferrals.defer({
+          assign_fn: (function() {
+            return function() {
+              return err = arguments[0];
+            };
+          })(),
+          lineno: 170
+        }));
+        __iced_deferrals._fulfill();
+      })(function() {
+        if (!err) {
+          Neo.index(obj._node, Class.Indexes, obj.serialize());
+          return cb(null, obj);
+        } else {
+          console.log("Failed");
+          return cb(err, obj);
+        }
+      });
     });
   };
 
@@ -287,7 +334,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 192
+        lineno: 213
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -300,6 +347,9 @@
       return Class.create(reqBody, cb);
     });
   };
+
+
+  /* Node Specific*/
 
   Neo.query = function(Class, query, params, cb) {
     return db.neo.query(query, params, function(err, res) {

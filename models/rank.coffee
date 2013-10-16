@@ -1,6 +1,9 @@
 # rank.coffee
 
 _und = require 'underscore'
+
+Neo = require './neo'
+
 StdSchema = require './stdSchema'
 Contants = StdSchema.Contants
 
@@ -23,21 +26,27 @@ RankSchema = {
     rankingName: 'New Ranking',
 }
 
-module.exports = class Rank
-    constructor: (voteData) ->
-        @name = Constants.REL_RANK
-
-        data = _und.clone voteData
-        _und.defaults data, RankSchema
-        _und.pick data, (_und.keys RankSchema)
-
-        @data = data
-
-        if not @data.time
-            @data.time = '' + new Date().getTime()
+module.exports = class Rank extends Neo
+    constructor: (@_node) ->
+        super @_node
 
 ###
 Static Method
 ###
 Rank.Name = 'rRank'
 Rank.INDEX_NAME = INDEX_NAME
+
+Rank.deserialize = (data) ->
+    Neo.deserialize RankSchema, data
+
+Rank.index = (rel, reqBody, cb = null) ->
+    Neo.index(rel, Indexes, reqBody, cb)
+
+Rank.find = (key, value, cb) ->
+    Neo.findRel Rank, Rank.INDEX_NAME, key, value, cb
+
+Rank.get = (id, cb) ->
+    Neo.getRel Rank, id, cb
+
+Rank.put = (relId, reqBody, cb) ->
+    Neo.putRel Rank, relId, reqBody, cb

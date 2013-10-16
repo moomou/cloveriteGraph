@@ -18,6 +18,7 @@ SchemaValidation = {
 }
 
 module.exports =
+    name: "requestFeed",
     validateSchema: (data) ->
         SchemaUtil.validate SchemaValidation, data
     deserialize: (data) ->

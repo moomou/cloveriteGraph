@@ -218,7 +218,7 @@
     });
   };
 
-  exports.getOrCreateLink = getOrCreateLink = function(startNode, otherNode, linkType, linkData, cb) {
+  exports.getOrCreateLink = getOrCreateLink = function(Class, startNode, otherNode, linkType, linkData, cb) {
     var err, path, relId, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
@@ -245,12 +245,12 @@
         return createLink(startNode, otherNode, linkType, linkData, cb);
       } else {
         relId = getRelationId(path);
-        return Link.get(relId, cb);
+        return Class.get(relId, cb);
       }
     });
   };
 
-  exports.updateLink = updateLink = function(startNode, otherNode, linkType, linkData, cb) {
+  exports.updateLink = updateLink = function(Class, startNode, otherNode, linkType, linkData, cb) {
     var err, path, relId, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
@@ -261,28 +261,32 @@
         filename: "utility.coffee",
         funcname: "updateLink"
       });
-      hasLink(startNode, otherNode, linkType, "out", __iced_deferrals.defer({
+      hasLink(startNode, otherNode, linkType, "all", __iced_deferrals.defer({
         assign_fn: (function() {
           return function() {
             err = arguments[0];
             return path = arguments[1];
           };
         })(),
-        lineno: 130
+        lineno: 132
       }));
       __iced_deferrals._fulfill();
     })(function() {
-      if (!path) {
-        return cb("Link does not exist", null);
-      } else if (err) {
+      if (err) {
+        console.log("UpdateLink ERR");
         return cb("Unable to retrieve link", null);
+      } else if (!path) {
+        console.log("UpdateLink Didn't find path");
+        return cb("Link does not exist", null);
       }
+      console.log("UpdateLinking...");
+      console.log(linkData);
       relId = getRelationId(path);
-      return Link.put(relId, linkData, cb);
+      return Class.put(relId, linkData, cb);
     });
   };
 
-  exports.deleteLink = deleteLink = function(startNode, otherNode, linkType, cb) {
+  exports.deleteLink = deleteLink = function(Class, startNode, otherNode, linkType, cb) {
     var err, link, path, relId, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
@@ -300,7 +304,7 @@
             return path = arguments[1];
           };
         })(),
-        lineno: 146
+        lineno: 152
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -316,18 +320,18 @@
           filename: "utility.coffee",
           funcname: "deleteLink"
         });
-        Link.get(relId, linkData, __iced_deferrals.defer({
+        Class.get(relId, __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
               err = arguments[0];
               return link = arguments[1];
             };
           })(),
-          lineno: 156
+          lineno: 162
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        return link["delete"]();
+        return link.del();
       });
     });
   };
@@ -360,7 +364,7 @@
               return __slot_3[__slot_4] = arguments[1];
             };
           })(errs, ind, rels, ind),
-          lineno: 173
+          lineno: 180
         }));
       }
       __iced_deferrals._fulfill();
@@ -415,7 +419,7 @@
             return path = arguments[1];
           };
         })(),
-        lineno: 206
+        lineno: 213
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -425,6 +429,39 @@
         return cb(null, true);
       }
     });
+  };
+
+  exports.authCurry = function(hasPermission) {
+    return function(cb) {
+      return function(req, res, next) {
+        var augReq, err, errRes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+          _this = this;
+        __iced_k = __iced_k_noop;
+        ___iced_passed_deferral = iced.findDeferral(arguments);
+        (function(__iced_k) {
+          __iced_deferrals = new iced.Deferrals(__iced_k, {
+            parent: ___iced_passed_deferral,
+            filename: "utility.coffee"
+          });
+          hasPermission(req, res, next, __iced_deferrals.defer({
+            assign_fn: (function() {
+              return function() {
+                err = arguments[0];
+                errRes = arguments[1];
+                return augReq = arguments[2];
+              };
+            })(),
+            lineno: 224
+          }));
+          __iced_deferrals._fulfill();
+        })(function() {
+          if (err) {
+            return errRes;
+          }
+          return cb(augReq, res, next);
+        });
+      };
+    };
   };
 
 }).call(this);

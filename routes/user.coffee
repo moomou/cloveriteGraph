@@ -3,8 +3,6 @@ _und = require('underscore')
 crypto = require('crypto')
 Logger = require('util')
 
-Neo = require('../models/neo')
-
 User = require('../models/user')
 Entity = require('../models/entity')
 Attribute = require('../models/attribute')
@@ -12,6 +10,7 @@ Tag = require('../models/tag')
 
 Request = require('../models/request')
 Recommendation = require('../models/recommendation')
+Ranking = require('../models/ranking')
 
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
@@ -40,22 +39,24 @@ hasPermission = (req, res, next, cb) ->
     # No Permission
     return cb true, res.status(401).json(error: "Unauthorized")
 
-getLinkType = (req, res, next, linkType) ->
-    await Utility.getUser req, defer(errUser, user)
-    return next(errUser) if errUser or not user
+getLinkType =
+    (linkType, NodeClass = Entity) ->
+        (req, res, next) ->
+            await Utility.getUser req, defer(errUser, user)
+            return next(errUser) if errUser or not user
 
-    Logger.debug "Getting linkType: #{linkType}"
+            Logger.debug "Getting linkType: #{linkType}"
 
-    await
-        user._node.getRelationshipNodes {type: linkType, direction:'out'},
-            defer(errGetRelationship, nodes)
-    return next(errGetRelationship) if errGetRelationship
+            await
+                user._node.getRelationshipNodes {type: linkType, direction:'out'},
+                    defer(errGetRelationship, nodes)
+            return next(errGetRelationship) if errGetRelationship
 
-    blobs = []
-    for node, ind in nodes
-        blobs[ind] = (new Entity node).serialize()
+            blobs = []
+            for node, ind in nodes
+                blobs[ind] = (new NodeClass node).serialize()
 
-    res.json(blobs)
+            res.json(blobs)
 
 getFeed = (userId, feedType, cb) ->
     # Retrieve latest request feed
@@ -69,6 +70,29 @@ addToFeed = (userId, newFeed, feedType, cb) ->
     await redis.lpush feedId, JSON.stringify(newFeed), defer(err, result)
     return cb true, null if not result
     return cb null, newFeed
+
+basicAuthentication = Utility.authCurry hasPermission
+
+basicFeedGetter =
+    (feedType) ->
+        (req, res, next) ->
+            await getFeed req.params.id, feedType, defer(err, feed)
+            return res.status(500).json(error: "getting #{feedType} failed") if err
+            return res.json feed
+
+basicFeedSetter =
+    (FeedClass) ->
+        (req, res, next) ->
+            cleanedFeed = FeedClass.fillMetaData FeedClass.deserialize req.body
+
+            await User.find "username", cleandFeed.to, defer(err, receiver)
+            return res.status(400).json(error: "No such user exist") if err
+
+            receiver = receiver.serialize()
+
+            await addToFeed receiver, cleanedFeed, FeedClass.name, defer(err, result)
+            return res.status(500).json(error: "Storing #{FeedClass.name} failed") if err
+            res.status(201).json({})
 
 ###
 # Internal API for creating userNode
@@ -99,85 +123,34 @@ exports.createUser = (req, res, next) ->
             res.status(403).json error: "Permission Denied"
 
 # GET /user/:id/discussion
-exports.getDiscussion = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-    await getFeed req.params.id, "discussionFeed", defer(err, discussionFeed)
-    return res.status(500).json(error: "get discussion failed") if err
-    return res.json discussionFeed
+exports.getDiscussion = basicAuthentication basicFeedGetter "discussionFeed"
 
 # GET /user/:id/recommendation
-exports.getRecommendation = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-    await getFeed req.params.id, "recommendationFeed", defer(err, recommendationFeed)
-    return res.status(500).json(error: "get recommendationFeed failed") if err
-    res.json recommendationFeed
+exports.getRecommendation = basicAuthentication basicFeedGetter "recommendationFeed"
 
 # GET /user/:id/request
-exports.getRequest = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-    await getFeed req.params.id, "requestFeed", defer(err, requestFeed)
-    return res.status(500).json(error: "get requestFeed") if err
-    res.json requestFeed
+exports.getRequest = basicAuthentication basicFeedGetter "requestFeed"
 
 # POST  /user/:id/recommendation
-exports.sendRecommendation = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-
-    cleanedRecommendation = Recommendation.fillMetaData Recommendation.deserialize req.body
-
-    console.log cleanedRecommendation
-    await User.find "username", cleanedRecommendation.to, defer(err, receiver)
-    return res.status(400).json(error: "No such user exist") if err
-
-    receiver = receiver.serialize()
-
-    await addToFeed receiver, cleanedRecommendation, "recommendationFeed", defer(err, result)
-    return res.status(500).json(error: "post recommendationFeed") if err
-    res.status(201).json({})
+exports.sendRecommendation = basicAuthentication basicFeedSetter Recommendation
 
 # POST /user/:id/request
-exports.sendRequest = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-
-    cleanedRequest = Request.fillMetaData Request.deserialize req.body
-
-    console.log cleanedRequest
-    await User.find "username", cleanedRequest.to, defer(err, receiver)
-    return res.status(400).json(error: "No such user exist") if err
-
-    receiver = receiver.serialize()
-
-    await addToFeed receiver.id, cleanedRequest, "requestFeed", defer(err, result)
-    return res.status(500).json(error: "post requestFeed") if err
-    res.status(201).json({})
+exports.sendRequest = basicAuthentication basicFeedSetter Request
 
 # GET /user/:id/created
-exports.getCreated = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-    getLinkType(req, res, next, Constants.REL_CREATED)
+exports.getCreated = basicAuthentication getLinkType Constants.REL_CREATED
 
 # GET /user/:id/voted
-exports.getVoted = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-    getLinkType(req, res, next, Constants.REL_VOTED)
+exports.getVoted = basicAuthentication getLinkType Constants.REL_VOTED
 
 # GET /user/:id/commented
-exports.getCommented = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
-    getLinkType(req, res, next, Constants.REL_COMMENTED)
+exports.getCommented = basicAuthentication getLinkType Constants.REL_COMMENTED
+
+# GET /user/:id/ranking
+exports.getRanking = basicAuthentication getLinkType Constants.REL_RANKING, Ranking
 
 # GET /user/:id/
-exports.getSelf = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes)
-    return errRes if err
+exports.getSelf = basicAuthentication (req, res, next) ->
     await User.get req.params.id, defer(err, user)
     res.json user.serialize()
 

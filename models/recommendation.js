@@ -23,6 +23,7 @@
   SchemaValidation = {};
 
   module.exports = {
+    name: "recommendationFeed",
     validateSchema: function(data) {
       return SchemaUtil.validate(SchemaValidation, data);
     },

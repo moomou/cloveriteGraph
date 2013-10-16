@@ -2,6 +2,9 @@
 _und = require('underscore')
 Logger = require('util')
 
+Setup = require '../models/setup'
+db = Setup.db
+
 Neo = require('../models/neo')
 
 User = require('../models/user')
@@ -10,6 +13,7 @@ Attribute = require('../models/attribute')
 Tag = require('../models/tag')
 
 Ranking = require('../models/ranking')
+Rank = require('../models/rank')
 
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
@@ -36,11 +40,7 @@ hasPermission = (req, res, next, cb) ->
     # No Permission
     return cb true, res.status(401).json(error: "Unauthorized"), req
 
-# POST /user/:id/ranking
-exports.create = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _create augReq, res, next
+basicAuthentication = Utility.authCurry hasPermission
 
 # create a new ranking
 _create = (req, res, next) ->
@@ -53,9 +53,10 @@ _create = (req, res, next) ->
     req.body.createdBy = req.user._node.data.username
     await Ranking.getOrCreate req.body, defer(err, ranking)
 
-    Utility.getOrCreateLink req.user._node, ranking._node,
+    # TODO: Make a generic relationship model class
+    Utility.getOrCreateLink Rank, req.user._node, ranking._node,
             Constants.REL_RANKING,
-            ranks: ranking.serialize().ranks,
+            {},
             (err, rel) ->
 
     errs = []
@@ -70,82 +71,119 @@ _create = (req, res, next) ->
 
     await
         for entity, rank in entities
-            Utility.getOrCreateLink ranking._node, entity._node,
+            Utility.getOrCreateLink Rank, ranking._node, entity._node,
                 Constants.REL_RANK,
-                {rank: rank, rankingName: ranking.serialize().name},
+                {rank: rank + 1, rankingName: ranking.serialize().name},
                 defer(errs[rank], rankLinks[rank])
 
     res.status(201).json ranking.serialize()
 
-# GET /user/:id/ranking/:rankingId
-exports.show = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    _show augReq, res, next
+# POST /user/:id/ranking
+exports.create = basicAuthentication _create
 
-# gets all the ranking of the user
+# Get a particular ranking
 _show = (req, res, next) ->
     await Ranking.get req.params.rankingId, defer(err, ranking)
     return next err if err
     res.json ranking.serialize()
 
-# PUT /user/:id/ranking/:rankingId
-exports.edit = (req, res, next) ->
-    await hasPermission req, res, next, defer(err, errRes, augReq)
-    return errRes if err
-    return res.status(400) if not req.body.entity
-    _edit augReq, res, next
+# GET /user/:id/ranking/:rankingId
+exports.show = basicAuthentication _show
 
 # Update ranking info
 _edit = (req, res, next) ->
     if not req.body.name or not req.body.ranks
         return res.status(400).json(err: "Missing required param name or ranks")
 
-    req.body.name = "#{req.user.username}:#{req.body.name}"
-
     await Ranking.get req.params.rankingId, defer(errR, ranking)
     oldRanking = _und.clone ranking.serialize()
-    await Ranking.put req.params.rankingId, defer(errR, ranking)
+
+    return res.status(400).json(err: errR) if errR
+
+    req.body.createdBy = req.user._node.data.username
+    await Ranking.put req.params.rankingId, req.body, defer(errR, ranking)
+
+    return res.status(400).json(err: errR) if errR
+
     newRanking = _und.clone ranking.serialize()
+
+    console.log "Old Ranking"
+    console.log oldRanking
+
+    console.log "New Ranking"
+    console.log newRanking
 
     rankMap = _und.object newRanking.ranks, [1..newRanking.ranks.length]
 
+    console.log "RankMap"
+    console.log rankMap
+
     # remove inactive links
     removedRankIds = _und.difference oldRanking.ranks, newRanking.ranks
+
+    console.log "To Remove"
+    console.log removedRankIds
+
     entities = []
     await
         for entityId, ind in removedRankIds
             Entity.get entityId, defer(err, entities[ind])
     await
         for entity, ind in entities
-            Utility.deleteLink ranking._node, entity._node,
+            Utility.deleteLink Rank, ranking._node, entity._node,
                 Constants.REL_RANK
 
     # add links to new ones
     newRankIds = _und.difference newRanking.ranks, oldRanking.ranks
+
+    console.log "To Add"
+    console.log newRankIds
+
     entities = []
     await
         for entityId, ind in newRankIds
             Entity.get entityId, defer(err, entities[ind])
 
-    for entity, ind in entities
-        Utility.getOrCreateLink ranking._node, entity._node,
-            Constants.REL_RANK,
-            {rank: rankMap[entity._node.id], rankingName: newRanking.name},
-            (err, rel) ->
+    await
+        for entity, ind in entities
+            Utility.getOrCreateLink Rank, ranking._node, entity._node,
+                Constants.REL_RANK,
+                {rank: rankMap[entity._node.id.toString()], rankingName: newRanking.name},
+                (err, rel) ->
 
     # Update Existing ones
     updateRankIds = _und.intersection newRanking.ranks, oldRanking.ranks
+    console.log "To Update"
+    console.log updateRankIds
+
     entities = []
     await
-        for entityId, ind in newRankIds
+        for entityId, ind in updateRankIds
             Entity.get entityId, defer(err, entities[ind])
 
-    for entity, ind in entities
-        Utility.updateLink ranking._node, entity._node,
-            Constants.REL_RANK,
-            {rank: rankMap[entity._node.id], rankingName: newRanking.name},
-            rankData,
-            (err, rel) ->
+    errs = []
+    rels = []
+    await
+        for entity, ind in entities
+            console.log "for entity " +
+                entity._node.id + "@" + rankMap[entity._node.id.toString()]
 
+            Utility.updateLink Rank, ranking._node, entity._node,
+                Constants.REL_RANK,
+                {rank: rankMap[entity._node.id.toString()], rankingName: newRanking.name},
+                defer(err, rel)
+
+    err = _und.find(errs, (err)->err)
+
+    res.status(500).json(err: err) if err
     res.status(201).json({})
+
+# PUT /user/:id/ranking/:rankingId
+exports.edit = basicAuthentication _edit
+
+_delete = (req, res, next) ->
+    res.status(503).json error: "Not Implemented"
+
+# DELETE /user/:id/ranking/:rankingId
+exports.delete = basicAuthentication _delete
+

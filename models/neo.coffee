@@ -15,13 +15,15 @@ MetaSchema = {
     modifiedAt: -1,   #last modified time
     private: false
     version: 0
+    nodeType: ''
 }
 
 ToOmitKeys = [
     'id',
     'createdAt',
     'modifiedAt',
-    'version'
+    'version',
+    'nodeType'
 ]
 
 module.exports = class Neo
@@ -40,11 +42,11 @@ module.exports = class Neo
 
     # Returns error message if unsuccessful
     update: (newData) ->
-        console.log "Data VER: " + @_node.data.version
-        console.log "New VER: " + newData.version
+        console.log "Current Data VER: " + @_node.data.version
+        console.log "Input Data VER: " + newData.version
 
         if newData.version != @_node.data.version
-            return "Version number behind"
+            return "Version number incorrect"
 
         # Cannot take a public entity and set it to private
         if not @_node.data.private and newData.private
@@ -54,6 +56,7 @@ module.exports = class Neo
         return false
 
     save: (cb) ->
+        cb ?= () ->
         @_node.data.modifiedAt = new Date().getTime() / 1000
 
         if @_node.data.createdAt < 0
@@ -63,6 +66,7 @@ module.exports = class Neo
         @_node.save (err) -> cb err
 
     del: (cb) ->
+        cb ?= () ->
         @_node.del (err) -> cb err, true
 
 Neo.MetaSchema = MetaSchema
@@ -149,12 +153,29 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
         errMsg = obj.update(data)
 
         if not errMsg
+            console.log "Saving..."
             await obj.save defer(saveErr)
             Neo.index(obj._node, Class.Indexes, obj.serialize())
             return cb(saveErr, null) if saveErr
             return cb(null, obj)
         else
+            console.log "Failed"
             return cb(errMsg, obj)
+
+Neo.putRel = (Class, relId, reqBody, cb) ->
+    data = Class.deserialize(reqBody)
+
+    Class.get relId, (err, obj) ->
+        return cb(err, null) if err
+        obj._node.data = data
+        await obj._node.save(defer(err))
+
+        if not err
+            Neo.index(obj._node, Class.Indexes, obj.serialize())
+            cb(null, obj)
+        else
+            console.log "Failed"
+            cb(err, obj)
 
 Neo.findRel = (Class, indexName, key, value, cb) ->
     db.neo.getIndexedRelationship indexName,
@@ -199,6 +220,7 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
     #Not found, create
     return Class.create(reqBody, cb)
 
+### Node Specific ###
 #Cypher
 Neo.query = (Class, query, params, cb) ->
     db.neo.query query,

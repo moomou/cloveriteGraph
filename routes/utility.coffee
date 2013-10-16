@@ -104,14 +104,16 @@ exports.createLink = createLink = (startNode, otherNode, linkType, linkData, cb)
             return cb(new Error("Unable to create link"), null) if err
             return cb(null, link)
 
-exports.getOrCreateLink = getOrCreateLink = (startNode, otherNode, linkType, linkData, cb) ->
+exports.getOrCreateLink = getOrCreateLink = (Class, startNode, otherNode, linkType, linkData, cb) ->
     await
         hasLink startNode,
             otherNode,
             linkType,
             "out",
             defer(err, path)
+
     console.log "Path"
+
     if not path
         createLink startNode,
             otherNode
@@ -120,25 +122,29 @@ exports.getOrCreateLink = getOrCreateLink = (startNode, otherNode, linkType, lin
             cb
     else
         relId = getRelationId path
-        Link.get relId, cb
+        Class.get relId, cb
 
-exports.updateLink = updateLink = (startNode, otherNode, linkType, linkData, cb) ->
+exports.updateLink = updateLink = (Class, startNode, otherNode, linkType, linkData, cb) ->
     await
         hasLink startNode,
             otherNode,
             linkType,
-            "out",
+            "all",
             defer(err, path)
-
-    if not path
-        return cb("Link does not exist", null)
-    else if err
+    if err
+        console.log "UpdateLink ERR"
         return cb("Unable to retrieve link", null)
+    else if not path
+        console.log "UpdateLink Didn't find path"
+        return cb("Link does not exist", null)
+
+    console.log "UpdateLinking..."
+    console.log linkData
 
     relId = getRelationId path
-    Link.put relId, linkData, cb
+    Class.put relId, linkData, cb
 
-exports.deleteLink = deleteLink = (startNode, otherNode, linkType, cb) ->
+exports.deleteLink = deleteLink = (Class, startNode, otherNode, linkType, cb) ->
     await
         hasLink startNode,
             otherNode,
@@ -154,9 +160,10 @@ exports.deleteLink = deleteLink = (startNode, otherNode, linkType, cb) ->
     relId = getRelationId path
 
     await
-        Link.get relId, linkData, defer(err, link)
+        Class.get relId, defer(err, link)
 
-    link.delete()
+    #link._node.del()
+    link.del()
 
 ###
 # Create multiple link with the same linkdata
@@ -210,3 +217,11 @@ exports.hasPermission = (user, other, cb) ->
         cb(null, false)
     else
         cb(null, true)
+
+exports.authCurry =
+    (hasPermission) ->
+        (cb) ->
+            (req, res, next) ->
+                await hasPermission req, res, next, defer(err, errRes, augReq)
+                return errRes if err
+                cb augReq, res, next
