@@ -23,7 +23,7 @@ app.version = '/v0'
 addCORSHeaders = (req, res, next) ->
     res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host)
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,X-access-token")
+    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,x-access-token")
     res.header('Access-Control-Allow-Credentials', 'true')
     next()
 
@@ -56,6 +56,7 @@ app.namespace(app.version, () ->
     app.get('/user/:id/created', routes.user.getCreated)
     app.get('/user/:id/voted', routes.user.getVoted)
     app.get('/user/:id/commented', routes.user.getCommented)
+    app.get('/user/:id/ranked', routes.user.getRanked)
 
 # Entity Method
     app.get('/entity/search', routes.entity.search)

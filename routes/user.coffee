@@ -25,27 +25,26 @@ hasPermission = (req, res, next, cb) ->
         Utility.getUser req, defer(errUser, user)
 
     err = errUser or errOther
-    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j") if err
+    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), null if err
 
     # Cannot access nonexistant user
-    return cb true, res.status(401).json(error: "Unable to retrieve from neo4j") if not other
-
-    user = user.serialize() if user
-    other = other.serialize() if other
+    return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), null if not other
 
     # If the user are the same, of course grant permission
-    return cb false, null if user and other and other.id == user.id
+    if user and other and other._node.id == user._node.id
+        # Returns a new shallow copy of req with user if authenticated
+        reqWithUser = _und.extend _und.clone(req), user: user
+        return cb false, null, reqWithUser
 
     # No Permission
-    return cb true, res.status(401).json(error: "Unauthorized")
+    return cb true, res.status(401).json(error: "Unauthorized"), null
 
 getLinkType =
     (linkType, NodeClass = Entity) ->
         (req, res, next) ->
-            await Utility.getUser req, defer(errUser, user)
-            return next(errUser) if errUser or not user
-
             Logger.debug "Getting linkType: #{linkType}"
+
+            user = req.user
 
             await
                 user._node.getRelationshipNodes {type: linkType, direction:'out'},
@@ -147,7 +146,7 @@ exports.getVoted = basicAuthentication getLinkType Constants.REL_VOTED
 exports.getCommented = basicAuthentication getLinkType Constants.REL_COMMENTED
 
 # GET /user/:id/ranking
-exports.getRanking = basicAuthentication getLinkType Constants.REL_RANKING, Ranking
+exports.getRanked = basicAuthentication getLinkType Constants.REL_RANKING, Ranking
 
 # GET /user/:id/
 exports.getSelf = basicAuthentication (req, res, next) ->

@@ -37,7 +37,7 @@
   addCORSHeaders = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host);
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,X-access-token");
+    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,x-access-token");
     res.header('Access-Control-Allow-Credentials', 'true');
     return next();
   };
@@ -61,6 +61,7 @@
     app.get('/user/:id/created', routes.user.getCreated);
     app.get('/user/:id/voted', routes.user.getVoted);
     app.get('/user/:id/commented', routes.user.getCommented);
+    app.get('/user/:id/ranked', routes.user.getRanked);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
     app.get('/entity/:id', routes.entity.show);

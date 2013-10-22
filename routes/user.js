@@ -34,7 +34,7 @@
   redis = require('../models/setup').db.redis;
 
   hasPermission = function(req, res, next, cb) {
-    var err, errOther, errUser, other, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var err, errOther, errUser, other, reqWithUser, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -68,25 +68,22 @@
       if (err) {
         return cb(true, res.status(500).json({
           error: "Unable to retrieve from neo4j"
-        }));
+        }), null);
       }
       if (!other) {
         return cb(true, res.status(401).json({
           error: "Unable to retrieve from neo4j"
-        }));
+        }), null);
       }
-      if (user) {
-        user = user.serialize();
-      }
-      if (other) {
-        other = other.serialize();
-      }
-      if (user && other && other.id === user.id) {
-        return cb(false, null);
+      if (user && other && other._node.id === user._node.id) {
+        reqWithUser = _und.extend(_und.clone(req), {
+          user: user
+        });
+        return cb(false, null, reqWithUser);
       }
       return cb(true, res.status(401).json({
         error: "Unauthorized"
-      }));
+      }), null);
     });
   };
 
@@ -95,60 +92,41 @@
       NodeClass = Entity;
     }
     return function(req, res, next) {
-      var blobs, errGetRelationship, errUser, ind, node, nodes, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      var blobs, errGetRelationship, ind, node, nodes, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
         _this = this;
       __iced_k = __iced_k_noop;
       ___iced_passed_deferral = iced.findDeferral(arguments);
+      Logger.debug("Getting linkType: " + linkType);
+      user = req.user;
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
           filename: "user.coffee"
         });
-        Utility.getUser(req, __iced_deferrals.defer({
+        user._node.getRelationshipNodes({
+          type: linkType,
+          direction: 'out'
+        }, __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
-              errUser = arguments[0];
-              return user = arguments[1];
+              errGetRelationship = arguments[0];
+              return nodes = arguments[1];
             };
           })(),
-          lineno: 44
+          lineno: 50
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        if (errUser || !user) {
-          return next(errUser);
+        var _i, _len;
+        if (errGetRelationship) {
+          return next(errGetRelationship);
         }
-        Logger.debug("Getting linkType: " + linkType);
-        (function(__iced_k) {
-          __iced_deferrals = new iced.Deferrals(__iced_k, {
-            parent: ___iced_passed_deferral,
-            filename: "user.coffee"
-          });
-          user._node.getRelationshipNodes({
-            type: linkType,
-            direction: 'out'
-          }, __iced_deferrals.defer({
-            assign_fn: (function() {
-              return function() {
-                errGetRelationship = arguments[0];
-                return nodes = arguments[1];
-              };
-            })(),
-            lineno: 51
-          }));
-          __iced_deferrals._fulfill();
-        })(function() {
-          var _i, _len;
-          if (errGetRelationship) {
-            return next(errGetRelationship);
-          }
-          blobs = [];
-          for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
-            node = nodes[ind];
-            blobs[ind] = (new NodeClass(node)).serialize();
-          }
-          return res.json(blobs);
-        });
+        blobs = [];
+        for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
+          node = nodes[ind];
+          blobs[ind] = (new NodeClass(node)).serialize();
+        }
+        return res.json(blobs);
       });
     };
   };
@@ -172,7 +150,7 @@
             return feeds = arguments[1];
           };
         })(),
-        lineno: 63
+        lineno: 62
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -204,7 +182,7 @@
             return result = arguments[1];
           };
         })(),
-        lineno: 69
+        lineno: 68
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -235,7 +213,7 @@
               return feed = arguments[1];
             };
           })(),
-          lineno: 78
+          lineno: 77
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -268,7 +246,7 @@
               return receiver = arguments[1];
             };
           })(),
-          lineno: 87
+          lineno: 86
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -290,7 +268,7 @@
                 return result = arguments[1];
               };
             })(),
-            lineno: 92
+            lineno: 91
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -337,7 +315,7 @@
             return buf = arguments[1];
           };
         })(),
-        lineno: 107
+        lineno: 106
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -361,7 +339,7 @@
                   return user = arguments[1];
                 };
               })(),
-              lineno: 115
+              lineno: 114
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -400,7 +378,7 @@
 
   exports.getCommented = basicAuthentication(getLinkType(Constants.REL_COMMENTED));
 
-  exports.getRanking = basicAuthentication(getLinkType(Constants.REL_RANKING, Ranking));
+  exports.getRanked = basicAuthentication(getLinkType(Constants.REL_RANKING, Ranking));
 
   exports.getSelf = basicAuthentication(function(req, res, next) {
     var err, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
@@ -419,7 +397,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 153
+        lineno: 152
       }));
       __iced_deferrals._fulfill();
     })(function() {
