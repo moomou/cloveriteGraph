@@ -7,6 +7,7 @@ trim = require('../misc/stringUtil').trim
 
 Neo = require('../models/neo')
 Entity = require('../models/entity')
+Ranking = require('../models/ranking')
 Vote = require('../models/vote')
 Attribute = require('../models/attribute')
 Tag = require('../models/tag')
@@ -105,23 +106,56 @@ exports.searchHandler = (req, res, next) ->
     results = []
     errs = []
 
+    rankingQuery = cleanedQuery.indexOf("ranking:") >= 0
+
     #serial searches, continue only if no result
     await
         Utility.getUser req, defer(errU, user)
 
-        for searchClass, ind in searchClasses
-            query = queryAnalyzer(searchClass, cleanedQuery)
-            console.log query
-            Neo.query searchClass,
-                query.replace('__indexName__', searchClass.INDEX_NAME),
+        if rankingQuery
+            rankingName = encodeURIComponent _und.escape cleanedQuery.substr(8).trim()
+            cQuery = "START n=node:nRanking('name:#{rankingName}~0.35') MATCH (n)-[r:_RANK]->(x)
+                RETURN DISTINCT n.name AS rankingName, r.rank AS rank, x AS entity ORDER BY n.name, r.rank;"
+
+            Neo.query Ranking,
+                cQuery,
                 {},
-                defer(errs[ind], results[ind])
+                defer(errs[ind], rankingResult)
+
+        # TODO Don't want if else, should be functional;
+        else
+            for searchClass, ind in searchClasses
+                query = queryAnalyzer(searchClass, cleanedQuery)
+                console.log query
+                Neo.query searchClass,
+                    query.replace('__indexName__', searchClass.INDEX_NAME),
+                    {},
+                    defer(errs[ind], results[ind])
 
     err = _und.find errs, (err) -> err
-    return res.status(500).json err: "Unable to execute query. Please wait" if err or errU
+    return res.status(500).json err: "Unable to execute query. Please try again later" if err or errU
 
     blobResults = []
     identified = {}
+
+    if rankingQuery
+        for item, ind in rankingResult
+            if not identified[item.rankingName]
+                identified[item.rankingName] = []
+
+            entity = (new Entity item.entity)
+
+            await
+                Utility.hasPermission user, entity, defer(err, authorized)
+
+            continue if not authorized
+
+            await
+                Utility.getEntityAttributes(entity, defer(attrBlobs))
+            entitySerialized = entity.serialize(null, attribute: attrBlobs)
+            identified[item.rankingName].push(entitySerialized)
+
+        return res.json(identified)
 
     for result, indX in results
         for obj, indY in result #always return entity results
