@@ -161,7 +161,7 @@
       }));
       if (rankingQuery) {
         rankingName = encodeURIComponent(_und.escape(cleanedQuery.substr(8).trim()));
-        cQuery = "START n=node:nRanking('name:" + rankingName + "~0.35') MATCH (n)-[r:_RANK]->(x)                RETURN DISTINCT n.name AS rankingName, r.rank AS rank, x AS entity ORDER BY n.name, r.rank;";
+        cQuery = "START n=node:nRanking('name:" + rankingName + "~0.25') MATCH (n)-[r:_RANK]->(x)                RETURN DISTINCT n.name AS rankingName, r.rank AS rank, x AS entity ORDER BY n.name, r.rank;";
         Neo.query(Ranking, cQuery, {}, __iced_deferrals.defer({
           assign_fn: (function(__slot_1, __slot_2) {
             return function() {
@@ -283,7 +283,7 @@ _continue()
             };
             _while(__iced_k);
           })(function() {
-            return res.json(identified);
+            return res.json(_und.chain(identified).values().first().value());
             return __iced_k();
           });
         } else {

@@ -114,7 +114,7 @@ exports.searchHandler = (req, res, next) ->
 
         if rankingQuery
             rankingName = encodeURIComponent _und.escape cleanedQuery.substr(8).trim()
-            cQuery = "START n=node:nRanking('name:#{rankingName}~0.35') MATCH (n)-[r:_RANK]->(x)
+            cQuery = "START n=node:nRanking('name:#{rankingName}~0.25') MATCH (n)-[r:_RANK]->(x)
                 RETURN DISTINCT n.name AS rankingName, r.rank AS rank, x AS entity ORDER BY n.name, r.rank;"
 
             Neo.query Ranking,
@@ -155,7 +155,7 @@ exports.searchHandler = (req, res, next) ->
             entitySerialized = entity.serialize(null, attribute: attrBlobs)
             identified[item.rankingName].push(entitySerialized)
 
-        return res.json(identified)
+        return res.json _und.chain(identified).values().first().value()
 
     for result, indX in results
         for obj, indY in result #always return entity results
