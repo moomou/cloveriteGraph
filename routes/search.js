@@ -147,7 +147,7 @@
       var _i, _len;
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "search.coffee",
+        filename: "routes/search.coffee",
         funcname: "searchHandler"
       });
       Utility.getUser(req, __iced_deferrals.defer({
@@ -233,7 +233,7 @@
                 (function(__iced_k) {
                   __iced_deferrals = new iced.Deferrals(__iced_k, {
                     parent: ___iced_passed_deferral,
-                    filename: "search.coffee",
+                    filename: "routes/search.coffee",
                     funcname: "searchHandler"
                   });
                   Utility.hasPermission(user, entity, __iced_deferrals.defer({
@@ -259,7 +259,7 @@ _continue()
                     (function(__iced_k) {
                       __iced_deferrals = new iced.Deferrals(__iced_k, {
                         parent: ___iced_passed_deferral,
-                        filename: "search.coffee",
+                        filename: "routes/search.coffee",
                         funcname: "searchHandler"
                       });
                       Utility.getEntityAttributes(entity, __iced_deferrals.defer({
@@ -273,7 +273,7 @@ _continue()
                       __iced_deferrals._fulfill();
                     })(function() {
                       entitySerialized = entity.serialize(null, {
-                        attribute: attrBlobs
+                        attributes: attrBlobs
                       });
                       return _next(identified[item.rankingName].push(entitySerialized));
                     });
@@ -344,7 +344,7 @@ _continue()
                     (function(__iced_k) {
                       __iced_deferrals = new iced.Deferrals(__iced_k, {
                         parent: ___iced_passed_deferral,
-                        filename: "search.coffee",
+                        filename: "routes/search.coffee",
                         funcname: "searchHandler"
                       });
                       Utility.hasPermission(user, entity, __iced_deferrals.defer({
@@ -370,7 +370,7 @@ _continue()
                         (function(__iced_k) {
                           __iced_deferrals = new iced.Deferrals(__iced_k, {
                             parent: ___iced_passed_deferral,
-                            filename: "search.coffee",
+                            filename: "routes/search.coffee",
                             funcname: "searchHandler"
                           });
                           Utility.getEntityAttributes(entity, __iced_deferrals.defer({
