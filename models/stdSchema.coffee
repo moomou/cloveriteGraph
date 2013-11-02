@@ -1,4 +1,5 @@
 _und = require('underscore')
+Hashids = require("hashids")
 
 _validator = (valid, validate, input) ->
     return [false, input] if not valid
@@ -79,9 +80,7 @@ exports.Constants = Constants = {
     ATTR_NUMERIC: "attr_numeric",
     ATTR_REFERENCE: "attr_ref"
 }
-###
-    Relationship Schema
-###
+
 exports.ErrorResponse = class ErrorResponse
     constructor: (
         @msg,       #message describing the problem
@@ -93,3 +92,11 @@ exports.ErrorResponse = class ErrorResponse
             message: @msg,
             solution: @fix
         }
+
+exports.RedisKey = {
+    shareTokens: "shareTokens",
+}
+
+exports.Security = {
+    hashids: new Hashids("Trust.Aspire.Succeed.Profit", 10)
+}

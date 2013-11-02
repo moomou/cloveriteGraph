@@ -58,6 +58,9 @@ app.namespace(app.version, () ->
     app.get('/user/:id/commented', routes.user.getCommented)
     app.get('/user/:id/ranked', routes.user.getRanked)
 
+# Ranking
+    app.get('/ranking/share/:shareToken', routes.ranking.shareView)
+
 # Entity Method
     app.get('/entity/search', routes.entity.search)
 

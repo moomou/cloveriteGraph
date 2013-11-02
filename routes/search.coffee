@@ -133,7 +133,8 @@ exports.searchHandler = (req, res, next) ->
                     defer(errs[ind], results[ind])
 
     err = _und.find errs, (err) -> err
-    return res.status(500).json err: "Unable to execute query. Please try again later" if err or errU
+    return res.status(500).json(
+        error: "Unable to execute query. Please try again later") if err or errU
 
     blobResults = []
     identified = {}
@@ -152,6 +153,7 @@ exports.searchHandler = (req, res, next) ->
 
             await
                 Utility.getEntityAttributes(entity, defer(attrBlobs))
+
             entitySerialized = entity.serialize(null, attributes: attrBlobs)
             identified[item.rankingName].push(entitySerialized)
 

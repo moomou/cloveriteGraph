@@ -541,6 +541,10 @@
           "resolved": "https://registry.npmjs.org/assertion-error/-/assertion-error-1.0.0.tgz"
         }
       }
+    },
+    "hashids": {
+      "version": "0.3.1",
+      "from": "hashids@"
     }
   }
 }

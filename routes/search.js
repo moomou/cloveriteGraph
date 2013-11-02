@@ -147,7 +147,7 @@
       var _i, _len;
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/search.coffee",
+        filename: "search.coffee",
         funcname: "searchHandler"
       });
       Utility.getUser(req, __iced_deferrals.defer({
@@ -194,7 +194,7 @@
       });
       if (err || errU) {
         return res.status(500).json({
-          err: "Unable to execute query. Please try again later"
+          error: "Unable to execute query. Please try again later"
         });
       }
       blobResults = [];
@@ -233,7 +233,7 @@
                 (function(__iced_k) {
                   __iced_deferrals = new iced.Deferrals(__iced_k, {
                     parent: ___iced_passed_deferral,
-                    filename: "routes/search.coffee",
+                    filename: "search.coffee",
                     funcname: "searchHandler"
                   });
                   Utility.hasPermission(user, entity, __iced_deferrals.defer({
@@ -243,7 +243,7 @@
                         return authorized = arguments[1];
                       };
                     })(),
-                    lineno: 148
+                    lineno: 149
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -259,7 +259,7 @@ _continue()
                     (function(__iced_k) {
                       __iced_deferrals = new iced.Deferrals(__iced_k, {
                         parent: ___iced_passed_deferral,
-                        filename: "routes/search.coffee",
+                        filename: "search.coffee",
                         funcname: "searchHandler"
                       });
                       Utility.getEntityAttributes(entity, __iced_deferrals.defer({
@@ -268,7 +268,7 @@ _continue()
                             return attrBlobs = arguments[0];
                           };
                         })(),
-                        lineno: 153
+                        lineno: 154
                       }));
                       __iced_deferrals._fulfill();
                     })(function() {
@@ -344,7 +344,7 @@ _continue()
                     (function(__iced_k) {
                       __iced_deferrals = new iced.Deferrals(__iced_k, {
                         parent: ___iced_passed_deferral,
-                        filename: "routes/search.coffee",
+                        filename: "search.coffee",
                         funcname: "searchHandler"
                       });
                       Utility.hasPermission(user, entity, __iced_deferrals.defer({
@@ -354,7 +354,7 @@ _continue()
                             return authorized = arguments[1];
                           };
                         })(),
-                        lineno: 163
+                        lineno: 165
                       }));
                       __iced_deferrals._fulfill();
                     })(function() {
@@ -370,7 +370,7 @@ _continue()
                         (function(__iced_k) {
                           __iced_deferrals = new iced.Deferrals(__iced_k, {
                             parent: ___iced_passed_deferral,
-                            filename: "routes/search.coffee",
+                            filename: "search.coffee",
                             funcname: "searchHandler"
                           });
                           Utility.getEntityAttributes(entity, __iced_deferrals.defer({
@@ -379,7 +379,7 @@ _continue()
                                 return attrBlobs = arguments[0];
                               };
                             })(),
-                            lineno: 166
+                            lineno: 168
                           }));
                           __iced_deferrals._fulfill();
                         })(function() {

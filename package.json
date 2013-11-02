@@ -19,8 +19,8 @@
     "socket.io": "~0.9",
     "mocha": "~1.12",
     "supertest": "~0.7",
-    "chai": "~1.7.2"
-
+    "chai": "~1.7.2",
+    "hashids": "0.3.1"
   },
   "devDependencies": {
     "node-dev": "~2.0.1"

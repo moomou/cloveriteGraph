@@ -31,6 +31,7 @@ Indexes = [
 ]
 
 RankingSchema = {
+    private: true,
     name: 'New Ranking',
     ranks: [-1],
     tone: 'positive',  #defaults to positive

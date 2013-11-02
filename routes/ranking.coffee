@@ -6,6 +6,7 @@ Setup = require '../models/setup'
 db = Setup.db
 
 Neo = require('../models/neo')
+Utility = require('./utility')
 
 User = require('../models/user')
 Entity = require('../models/entity')
@@ -17,7 +18,7 @@ Rank = require('../models/rank')
 
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
-Utility = require('./utility')
+RedisKey = SchemaUtil.RedisKey
 
 redis = require('../models/setup').db.redis
 
@@ -48,7 +49,7 @@ _create = (req, res, next) ->
     # get user node
     # connect the two using ranking link
     if not req.body.name or not req.body.ranks
-        return res.status(400).json(err: "Missing required param name or ranks")
+        return res.status(400).json(error: "Missing required param name or ranks")
 
     req.body.createdBy = req.user._node.data.username
     await Ranking.getOrCreate req.body, defer(err, ranking)
@@ -76,16 +77,53 @@ _create = (req, res, next) ->
                 {rank: rank + 1, rankingName: ranking.serialize().name},
                 defer(errs[rank], rankLinks[rank])
 
-    res.status(201).json ranking.serialize()
+    console.log ranking._node.id
+    console.log SchemaUtil.Security.hashids
+    shareToken = SchemaUtil.Security.hashids.encrypt ranking._node.id
+
+    await
+        redis.set "ranking:#{ranking._node.id}:shareToken",
+            shareToken,
+            defer(err, ok)
+
+    res.status(201).json ranking.serialize(null, shareToken: shareToken)
 
 # POST /user/:id/ranking
 exports.create = basicAuthentication _create
 
-# Get a particular ranking
 _show = (req, res, next) ->
+    await
+        Ranking.get req.params.rankingId, defer(err, ranking)
+        redis.get "ranking:#{req.params.rankingId}:shareToken",
+            shareToken,
+            defer(err, shareToken)
+
+    return next err if err
+    return ranking.serialize(null, shareToken: shareToken)
+
+# Get a particular ranking
+_showDetail = (req, res, next) ->
     await Ranking.get req.params.rankingId, defer(err, ranking)
     return next err if err
-    res.json ranking.serialize()
+
+    rankedEntities = []
+    attrBlobs = []
+    sRankedEntities = []
+    sRanking = ranking.serialize()
+
+    await
+        for entityId, ind in sRanking.ranks
+            Entity.get entityId, defer(err, rankedEntities[ind])
+
+    await
+        for entity, ind in rankedEntities
+            Utility.getEntityAttributes(entity, defer(attrBlobs[ind]))
+
+    for entity, ind in rankedEntities
+        sRankedEntities[ind] =
+            entity.serialize(null, attributes: attrBlobs[ind])
+
+    res.json sRankedEntities
 
 # GET /user/:id/ranking/:rankingId
 exports.show = basicAuthentication _show
@@ -93,17 +131,17 @@ exports.show = basicAuthentication _show
 # Update ranking info
 _edit = (req, res, next) ->
     if not req.body.name or not req.body.ranks
-        return res.status(400).json(err: "Missing required param name or ranks")
+        return res.status(400).json(error: "Missing required param name or ranks")
 
     await Ranking.get req.params.rankingId, defer(errR, ranking)
     oldRanking = _und.clone ranking.serialize()
 
-    return res.status(400).json(err: errR) if errR
+    return res.status(400).json(error: errR) if errR
 
     req.body.createdBy = req.user._node.data.username
     await Ranking.put req.params.rankingId, req.body, defer(errR, ranking)
 
-    return res.status(400).json(err: errR) if errR
+    return res.status(400).json(error: errR) if errR
 
     newRanking = _und.clone ranking.serialize()
 
@@ -125,6 +163,7 @@ _edit = (req, res, next) ->
     console.log removedRankIds
 
     entities = []
+
     await
         for entityId, ind in removedRankIds
             Entity.get entityId, defer(err, entities[ind])
@@ -175,7 +214,7 @@ _edit = (req, res, next) ->
 
     err = _und.find(errs, (err)->err)
 
-    res.status(500).json(err: err) if err
+    res.status(500).json(error: err) if err
     res.status(201).json({})
 
 # PUT /user/:id/ranking/:rankingId
@@ -187,3 +226,11 @@ _delete = (req, res, next) ->
 # DELETE /user/:id/ranking/:rankingId
 exports.delete = basicAuthentication _delete
 
+# GET /ranking/share/:shareToken
+exports.shareView = (req, res, next) ->
+    rankingId = SchemaUtil.Security.hashids.decrypt(req.params.shareToken)
+    if parseInt(rankingId)
+        req.params.rankingId = rankingId
+        _showDetail(req, res, next)
+    else
+        res.status(404).json error: "Not Found"

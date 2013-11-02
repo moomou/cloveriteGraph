@@ -62,6 +62,7 @@
     app.get('/user/:id/voted', routes.user.getVoted);
     app.get('/user/:id/commented', routes.user.getCommented);
     app.get('/user/:id/ranked', routes.user.getRanked);
+    app.get('/ranking/share/:shareToken', routes.ranking.shareView);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
     app.get('/entity/:id', routes.entity.show);
