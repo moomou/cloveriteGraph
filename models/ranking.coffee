@@ -35,7 +35,8 @@ RankingSchema = {
     name: 'New Ranking',
     ranks: [-1],
     tone: 'positive',  #defaults to positive
-    createdBy: 'username'
+    createdBy: 'username',
+    shareToken: ''
 }
 
 SchemaValidation = {

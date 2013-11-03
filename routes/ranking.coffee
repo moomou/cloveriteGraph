@@ -80,26 +80,23 @@ _create = (req, res, next) ->
     console.log ranking._node.id
     console.log SchemaUtil.Security.hashids
     shareToken = SchemaUtil.Security.hashids.encrypt ranking._node.id
+    ranking._node.data.shareToken = shareToken
 
     await
         redis.set "ranking:#{ranking._node.id}:shareToken",
             shareToken,
             defer(err, ok)
-
+        ranking.save defer(err)
+        
     res.status(201).json ranking.serialize(null, shareToken: shareToken)
 
 # POST /user/:id/ranking
 exports.create = basicAuthentication _create
 
 _show = (req, res, next) ->
-    await
-        Ranking.get req.params.rankingId, defer(err, ranking)
-        redis.get "ranking:#{req.params.rankingId}:shareToken",
-            shareToken,
-            defer(err, shareToken)
-
+    await Ranking.get req.params.rankingId, defer(err, ranking)
     return next err if err
-    return ranking.serialize(null, shareToken: shareToken)
+    return res.json(ranking.serialize())
 
 # Get a particular ranking
 _showDetail = (req, res, next) ->

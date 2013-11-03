@@ -47,7 +47,8 @@
     name: 'New Ranking',
     ranks: [-1],
     tone: 'positive',
-    createdBy: 'username'
+    createdBy: 'username',
+    shareToken: ''
   };
 
   SchemaValidation = {};

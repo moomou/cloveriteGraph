@@ -175,6 +175,7 @@
           console.log(ranking._node.id);
           console.log(SchemaUtil.Security.hashids);
           shareToken = SchemaUtil.Security.hashids.encrypt(ranking._node.id);
+          ranking._node.data.shareToken = shareToken;
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
@@ -188,7 +189,15 @@
                   return ok = arguments[1];
                 };
               })(),
-              lineno: 86
+              lineno: 87
+            }));
+            ranking.save(__iced_deferrals.defer({
+              assign_fn: (function() {
+                return function() {
+                  return err = arguments[0];
+                };
+              })(),
+              lineno: 88
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -204,7 +213,7 @@
   exports.create = basicAuthentication(_create);
 
   _show = function(req, res, next) {
-    var err, ranking, shareToken, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var err, ranking, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -221,25 +230,14 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 95
-      }));
-      redis.get("ranking:" + req.params.rankingId + ":shareToken", shareToken, __iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            err = arguments[0];
-            return shareToken = arguments[1];
-          };
-        })(),
-        lineno: 98
+        lineno: 96
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return next(err);
       }
-      return ranking.serialize(null, {
-        shareToken: shareToken
-      });
+      return res.json(ranking.serialize());
     });
   };
 
@@ -261,7 +259,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 105
+        lineno: 102
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -289,7 +287,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rankedEntities, ind),
-            lineno: 115
+            lineno: 112
           }));
         }
         __iced_deferrals._fulfill();
@@ -309,7 +307,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(attrBlobs, ind),
-              lineno: 119
+              lineno: 116
             }));
           }
           __iced_deferrals._fulfill();
@@ -352,7 +350,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 135
+        lineno: 132
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -376,7 +374,7 @@
               return ranking = arguments[1];
             };
           })(),
-          lineno: 141
+          lineno: 138
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -418,7 +416,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(entities, ind),
-              lineno: 168
+              lineno: 165
             }));
           }
           __iced_deferrals._fulfill();
@@ -456,7 +454,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(entities, ind),
-                  lineno: 183
+                  lineno: 180
                 }));
               }
               __iced_deferrals._fulfill();
@@ -497,7 +495,7 @@
                           return __slot_1[__slot_2] = arguments[1];
                         };
                       })(entities, ind),
-                      lineno: 200
+                      lineno: 197
                     }));
                   }
                   __iced_deferrals._fulfill();
@@ -524,7 +522,7 @@
                             return rel = arguments[1];
                           };
                         })(),
-                        lineno: 212
+                        lineno: 209
                       }));
                     }
                     __iced_deferrals._fulfill();
