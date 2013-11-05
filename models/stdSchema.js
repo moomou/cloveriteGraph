@@ -76,7 +76,7 @@
 
   exports.Constants = Constants = {
     API_VERSION: 'v0',
-    TAG_GLOBAL: '__global__',
+    TAG_GLOBAL: '#__global__',
     REL_LOCATION: '_LOCATION',
     REL_AWARD: '_AWARD',
     REL_ATTRIBUTE: '_ATTRIBUTE',
