@@ -35,6 +35,7 @@ exports.validate = (schemaValidation, input) ->
             true
     console.log result
     return false if _und.contains(result, false)
+    console.log "VALID"
     return true
 
 exports.required = () ->
