@@ -38,7 +38,7 @@
   redis = require('../models/setup').db.redis;
 
   hasPermission = function(req, res, next, cb) {
-    var err, errOther, errUser, other, reqWithUser, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var err, errOther, errUser, isPublic, other, reqWithUser, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -68,6 +68,7 @@
       }));
       __iced_deferrals._fulfill();
     })(function() {
+      isPublic = req.params.id === "public";
       err = errUser || errOther;
       if (err) {
         return cb(true, res.status(500).json({
@@ -79,10 +80,16 @@
           error: "Unable to retrieve from neo4j"
         }), req);
       }
-      reqWithUser = _und.extend(_und.clone(req), {
-        user: user
-      });
-      if ((user && other && other._node.id === user._node.id) || req.params.id === "public") {
+      if (isPublic) {
+        reqWithUser = _und.extend(_und.clone(req), {
+          user: other
+        });
+      } else {
+        reqWithUser = _und.extend(_und.clone(req), {
+          user: user
+        });
+      }
+      if (isPublic || (user && other && other._node.id === user._node.id)) {
         return cb(false, null, reqWithUser);
       }
       return cb(true, res.status(401).json({
@@ -103,6 +110,7 @@
         error: "Missing required param name or ranks"
       });
     }
+    console.log(req.user);
     req.body.createdBy = req.user._node.data.username;
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -117,7 +125,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 55
+        lineno: 62
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -141,7 +149,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, entities, ind),
-            lineno: 68
+            lineno: 75
           }));
         }
         __iced_deferrals._fulfill();
@@ -167,7 +175,7 @@
                   return __slot_3[__slot_4] = arguments[1];
                 };
               })(errs, rank, rankLinks, rank),
-              lineno: 78
+              lineno: 85
             }));
           }
           __iced_deferrals._fulfill();
@@ -189,7 +197,7 @@
                   return ok = arguments[1];
                 };
               })(),
-              lineno: 88
+              lineno: 95
             }));
             ranking.save(__iced_deferrals.defer({
               assign_fn: (function() {
@@ -197,7 +205,7 @@
                   return err = arguments[0];
                 };
               })(),
-              lineno: 89
+              lineno: 96
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -230,7 +238,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 97
+        lineno: 104
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -259,7 +267,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 103
+        lineno: 110
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -287,7 +295,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rankedEntities, ind),
-            lineno: 113
+            lineno: 120
           }));
         }
         __iced_deferrals._fulfill();
@@ -307,7 +315,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(attrBlobs, ind),
-              lineno: 117
+              lineno: 124
             }));
           }
           __iced_deferrals._fulfill();
@@ -350,7 +358,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 133
+        lineno: 140
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -374,7 +382,7 @@
               return ranking = arguments[1];
             };
           })(),
-          lineno: 139
+          lineno: 146
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -416,7 +424,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(entities, ind),
-              lineno: 166
+              lineno: 173
             }));
           }
           __iced_deferrals._fulfill();
@@ -454,7 +462,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(entities, ind),
-                  lineno: 181
+                  lineno: 188
                 }));
               }
               __iced_deferrals._fulfill();
@@ -495,7 +503,7 @@
                           return __slot_1[__slot_2] = arguments[1];
                         };
                       })(entities, ind),
-                      lineno: 198
+                      lineno: 205
                     }));
                   }
                   __iced_deferrals._fulfill();
@@ -522,7 +530,7 @@
                             return rel = arguments[1];
                           };
                         })(),
-                        lineno: 210
+                        lineno: 217
                       }));
                     }
                     __iced_deferrals._fulfill();
