@@ -83,6 +83,9 @@ User.create = (reqBody, cb) ->
     Neo.create User, reqBody, Indexes, cb
 
 User.get = (id, cb) ->
+    resolvedId = id
+    if id == "public"
+        await redis.get("user:public", defer(err, resolvedId))
     Neo.get User, id, cb
 
 User.getOrCreate = (reqBody, cb) ->
