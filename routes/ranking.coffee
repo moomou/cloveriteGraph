@@ -36,7 +36,8 @@ hasPermission = (req, res, next, cb) ->
     # If the user are the same, of course grant permission
     # Returns a new shallow copy of req with user if authenticated
     reqWithUser = _und.extend _und.clone(req), user: user
-    return cb false, null, reqWithUser if user and other and other._node.id == user._node.id
+    if (user and other and other._node.id == user._node.id) or req.params.id == "public"
+        return cb false, null, reqWithUser
 
     # No Permission
     return cb true, res.status(401).json(error: "Unauthorized"), req

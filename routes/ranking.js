@@ -82,7 +82,7 @@
       reqWithUser = _und.extend(_und.clone(req), {
         user: user
       });
-      if (user && other && other._node.id === user._node.id) {
+      if ((user && other && other._node.id === user._node.id) || req.params.id === "public") {
         return cb(false, null, reqWithUser);
       }
       return cb(true, res.status(401).json({
@@ -117,7 +117,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 54
+        lineno: 55
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -141,7 +141,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, entities, ind),
-            lineno: 67
+            lineno: 68
           }));
         }
         __iced_deferrals._fulfill();
@@ -167,7 +167,7 @@
                   return __slot_3[__slot_4] = arguments[1];
                 };
               })(errs, rank, rankLinks, rank),
-              lineno: 77
+              lineno: 78
             }));
           }
           __iced_deferrals._fulfill();
@@ -189,7 +189,7 @@
                   return ok = arguments[1];
                 };
               })(),
-              lineno: 87
+              lineno: 88
             }));
             ranking.save(__iced_deferrals.defer({
               assign_fn: (function() {
@@ -197,7 +197,7 @@
                   return err = arguments[0];
                 };
               })(),
-              lineno: 88
+              lineno: 89
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -230,7 +230,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 96
+        lineno: 97
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -259,7 +259,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 102
+        lineno: 103
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -287,7 +287,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rankedEntities, ind),
-            lineno: 112
+            lineno: 113
           }));
         }
         __iced_deferrals._fulfill();
@@ -307,7 +307,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(attrBlobs, ind),
-              lineno: 116
+              lineno: 117
             }));
           }
           __iced_deferrals._fulfill();
@@ -350,7 +350,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 132
+        lineno: 133
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -374,7 +374,7 @@
               return ranking = arguments[1];
             };
           })(),
-          lineno: 138
+          lineno: 139
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -416,7 +416,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(entities, ind),
-              lineno: 165
+              lineno: 166
             }));
           }
           __iced_deferrals._fulfill();
@@ -454,7 +454,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(entities, ind),
-                  lineno: 180
+                  lineno: 181
                 }));
               }
               __iced_deferrals._fulfill();
@@ -495,7 +495,7 @@
                           return __slot_1[__slot_2] = arguments[1];
                         };
                       })(entities, ind),
-                      lineno: 197
+                      lineno: 198
                     }));
                   }
                   __iced_deferrals._fulfill();
@@ -522,7 +522,7 @@
                             return rel = arguments[1];
                           };
                         })(),
-                        lineno: 209
+                        lineno: 210
                       }));
                     }
                     __iced_deferrals._fulfill();
