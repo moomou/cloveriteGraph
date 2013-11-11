@@ -32,9 +32,6 @@ hasPermission = (req, res, next, cb) ->
     err = errUser or errOther
     return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), req if err
 
-    # Cannot access nonexistant user
-    return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), req if not other
-
     # If the user are the same, of course grant permission or the user profile is public
     # Returns a new shallow copy of req with user if authenticated
     if isPublic
@@ -44,6 +41,9 @@ hasPermission = (req, res, next, cb) ->
 
     if isPublic or (user and other and other._node.id == user._node.id)
         return cb false, null, reqWithUser
+
+    # Cannot access nonexistant user
+    return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), req if not other
 
     # No Permission
     return cb true, res.status(401).json(error: "Unauthorized"), req

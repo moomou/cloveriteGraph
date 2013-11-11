@@ -75,11 +75,6 @@
           error: "Unable to retrieve from neo4j"
         }), req);
       }
-      if (!other) {
-        return cb(true, res.status(401).json({
-          error: "Unable to retrieve from neo4j"
-        }), req);
-      }
       if (isPublic) {
         reqWithUser = _und.extend(_und.clone(req), {
           user: other
@@ -91,6 +86,11 @@
       }
       if (isPublic || (user && other && other._node.id === user._node.id)) {
         return cb(false, null, reqWithUser);
+      }
+      if (!other) {
+        return cb(true, res.status(401).json({
+          error: "Unable to retrieve from neo4j"
+        }), req);
       }
       return cb(true, res.status(401).json({
         error: "Unauthorized"
