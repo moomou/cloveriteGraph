@@ -354,6 +354,7 @@
             }));
           });
         } else {
+          console.log("You are not awesome.");
           return __iced_k(res.status(403).json({
             error: "Permission Denied"
           }));
@@ -397,7 +398,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 152
+        lineno: 153
       }));
       __iced_deferrals._fulfill();
     })(function() {

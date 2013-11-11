@@ -119,6 +119,7 @@ exports.createUser = (req, res, next) ->
                 return res.json error: err if err
                 return res.status(201).json userObj
         else
+            console.log "You are not awesome."
             res.status(403).json error: "Permission Denied"
 
 # GET /user/:id/discussion
