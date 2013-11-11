@@ -24,6 +24,8 @@ hasPermission = (req, res, next, cb) ->
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
 
+    isPublic = req.params.id == "public"
+
     err = errUser or errOther
     return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), null if err
 
@@ -31,9 +33,13 @@ hasPermission = (req, res, next, cb) ->
     return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), null if not other
 
     # If the user are the same, of course grant permission
-    if user and other and other._node.id == user._node.id
-        # Returns a new shallow copy of req with user if authenticated
+    # Returns a new shallow copy of req with user if authenticated
+    if isPublic
+        reqWithUser = _und.extend _und.clone(req), user: other
+    else
         reqWithUser = _und.extend _und.clone(req), user: user
+
+    if user and other and other._node.id == user._node.id
         return cb false, null, reqWithUser
 
     # No Permission
