@@ -86,7 +86,7 @@ User.get = (id, cb) ->
     resolvedId = id
     if id == "public"
         await redis.get("user:public", defer(err, resolvedId))
-    Neo.get User, id, cb
+    Neo.get User, resolvedId, cb
 
 User.getOrCreate = (reqBody, cb) ->
     throw "Not Implemented"

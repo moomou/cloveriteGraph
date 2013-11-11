@@ -128,7 +128,7 @@
         return __iced_k();
       }
     })(function() {
-      return Neo.get(User, id, cb);
+      return Neo.get(User, resolvedId, cb);
     });
   };
 
