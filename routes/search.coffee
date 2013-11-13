@@ -157,7 +157,7 @@ exports.searchHandler = (req, res, next) ->
             entitySerialized = entity.serialize(null, attributes: attrBlobs)
             identified[item.rankingName].push(entitySerialized)
 
-        return res.json _und.chain(identified).values().value()
+        return res.json identified
 
     for result, indX in results
         for obj, indY in result #always return entity results
