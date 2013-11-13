@@ -127,7 +127,7 @@
   };
 
   exports.searchHandler = function(req, res, next) {
-    var attrBlobs, authorized, blobResults, cQuery, cleanedQuery, entity, entitySerialized, err, errU, errs, identified, ind, indX, indY, item, obj, query, rankingName, rankingQuery, rankingResult, result, results, searchClass, searchClasses, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var attrBlobs, authorized, blobResults, cQuery, cleanedQuery, entity, entitySerialized, err, errU, errs, identified, ind, indX, indY, item, obj, query, rankingName, rankingQuery, rankingResult, result, resultBlob, results, sRanking, searchClass, searchClasses, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -161,7 +161,7 @@
       }));
       if (rankingQuery) {
         rankingName = encodeURIComponent(_und.escape(cleanedQuery.substr(8).trim()));
-        cQuery = "START n=node:nRanking('name:" + rankingName + "~0.25') MATCH (n)-[r:_RANK]->(x)                RETURN DISTINCT n.name AS rankingName, r.rank AS rank, x AS entity ORDER BY n.name, r.rank;";
+        cQuery = "START n=node:nRanking('name:" + rankingName + "~0.25') MATCH (n)-[r:_RANK]->(x)                RETURN DISTINCT n AS ranking, r.rank AS rank, x AS entity ORDER BY ID(n), r.rank;";
         Neo.query(Ranking, cQuery, {}, __iced_deferrals.defer({
           assign_fn: (function(__slot_1, __slot_2) {
             return function() {
@@ -197,7 +197,7 @@
           error: "Unable to execute query. Please try again later"
         });
       }
-      blobResults = [];
+      resultBlob = [];
       identified = {};
       (function(__iced_k) {
         if (rankingQuery) {
@@ -226,8 +226,10 @@
                 return _break();
               } else {
                 item = _ref[ind];
-                if (!identified[item.rankingName]) {
-                  identified[item.rankingName] = [];
+                sRanking = (new Ranking(item.ranking)).serialize();
+                if (!identified[sRanking.id]) {
+                  sRanking.entities = identified[sRanking.id] = [];
+                  resultBlob.push(sRanking);
                 }
                 entity = new Entity(item.entity);
                 (function(__iced_k) {
@@ -243,7 +245,7 @@
                         return authorized = arguments[1];
                       };
                     })(),
-                    lineno: 149
+                    lineno: 152
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
@@ -268,14 +270,14 @@ _continue()
                             return attrBlobs = arguments[0];
                           };
                         })(),
-                        lineno: 154
+                        lineno: 157
                       }));
                       __iced_deferrals._fulfill();
                     })(function() {
                       entitySerialized = entity.serialize(null, {
                         attributes: attrBlobs
                       });
-                      return _next(identified[item.rankingName].push(entitySerialized));
+                      return _next(identified[sRanking.id].push(entitySerialized));
                     });
                   });
                 });
@@ -283,13 +285,14 @@ _continue()
             };
             _while(__iced_k);
           })(function() {
-            return res.json(identified);
+            return res.json(resultBlob);
             return __iced_k();
           });
         } else {
           return __iced_k();
         }
       })(function() {
+        blobResults = [];
         (function(__iced_k) {
           var _i, _len, _ref, _results, _while;
           _ref = results;
@@ -354,7 +357,7 @@ _continue()
                             return authorized = arguments[1];
                           };
                         })(),
-                        lineno: 165
+                        lineno: 169
                       }));
                       __iced_deferrals._fulfill();
                     })(function() {
@@ -379,7 +382,7 @@ _continue()
                                 return attrBlobs = arguments[0];
                               };
                             })(),
-                            lineno: 168
+                            lineno: 172
                           }));
                           __iced_deferrals._fulfill();
                         })(function() {
