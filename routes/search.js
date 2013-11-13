@@ -283,7 +283,7 @@ _continue()
             };
             _while(__iced_k);
           })(function() {
-            return res.json(_und.chain(identified).values().first().value());
+            return res.json(_und.chain(identified).values().value());
             return __iced_k();
           });
         } else {
