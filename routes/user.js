@@ -34,7 +34,7 @@
   redis = require('../models/setup').db.redis;
 
   hasPermission = function(req, res, next, cb) {
-    var err, errOther, errUser, other, reqWithUser, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var err, errOther, errUser, isPublic, other, reqWithUser, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -64,22 +64,29 @@
       }));
       __iced_deferrals._fulfill();
     })(function() {
+      isPublic = req.params.id === "public";
       err = errUser || errOther;
       if (err) {
         return cb(true, res.status(500).json({
           error: "Unable to retrieve from neo4j"
         }), null);
       }
+      if (isPublic) {
+        reqWithUser = _und.extend(_und.clone(req), {
+          user: other
+        });
+      } else {
+        reqWithUser = _und.extend(_und.clone(req), {
+          user: user
+        });
+      }
+      if (isPublic || (user && other && other._node.id === user._node.id)) {
+        return cb(false, null, reqWithUser);
+      }
       if (!other) {
         return cb(true, res.status(401).json({
           error: "Unable to retrieve from neo4j"
         }), null);
-      }
-      if (user && other && other._node.id === user._node.id) {
-        reqWithUser = _und.extend(_und.clone(req), {
-          user: user
-        });
-        return cb(false, null, reqWithUser);
       }
       return cb(true, res.status(401).json({
         error: "Unauthorized"
@@ -113,7 +120,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 50
+          lineno: 56
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -150,7 +157,7 @@
             return feeds = arguments[1];
           };
         })(),
-        lineno: 62
+        lineno: 68
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -182,7 +189,7 @@
             return result = arguments[1];
           };
         })(),
-        lineno: 68
+        lineno: 74
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -213,7 +220,7 @@
               return feed = arguments[1];
             };
           })(),
-          lineno: 77
+          lineno: 83
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -246,7 +253,7 @@
               return receiver = arguments[1];
             };
           })(),
-          lineno: 86
+          lineno: 92
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -268,7 +275,7 @@
                 return result = arguments[1];
               };
             })(),
-            lineno: 91
+            lineno: 97
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -315,7 +322,7 @@
             return buf = arguments[1];
           };
         })(),
-        lineno: 106
+        lineno: 112
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -339,7 +346,7 @@
                   return user = arguments[1];
                 };
               })(),
-              lineno: 114
+              lineno: 120
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -354,6 +361,7 @@
             }));
           });
         } else {
+          console.log("You are not awesome.");
           return __iced_k(res.status(403).json({
             error: "Permission Denied"
           }));
@@ -397,7 +405,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 152
+        lineno: 159
       }));
       __iced_deferrals._fulfill();
     })(function() {

@@ -24,17 +24,23 @@ hasPermission = (req, res, next, cb) ->
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
 
+    isPublic = req.params.id == "public"
+
     err = errUser or errOther
     return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), null if err
 
+    # If the user are the same, of course grant permission
+    # Returns a new shallow copy of req with user if authenticated
+    if isPublic
+        reqWithUser = _und.extend _und.clone(req), user: other
+    else
+        reqWithUser = _und.extend _und.clone(req), user: user
+
+    if isPublic or (user and other and other._node.id == user._node.id)
+        return cb false, null, reqWithUser
+
     # Cannot access nonexistant user
     return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), null if not other
-
-    # If the user are the same, of course grant permission
-    if user and other and other._node.id == user._node.id
-        # Returns a new shallow copy of req with user if authenticated
-        reqWithUser = _und.extend _und.clone(req), user: user
-        return cb false, null, reqWithUser
 
     # No Permission
     return cb true, res.status(401).json(error: "Unauthorized"), null
@@ -119,6 +125,7 @@ exports.createUser = (req, res, next) ->
                 return res.json error: err if err
                 return res.status(201).json userObj
         else
+            console.log "You are not awesome."
             res.status(403).json error: "Permission Denied"
 
 # GET /user/:id/discussion

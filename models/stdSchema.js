@@ -63,6 +63,7 @@
     if (_und.contains(result, false)) {
       return false;
     }
+    console.log("VALID");
     return true;
   };
 

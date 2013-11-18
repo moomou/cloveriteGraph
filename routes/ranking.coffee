@@ -27,16 +27,23 @@ hasPermission = (req, res, next, cb) ->
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
 
+    isPublic = req.params.id == "public"
+
     err = errUser or errOther
     return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), req if err
 
+    # If the user are the same, of course grant permission or the user profile is public
+    # Returns a new shallow copy of req with user if authenticated
+    if isPublic
+        reqWithUser = _und.extend _und.clone(req), user: other
+    else
+        reqWithUser = _und.extend _und.clone(req), user: user
+
+    if isPublic or (user and other and other._node.id == user._node.id)
+        return cb false, null, reqWithUser
+
     # Cannot access nonexistant user
     return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), req if not other
-
-    # If the user are the same, of course grant permission
-    # Returns a new shallow copy of req with user if authenticated
-    reqWithUser = _und.extend _und.clone(req), user: user
-    return cb false, null, reqWithUser if user and other and other._node.id == user._node.id
 
     # No Permission
     return cb true, res.status(401).json(error: "Unauthorized"), req
@@ -51,6 +58,7 @@ _create = (req, res, next) ->
     if not req.body.name or not req.body.ranks
         return res.status(400).json(error: "Missing required param name or ranks")
 
+    console.log req.user
     req.body.createdBy = req.user._node.data.username
     await Ranking.getOrCreate req.body, defer(err, ranking)
 
