@@ -83,9 +83,7 @@
       if (cb == null) {
         cb = function() {};
       }
-      return this._node.del(function(err) {
-        return cb(err, true);
-      });
+      return this._node["delete"](cb, true);
     };
 
     return Neo;
@@ -211,7 +209,9 @@
       __iced_k = __iced_k_noop;
       ___iced_passed_deferral = iced.findDeferral(arguments);
       if (err) {
-        return cb(err, null);
+        return cb({
+          dbError: err
+        }, null);
       }
       errMsg = obj.update(data);
       if (!errMsg) {
@@ -240,7 +240,9 @@
         });
       } else {
         console.log("Failed");
-        return cb(errMsg, obj);
+        return cb({
+          validationError: errMsg
+        }, obj);
         return __iced_k();
       }
     });
@@ -370,7 +372,5 @@
       }));
     });
   };
-
-  Neo.createLink = function(srcNode, destNode, linkName, linkData, cb) {};
 
 }).call(this);

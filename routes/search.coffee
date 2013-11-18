@@ -3,7 +3,6 @@
 require('source-map-support').install()
 
 _und = require('underscore')
-trim = require('../misc/stringUtil').trim
 
 Neo = require('../models/neo')
 Entity = require('../models/entity')
@@ -15,6 +14,7 @@ Tag = require('../models/tag')
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
 
+EntityUtil = require('./entity/util')
 Utility = require('./utility')
 
 OTHER_SPLIT_REGEX = /\bwith\b/
@@ -96,7 +96,7 @@ exports.searchHandler = (req, res, next) ->
     #generic searching if no type specified
     return res.json {} unless req.query['q']
 
-    cleanedQuery = trim req.query.q
+    cleanedQuery = req.query.q.trim()
 
     if req.params.type
         searchClasses = [searchableClass[req.params.type]]
@@ -155,7 +155,7 @@ exports.searchHandler = (req, res, next) ->
             continue if not authorized
 
             await
-                Utility.getEntityAttributes(entity, defer(attrBlobs))
+                EntityUtil.getEntityAttributes(entity, defer(attrBlobs))
 
             entitySerialized = entity.serialize(null, attributes: attrBlobs)
             identified[sRanking.id].push(entitySerialized)
@@ -170,7 +170,7 @@ exports.searchHandler = (req, res, next) ->
             await Utility.hasPermission user, entity, defer(err, authorized)
             continue if not authorized
 
-            await Utility.getEntityAttributes(entity, defer(attrBlobs))
+            await EntityUtil.getEntityAttributes(entity, defer(attrBlobs))
             entitySerialized = entity.serialize(null, attributes: attrBlobs)
 
             if not identified[entitySerialized.id] #do not duplicate result

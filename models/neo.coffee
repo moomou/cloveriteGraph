@@ -67,7 +67,7 @@ module.exports = class Neo
 
     del: (cb) ->
         cb ?= () ->
-        @_node.del (err) -> cb err, true
+        @_node.delete(cb, true)
 
 Neo.MetaSchema = MetaSchema
 
@@ -149,7 +149,7 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
     console.log "ID: " + nodeId
 
     Class.get nodeId, (err, obj) ->
-        return cb(err, null) if err
+        return cb(dbError: err, null) if err
         errMsg = obj.update(data)
 
         if not errMsg
@@ -160,7 +160,7 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
             return cb(null, obj)
         else
             console.log "Failed"
-            return cb(errMsg, obj)
+            return cb(validationError: errMsg, obj)
 
 Neo.putRel = (Class, relId, reqBody, cb) ->
     data = Class.deserialize(reqBody)
@@ -236,5 +236,3 @@ Neo.search = (Class, indexName, query, cb) ->
         (err, nodes) ->
             cb err if err
             cb(null, _und.map(nodes, (node)-> new Class node))
-
-Neo.createLink = (srcNode, destNode, linkName, linkData, cb) ->

@@ -54,14 +54,14 @@
     app.post('/user/:id/request', routes.user.sendRequest);
     app.get('/user/:id/recommendation', routes.user.getRecommendation);
     app.post('/user/:id/recommendation', routes.user.sendRecommendation);
-    app.get('/user/:id/ranking/:rankingId', routes.ranking.show);
-    app.post('/user/:id/ranking', routes.ranking.create);
-    app.put('/user/:id/ranking/:rankingId', routes.ranking.edit);
-    app["delete"]('/user/:id/ranking/:rankingId', routes.ranking["delete"]);
     app.get('/user/:id/created', routes.user.getCreated);
     app.get('/user/:id/voted', routes.user.getVoted);
     app.get('/user/:id/commented', routes.user.getCommented);
     app.get('/user/:id/ranked', routes.user.getRanked);
+    app.get('/user/:id/ranking/:rankingId', routes.ranking.show);
+    app.post('/user/:id/ranking', routes.ranking.create);
+    app.put('/user/:id/ranking/:rankingId', routes.ranking.edit);
+    app["delete"]('/user/:id/ranking/:rankingId', routes.ranking["delete"]);
     app.get('/ranking/share/:shareToken', routes.ranking.shareView);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
