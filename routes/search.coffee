@@ -1,7 +1,6 @@
 #search.coffee
 #Routes to CRUD entities
 require('source-map-support').install()
-
 _und = require('underscore')
 
 Neo = require('../models/neo')
@@ -13,6 +12,10 @@ Tag = require('../models/tag')
 
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
+
+Fields = require('./fields')
+Response = require('./response')
+ErrorDevMessage = Response.ErrorDevMessage
 
 EntityUtil = require('./entity/util')
 Utility = require('./utility')
@@ -56,14 +59,14 @@ queryAnalyzer = (searchClass, query) ->
 
     return cypherQueryConstructor(searchClass, mainQuery, otherQuery, relQuery)
 
-cypherQueryConstructor = (searchClass, name = '', otherMatches = [], relMatches = []) ->
+cypherQueryConstructor = (searchClass, name = '', otherMatches = [], relMatches = [], skip = 0, limit = 1000) ->
     console.log "name: #{name}"
     console.log "otherMatches: #{otherMatches}"
     console.log "relationMatches: #{relMatches}"
 
     #potential injection attack
     startNodeQ = "START n=node:__indexName__('name:#{name}~0.65')"
-    endQ = 'RETURN DISTINCT n AS result;'
+    endQ = "RETURN DISTINCT n AS result SKIP #{skip} LIMIT #{limit};"
 
     otherMatchQ = []
 
@@ -93,9 +96,8 @@ luceneQueryContructor = (query) ->
 
 # GET /search/:type
 exports.searchHandler = (req, res, next) ->
-    #generic searching if no type specified
-    return res.json {} unless req.query['q']
-
+    Response.OKResponse(res)(200, {}) unless req.query.q
+    queryParams = Fields.parseQuery req
     cleanedQuery = req.query.q.trim()
 
     if req.params.type
@@ -133,8 +135,7 @@ exports.searchHandler = (req, res, next) ->
                     defer(errs[ind], results[ind])
 
     err = _und.find errs, (err) -> err
-    return res.status(500).json(
-        error: "Unable to execute query. Please try again later") if err or errU
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     resultBlob = []
     identified = {}
@@ -160,7 +161,7 @@ exports.searchHandler = (req, res, next) ->
             entitySerialized = entity.serialize(null, attributes: attrBlobs)
             identified[sRanking.id].push(entitySerialized)
 
-        return res.json resultBlob
+        return Response.OKResponse(res)(200, resultBlob)
 
     blobResults = []
     for result, indX in results
@@ -176,6 +177,6 @@ exports.searchHandler = (req, res, next) ->
             if not identified[entitySerialized.id] #do not duplicate result
                 blobResults.push(entitySerialized)
                 identified[entitySerialized.id] = true
-
-    #cache results?
-    res.json(blobResults)
+    
+    # TODO Add next, & prev
+    Response.OKResponse(res)(200, blobResults)

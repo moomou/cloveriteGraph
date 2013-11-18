@@ -46,7 +46,7 @@ class CypherLinkUtil
 
     @getOrCreateLink: (Class, startNode, otherNode, linkType, linkData, cb) ->
         await
-            hasLink startNode,
+            @hasLink startNode,
                 otherNode,
                 linkType,
                 "out",
@@ -64,7 +64,7 @@ class CypherLinkUtil
 
     @updateLink: (Class, startNode, otherNode, linkType, linkData, cb) ->
         await
-            hasLink startNode,
+            @hasLink startNode,
                 otherNode,
                 linkType,
                 "all",
@@ -84,7 +84,7 @@ class CypherLinkUtil
 
     @deleteLink = (Class, startNode, otherNode, linkType, cb) ->
         await
-            hasLink startNode,
+            @hasLink startNode,
                 otherNode,
                 linkType,
                 "out",

@@ -6,7 +6,6 @@ Setup = require '../models/setup'
 db = Setup.db
 
 Neo = require('../models/neo')
-Utility = require('./utility')
 
 User = require('../models/user')
 Entity = require('../models/entity')
@@ -18,11 +17,23 @@ Rank = require('../models/rank')
 
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
-RedisKey = SchemaUtil.RedisKey
+
+EntityUtil = require('./entity/util')
+
+Cypher = require('./cypher')
+CypherBuilder = Cypher.CypherBuilder
+CypherLinkUtil = Cypher.CypherLinkUtil
+
+Response = require('./response')
+ErrorDevMessage = Response.ErrorDevMessage
+
+Utility = require('./utility')
 
 redis = require('../models/setup').db.redis
 
 hasPermission = (req, res, next, cb) ->
+    ErrorResponse = Response.ErrorResponse(res)
+
     await
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
@@ -30,7 +41,7 @@ hasPermission = (req, res, next, cb) ->
     isPublic = req.params.id == "public"
 
     err = errUser or errOther
-    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), req if err
+    return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if err
 
     # If the user are the same, of course grant permission or the user profile is public
     # Returns a new shallow copy of req with user if authenticated
@@ -43,10 +54,10 @@ hasPermission = (req, res, next, cb) ->
         return cb false, null, reqWithUser
 
     # Cannot access nonexistant user
-    return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), req if not other
+    return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if not other
 
     # No Permission
-    return cb true, res.status(401).json(error: "Unauthorized"), req
+    return cb true, ErrorResponse(401, ErrorDevMessage.permissionIssue()), null
 
 basicAuthentication = Utility.authCurry hasPermission
 
@@ -56,14 +67,14 @@ _create = (req, res, next) ->
     # get user node
     # connect the two using ranking link
     if not req.body.name or not req.body.ranks
-        return res.status(400).json(error: "Missing required param name or ranks")
+        return Response.ErrorResponse(res)(400, ErrorDevMessage.missingParam("name or rank"))
 
     console.log req.user
     req.body.createdBy = req.user._node.data.username
-    await Ranking.getOrCreate req.body, defer(err, ranking)
+    await Ranking.create req.body, defer(err, ranking)
 
     # TODO: Make a generic relationship model class
-    Utility.getOrCreateLink Rank, req.user._node, ranking._node,
+    CypherLinkUtil.getOrCreateLink Rank, req.user._node, ranking._node,
             Constants.REL_RANKING,
             {},
             (err, rel) ->
@@ -80,36 +91,43 @@ _create = (req, res, next) ->
 
     await
         for entity, rank in entities
-            Utility.getOrCreateLink Rank, ranking._node, entity._node,
+            CypherLinkUtil.getOrCreateLink Rank, ranking._node, entity._node,
                 Constants.REL_RANK,
                 {rank: rank + 1, rankingName: ranking.serialize().name},
                 defer(errs[rank], rankLinks[rank])
 
-    console.log ranking._node.id
-    console.log SchemaUtil.Security.hashids
     shareToken = SchemaUtil.Security.hashids.encrypt ranking._node.id
     ranking._node.data.shareToken = shareToken
 
+    publicUser = null
     await
+        if not ranking._node.data.private
+            User.get "public", defer(err, publicUser)
+
         redis.set "ranking:#{ranking._node.id}:shareToken",
             shareToken,
             defer(err, ok)
         ranking.save defer(err)
-        
-    res.status(201).json ranking.serialize(null, shareToken: shareToken)
+
+    if publicUser
+        console.log "LINKING TO PUBLIC USER"
+        CypherLinkUtil.createLink publicUser._node, ranking._node,
+            Constants.REL_RANKING, {}, (err, rel) ->
+
+    Response.OKResponse(res)(201, ranking.serialize(null, shareToken: shareToken))
 
 # POST /user/:id/ranking
 exports.create = basicAuthentication _create
 
 _show = (req, res, next) ->
     await Ranking.get req.params.rankingId, defer(err, ranking)
-    return next err if err
-    return res.json(ranking.serialize())
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
+    Response.OKResponse(res)(200,ranking.serialize())
 
 # Get a particular ranking
 _showDetail = (req, res, next) ->
     await Ranking.get req.params.rankingId, defer(err, ranking)
-    return next err if err
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     rankedEntities = []
     attrBlobs = []
@@ -122,13 +140,13 @@ _showDetail = (req, res, next) ->
 
     await
         for entity, ind in rankedEntities
-            Utility.getEntityAttributes(entity, defer(attrBlobs[ind]))
+            EntityUtil.getEntityAttributes(entity, defer(attrBlobs[ind]))
 
     for entity, ind in rankedEntities
         sRankedEntities[ind] =
             entity.serialize(null, attributes: attrBlobs[ind])
 
-    res.json sRankedEntities
+    Response.OKResponse(res)(200, sRankedEntities)
 
 # GET /user/:id/ranking/:rankingId
 exports.show = basicAuthentication _show
@@ -136,17 +154,16 @@ exports.show = basicAuthentication _show
 # Update ranking info
 _edit = (req, res, next) ->
     if not req.body.name or not req.body.ranks
-        return res.status(400).json(error: "Missing required param name or ranks")
+        return Response.ErrorResponse(res)(400, ErrorDevMessage.missingParam("name or rank"))
 
     await Ranking.get req.params.rankingId, defer(errR, ranking)
+    return Response.ErrorResponse(res)(400, errR) if errR
+
     oldRanking = _und.clone ranking.serialize()
-
-    return res.status(400).json(error: errR) if errR
-
     req.body.createdBy = req.user._node.data.username
-    await Ranking.put req.params.rankingId, req.body, defer(errR, ranking)
 
-    return res.status(400).json(error: errR) if errR
+    await Ranking.put req.params.rankingId, req.body, defer(errR, ranking)
+    return Response.ErrorResponse(res)(400, errR) if errR
 
     newRanking = _und.clone ranking.serialize()
 
@@ -174,7 +191,7 @@ _edit = (req, res, next) ->
             Entity.get entityId, defer(err, entities[ind])
     await
         for entity, ind in entities
-            Utility.deleteLink Rank, ranking._node, entity._node,
+            CypherLinkUtil.deleteLink Rank, ranking._node, entity._node,
                 Constants.REL_RANK
 
     # add links to new ones
@@ -190,7 +207,7 @@ _edit = (req, res, next) ->
 
     await
         for entity, ind in entities
-            Utility.getOrCreateLink Rank, ranking._node, entity._node,
+            CypherLinkUtil.getOrCreateLink Rank, ranking._node, entity._node,
                 Constants.REL_RANK,
                 {rank: rankMap[entity._node.id.toString()], rankingName: newRanking.name},
                 (err, rel) ->
@@ -212,15 +229,14 @@ _edit = (req, res, next) ->
             console.log "for entity " +
                 entity._node.id + "@" + rankMap[entity._node.id.toString()]
 
-            Utility.updateLink Rank, ranking._node, entity._node,
+            CypherLinkUtil.updateLink Rank, ranking._node, entity._node,
                 Constants.REL_RANK,
                 {rank: rankMap[entity._node.id.toString()], rankingName: newRanking.name},
                 defer(err, rel)
 
     err = _und.find(errs, (err)->err)
-
-    res.status(500).json(error: err) if err
-    res.status(201).json({})
+    return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if err
+    Response.OKResponse(res)(200, {})
 
 # PUT /user/:id/ranking/:rankingId
 exports.edit = basicAuthentication _edit

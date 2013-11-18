@@ -87,7 +87,7 @@
           filename: "cypher.coffee",
           funcname: "CypherLinkUtil.getOrCreateLink"
         });
-        hasLink(startNode, otherNode, linkType, "out", __iced_deferrals.defer({
+        _this.hasLink(startNode, otherNode, linkType, "out", __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
               err = arguments[0];
@@ -118,7 +118,7 @@
           filename: "cypher.coffee",
           funcname: "CypherLinkUtil.updateLink"
         });
-        hasLink(startNode, otherNode, linkType, "all", __iced_deferrals.defer({
+        _this.hasLink(startNode, otherNode, linkType, "all", __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
               err = arguments[0];
@@ -154,7 +154,7 @@
           filename: "cypher.coffee",
           funcname: "CypherLinkUtil.deleteLink"
         });
-        hasLink(startNode, otherNode, linkType, "out", __iced_deferrals.defer({
+        _this.hasLink(startNode, otherNode, linkType, "out", __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
               err = arguments[0];
