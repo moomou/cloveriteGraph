@@ -184,8 +184,6 @@ _del = (req, res, next) ->
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     await entity.del defer(err)
-    console.log err if err
-
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     Response.OKResponse(res)(204)

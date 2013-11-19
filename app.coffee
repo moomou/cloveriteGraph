@@ -15,7 +15,7 @@ app.use(useragent.express())
 app.use(app.router)
 
 #development only
-if 'development' == app.get('env')
+if false and 'development' == app.get('env')
     app.use(express.errorHandler())
 
 app.version = '/v0'

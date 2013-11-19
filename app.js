@@ -28,7 +28,7 @@
 
   app.use(app.router);
 
-  if ('development' === app.get('env')) {
+  if (false && 'development' === app.get('env')) {
     app.use(express.errorHandler());
   }
 
