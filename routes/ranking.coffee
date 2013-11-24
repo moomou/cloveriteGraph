@@ -128,7 +128,8 @@ _showDetail = (req, res, next) ->
         sRankedEntities[ind] =
             entity.serialize(null, attributes: attrBlobs[ind])
 
-    res.json sRankedEntities
+    sRanking.entities = sRankedEntities
+    res.json sRanking
 
 # GET /user/:id/ranking/:rankingId
 exports.show = basicAuthentication _show

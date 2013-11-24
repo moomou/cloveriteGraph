@@ -327,7 +327,8 @@
               attributes: attrBlobs[ind]
             });
           }
-          return res.json(sRankedEntities);
+          sRanking.entities = sRankedEntities;
+          return res.json(sRanking);
         });
       });
     });
@@ -358,7 +359,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 140
+        lineno: 141
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -382,7 +383,7 @@
               return ranking = arguments[1];
             };
           })(),
-          lineno: 146
+          lineno: 147
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -424,7 +425,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(entities, ind),
-              lineno: 173
+              lineno: 174
             }));
           }
           __iced_deferrals._fulfill();
@@ -462,7 +463,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(entities, ind),
-                  lineno: 188
+                  lineno: 189
                 }));
               }
               __iced_deferrals._fulfill();
@@ -503,7 +504,7 @@
                           return __slot_1[__slot_2] = arguments[1];
                         };
                       })(entities, ind),
-                      lineno: 205
+                      lineno: 206
                     }));
                   }
                   __iced_deferrals._fulfill();
@@ -530,7 +531,7 @@
                             return rel = arguments[1];
                           };
                         })(),
-                        lineno: 217
+                        lineno: 218
                       }));
                     }
                     __iced_deferrals._fulfill();
