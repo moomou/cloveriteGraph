@@ -128,7 +128,7 @@ _showDetail = (req, res, next) ->
         sRankedEntities[ind] =
             entity.serialize(null, attributes: attrBlobs[ind])
 
-    sRanking.entities = sRankedEntities
+    sRanking.ranksDetail = sRankedEntities
     res.json sRanking
 
 # GET /user/:id/ranking/:rankingId

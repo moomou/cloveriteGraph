@@ -327,7 +327,7 @@
               attributes: attrBlobs[ind]
             });
           }
-          sRanking.entities = sRankedEntities;
+          sRanking.ranksDetail = sRankedEntities;
           return res.json(sRanking);
         });
       });
