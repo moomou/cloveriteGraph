@@ -56,7 +56,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "ranking.coffee",
+        filename: "routes/ranking.coffee",
         funcname: "hasPermission"
       });
       User.get(req.params.id, __iced_deferrals.defer({
@@ -118,7 +118,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "ranking.coffee",
+        filename: "routes/ranking.coffee",
         funcname: "_create"
       });
       Ranking.create(req.body, __iced_deferrals.defer({
@@ -139,7 +139,7 @@
         var _i, _len, _ref;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "ranking.coffee",
+          filename: "routes/ranking.coffee",
           funcname: "_create"
         });
         _ref = ranking.serialize().ranks;
@@ -163,7 +163,7 @@
           var _i, _len;
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "ranking.coffee",
+            filename: "routes/ranking.coffee",
             funcname: "_create"
           });
           for (rank = _i = 0, _len = entities.length; _i < _len; rank = ++_i) {
@@ -189,7 +189,7 @@
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
-              filename: "ranking.coffee",
+              filename: "routes/ranking.coffee",
               funcname: "_create"
             });
             if (!ranking._node.data["private"]) {
@@ -200,7 +200,7 @@
                     return publicUser = arguments[1];
                   };
                 })(),
-                lineno: 104
+                lineno: 105
               }));
             }
             redis.set("ranking:" + ranking._node.id + ":shareToken", shareToken, __iced_deferrals.defer({
@@ -210,7 +210,7 @@
                   return ok = arguments[1];
                 };
               })(),
-              lineno: 108
+              lineno: 109
             }));
             ranking.save(__iced_deferrals.defer({
               assign_fn: (function() {
@@ -218,7 +218,7 @@
                   return err = arguments[0];
                 };
               })(),
-              lineno: 109
+              lineno: 110
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -245,7 +245,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "ranking.coffee",
+        filename: "routes/ranking.coffee",
         funcname: "_show"
       });
       Ranking.get(req.params.rankingId, __iced_deferrals.defer({
@@ -255,7 +255,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 122
+        lineno: 123
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -274,7 +274,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "ranking.coffee",
+        filename: "routes/ranking.coffee",
         funcname: "_showDetail"
       });
       Ranking.get(req.params.rankingId, __iced_deferrals.defer({
@@ -284,7 +284,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 128
+        lineno: 129
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -299,7 +299,7 @@
         var _i, _len, _ref;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "ranking.coffee",
+          filename: "routes/ranking.coffee",
           funcname: "_showDetail"
         });
         _ref = sRanking.ranks;
@@ -312,7 +312,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rankedEntities, ind),
-            lineno: 138
+            lineno: 139
           }));
         }
         __iced_deferrals._fulfill();
@@ -321,7 +321,7 @@
           var _i, _len;
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "ranking.coffee",
+            filename: "routes/ranking.coffee",
             funcname: "_showDetail"
           });
           for (ind = _i = 0, _len = rankedEntities.length; _i < _len; ind = ++_i) {
@@ -332,7 +332,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(attrBlobs, ind),
-              lineno: 142
+              lineno: 143
             }));
           }
           __iced_deferrals._fulfill();
@@ -363,7 +363,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "ranking.coffee",
+        filename: "routes/ranking.coffee",
         funcname: "_edit"
       });
       Ranking.get(req.params.rankingId, __iced_deferrals.defer({
@@ -373,7 +373,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 158
+        lineno: 159
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -385,7 +385,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "ranking.coffee",
+          filename: "routes/ranking.coffee",
           funcname: "_edit"
         });
         Ranking.put(req.params.rankingId, req.body, __iced_deferrals.defer({
@@ -395,7 +395,7 @@
               return ranking = arguments[1];
             };
           })(),
-          lineno: 164
+          lineno: 165
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -423,7 +423,7 @@
           var _j, _len;
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "ranking.coffee",
+            filename: "routes/ranking.coffee",
             funcname: "_edit"
           });
           for (ind = _j = 0, _len = removedRankIds.length; _j < _len; ind = ++_j) {
@@ -435,7 +435,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(entities, ind),
-              lineno: 190
+              lineno: 191
             }));
           }
           __iced_deferrals._fulfill();
@@ -444,7 +444,7 @@
             var _j, _len;
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
-              filename: "ranking.coffee",
+              filename: "routes/ranking.coffee",
               funcname: "_edit"
             });
             for (ind = _j = 0, _len = entities.length; _j < _len; ind = ++_j) {
@@ -461,7 +461,7 @@
               var _j, _len;
               __iced_deferrals = new iced.Deferrals(__iced_k, {
                 parent: ___iced_passed_deferral,
-                filename: "ranking.coffee",
+                filename: "routes/ranking.coffee",
                 funcname: "_edit"
               });
               for (ind = _j = 0, _len = newRankIds.length; _j < _len; ind = ++_j) {
@@ -473,7 +473,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(entities, ind),
-                  lineno: 205
+                  lineno: 206
                 }));
               }
               __iced_deferrals._fulfill();
@@ -482,7 +482,7 @@
                 var _j, _len;
                 __iced_deferrals = new iced.Deferrals(__iced_k, {
                   parent: ___iced_passed_deferral,
-                  filename: "ranking.coffee",
+                  filename: "routes/ranking.coffee",
                   funcname: "_edit"
                 });
                 for (ind = _j = 0, _len = entities.length; _j < _len; ind = ++_j) {
@@ -502,7 +502,7 @@
                   var _j, _len;
                   __iced_deferrals = new iced.Deferrals(__iced_k, {
                     parent: ___iced_passed_deferral,
-                    filename: "ranking.coffee",
+                    filename: "routes/ranking.coffee",
                     funcname: "_edit"
                   });
                   for (ind = _j = 0, _len = updateRankIds.length; _j < _len; ind = ++_j) {
@@ -514,7 +514,7 @@
                           return __slot_1[__slot_2] = arguments[1];
                         };
                       })(entities, ind),
-                      lineno: 222
+                      lineno: 223
                     }));
                   }
                   __iced_deferrals._fulfill();
@@ -525,7 +525,7 @@
                     var _j, _len;
                     __iced_deferrals = new iced.Deferrals(__iced_k, {
                       parent: ___iced_passed_deferral,
-                      filename: "ranking.coffee",
+                      filename: "routes/ranking.coffee",
                       funcname: "_edit"
                     });
                     for (ind = _j = 0, _len = entities.length; _j < _len; ind = ++_j) {
@@ -541,7 +541,7 @@
                             return rel = arguments[1];
                           };
                         })(),
-                        lineno: 234
+                        lineno: 235
                       }));
                     }
                     __iced_deferrals._fulfill();

@@ -113,12 +113,14 @@
   };
 
   Neo.deserialize = function(ClassSchema, data) {
-    var validKeys;
+    var cleaned, validKeys;
     data = _und.clone(data);
     validKeys = ['id', 'version', 'private'];
     validKeys = _und.union(_und.keys(ClassSchema), validKeys);
     _und.defaults(data, ClassSchema);
-    return _und.pick(data, validKeys);
+    cleaned = _und.pick(data, validKeys);
+    cleaned["private"] = cleaned["private"] === 'true';
+    return cleanend;
   };
 
   Neo.index = function(node, indexes, reqBody, cb) {
@@ -167,7 +169,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 125
+        lineno: 127
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -227,7 +229,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 156
+            lineno: 158
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -271,7 +273,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 170
+          lineno: 172
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -336,7 +338,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 213
+        lineno: 215
       }));
       __iced_deferrals._fulfill();
     })(function() {

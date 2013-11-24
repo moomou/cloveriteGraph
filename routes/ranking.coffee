@@ -100,6 +100,7 @@ _create = (req, res, next) ->
     ranking._node.data.shareToken = shareToken
 
     publicUser = null
+
     await
         if not ranking._node.data.private
             User.get "public", defer(err, publicUser)

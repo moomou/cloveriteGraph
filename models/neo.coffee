@@ -99,7 +99,9 @@ Neo.deserialize = (ClassSchema, data) ->
         validKeys)
 
     _und.defaults data, ClassSchema
-    return _und.pick(data, validKeys)
+    cleaned = _und.pick data, validKeys
+    cleaned.private = cleaned.private == 'true'
+    cleanend
 
 Neo.index = (node, indexes, reqBody, cb = null) ->
     console.log "~~~Indexing~~~"
