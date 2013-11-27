@@ -108,4 +108,41 @@
     });
   };
 
+  exports.cleanAttributes = function(entity, cb) {
+    var err, nodes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        filename: "entity/util.coffee",
+        funcname: "cleanAttributes"
+      });
+      entity._node.getRelationshipNodes({
+        type: Constants.REL_ATTRIBUTE,
+        direction: 'in'
+      }, __iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            err = arguments[0];
+            return nodes = arguments[1];
+          };
+        })(),
+        lineno: 50
+      }));
+      __iced_deferrals._fulfill();
+    })(function() {
+      if (err) {
+        return err;
+      }
+
+      /*
+      # The logic here should be if the attribute is over
+      # if total attributeVote < day age of attribute and not over threshold
+      #   remove link
+      */
+    });
+  };
+
 }).call(this);

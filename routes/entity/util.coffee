@@ -44,3 +44,15 @@ exports.getEntityAttributes = (entity, cb) ->
 
     console.log attrBlobs
     cb attrBlobs
+
+exports.cleanAttributes = (entity, cb) ->
+    await
+        entity._node.getRelationshipNodes({type: Constants.REL_ATTRIBUTE, direction:'in'},
+            defer(err, nodes))
+    return err if err
+
+    ###
+    # The logic here should be if the attribute is over
+    # if total attributeVote < day age of attribute and not over threshold
+    #   remove link
+    ###
