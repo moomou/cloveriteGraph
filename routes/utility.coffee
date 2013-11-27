@@ -32,15 +32,17 @@ exports.getUser = getUser = (req, cb) ->
     await redis.get(accessToken, defer(err, neoUserId))
     err = user = null
 
-    if (not neoUserId) # Anonymous users
+    if not neoUserId # Anonymous users
         console.log "No such user"
         return cb(null, null)
 
     console.log "Utility.getUser #{neoUserId}"
     await User.get neoUserId, defer(err, user)
 
-    cb(err, null) if err
-    cb(null, user)
+    if err
+        cb(err, null) if err
+    else
+        cb(null, user)
 
 ###
 # Permission Related Stuff

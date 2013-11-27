@@ -15,7 +15,7 @@ DEFAULT_RESPONSE = {
 }
 
 MessageGen = {
-    '400': "Please check all required fields are provided.",
+    '400': "Please check all required fields are provided and correct.",
     '500': "Oops. That didn't work. Please try again. If the problem persists, please notify us.",
     '403': "Permission denied"
 }
@@ -33,9 +33,9 @@ DOC_LINK = {
 }
 
 createErrorDetailObj = (devMsg, msg, docLink) -> {
-    message: msg || null,
-    devMessage: devMessage || msg || null,
-    documentation: docLink || null
+    message: msg or null,
+    devMessage: devMsg or msg or null,
+    documentation: docLink or null
 }
 
 errorMessage = (httpCode) ->
@@ -45,9 +45,9 @@ exports.ErrorDevMessage = DevMessageGenerator
 
 exports.ErrorResponse = (res) -> (httpCode, devMsg, docLink) ->
     response = _und.clone DEFAULT_RESPONSE
-    resposne.success = false
+    response.success = false
     response.httpCode = httpCode
-    response.error = createErrorDetailObj(devMsg, errorMessage(httpCode), docLink)
+    response.error = createErrorDetailObj devMsg, errorMessage(httpCode), docLink
     res.status(httpCode).json(response)
 
 exports.OKResponse = (res) -> (httpCode, payload, next, prev) ->

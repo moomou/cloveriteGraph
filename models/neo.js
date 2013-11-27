@@ -119,8 +119,7 @@
     validKeys = _und.union(_und.keys(ClassSchema), validKeys);
     _und.defaults(data, ClassSchema);
     cleaned = _und.pick(data, validKeys);
-    cleaned["private"] = cleaned["private"] === 'true';
-    return cleanend;
+    return cleaned;
   };
 
   Neo.index = function(node, indexes, reqBody, cb) {
@@ -169,7 +168,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 127
+        lineno: 125
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -229,7 +228,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 158
+            lineno: 156
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -273,7 +272,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 172
+          lineno: 170
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -338,7 +337,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 215
+        lineno: 213
       }));
       __iced_deferrals._fulfill();
     })(function() {

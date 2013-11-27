@@ -88,9 +88,12 @@
         __iced_deferrals._fulfill();
       })(function() {
         if (err) {
-          cb(err, null);
+          if (err) {
+            return cb(err, null);
+          }
+        } else {
+          return cb(null, user);
         }
-        return cb(null, user);
       });
     });
   };
@@ -138,7 +141,7 @@
             return path = arguments[1];
           };
         })(),
-        lineno: 72
+        lineno: 74
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -170,7 +173,7 @@
                 return augReq = arguments[2];
               };
             })(),
-            lineno: 83
+            lineno: 85
           }));
           __iced_deferrals._fulfill();
         })(function() {

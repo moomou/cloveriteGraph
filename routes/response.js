@@ -21,7 +21,7 @@
   };
 
   MessageGen = {
-    '400': "Please check all required fields are provided.",
+    '400': "Please check all required fields are provided and correct.",
     '500': "Oops. That didn't work. Please try again. If the problem persists, please notify us.",
     '403': "Permission denied"
   };
@@ -52,7 +52,7 @@
   createErrorDetailObj = function(devMsg, msg, docLink) {
     return {
       message: msg || null,
-      devMessage: devMessage || msg || null,
+      devMessage: devMsg || msg || null,
       documentation: docLink || null
     };
   };
@@ -67,7 +67,7 @@
     return function(httpCode, devMsg, docLink) {
       var response;
       response = _und.clone(DEFAULT_RESPONSE);
-      resposne.success = false;
+      response.success = false;
       response.httpCode = httpCode;
       response.error = createErrorDetailObj(devMsg, errorMessage(httpCode), docLink);
       return res.status(httpCode).json(response);

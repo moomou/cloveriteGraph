@@ -15,35 +15,44 @@ Ranking = require('../models/ranking')
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
 
-Utility = require('./utility')
+Response = require('./response')
+ErrorDevMessage = Response.ErrorDevMessage
 
+Utility = require('./utility')
 redis = require('../models/setup').db.redis
 
 hasPermission = (req, res, next, cb) ->
+    ErrorResponse = Response.ErrorResponse(res)
+
     await
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
 
     isPublic = req.params.id == "public"
+    if errUser or errOther
+        return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null
 
-    err = errUser or errOther
-    return cb true, res.status(500).json(error: "Unable to retrieve from neo4j"), null if err
+    # Didn't find user
+    if not other
+        return cb true,
+            ErrorResponse(400,
+                ErrorDevMessage.customMsg("user #{req.params.id} does not exist")), null
 
     # If the user are the same, of course grant permission
     # Returns a new shallow copy of req with user if authenticated
-    if isPublic
+
+    if isPublic or not user
         reqWithUser = _und.extend _und.clone(req), user: other
     else
         reqWithUser = _und.extend _und.clone(req), user: user
 
+    # The user if public or the user is the owner of the account
     if isPublic or (user and other and other._node.id == user._node.id)
         return cb false, null, reqWithUser
 
-    # Cannot access nonexistant user
-    return cb true, res.status(401).json(error: "Unable to retrieve from neo4j"), null if not other
-
-    # No Permission
-    return cb true, res.status(401).json(error: "Unauthorized"), null
+    # Grant permission only for public assets under the user
+    console.log "Public View"
+    return cb false, null, _und.extend reqWithUser, publicView: true
 
 getLinkType =
     (linkType, NodeClass = Entity) ->
@@ -59,9 +68,11 @@ getLinkType =
 
             blobs = []
             for node, ind in nodes
-                blobs[ind] = (new NodeClass node).serialize()
+                nodeObj = new NodeClass node
+                continue if req.publicView and nodeObj._node.data.private
+                blobs.push nodeObj.serialize()
 
-            res.json(blobs)
+            Response.OKResponse(res)(200, blobs)
 
 getFeed = (userId, feedType, cb) ->
     # Retrieve latest request feed

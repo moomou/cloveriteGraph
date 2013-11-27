@@ -95,13 +95,11 @@ Neo.deserialize = (ClassSchema, data) ->
     data = _und.clone data
 
     validKeys = ['id', 'version', 'private']
-    validKeys = _und.union(_und.keys(ClassSchema),
-        validKeys)
+    validKeys = _und.union(_und.keys(ClassSchema), validKeys)
 
     _und.defaults data, ClassSchema
     cleaned = _und.pick data, validKeys
-    cleaned.private = cleaned.private == 'true'
-    cleanend
+    cleaned
 
 Neo.index = (node, indexes, reqBody, cb = null) ->
     console.log "~~~Indexing~~~"

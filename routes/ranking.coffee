@@ -40,8 +40,12 @@ hasPermission = (req, res, next, cb) ->
 
     isPublic = req.params.id == "public"
 
-    err = errUser or errOther
-    return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if err
+    if errUser or errOther
+        return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null
+
+    if not other
+        return cb true,
+            ErrorResponse(400, ErrorDevMessage.customMsg("User does not exist")), null
 
     # If the user are the same, of course grant permission or the user profile is public
     # Returns a new shallow copy of req with user if authenticated
@@ -52,9 +56,6 @@ hasPermission = (req, res, next, cb) ->
 
     if isPublic or (user and other and other._node.id == user._node.id)
         return cb false, null, reqWithUser
-
-    # Cannot access nonexistant user
-    return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if not other
 
     # No Permission
     return cb true, ErrorResponse(401, ErrorDevMessage.permissionIssue()), null
@@ -69,8 +70,8 @@ _create = (req, res, next) ->
     if not req.body.name or not req.body.ranks
         return Response.ErrorResponse(res)(400, ErrorDevMessage.missingParam("name or rank"))
 
-    console.log req.user
     req.body.createdBy = req.user._node.data.username
+
     await Ranking.create req.body, defer(err, ranking)
 
     # TODO: Make a generic relationship model class
@@ -101,6 +102,7 @@ _create = (req, res, next) ->
 
     publicUser = null
 
+    console.log "Ranking is #{ranking._node.data.private}"
     await
         if not ranking._node.data.private
             User.get "public", defer(err, publicUser)
@@ -147,7 +149,8 @@ _showDetail = (req, res, next) ->
         sRankedEntities[ind] =
             entity.serialize(null, attributes: attrBlobs[ind])
 
-    Response.OKResponse(res)(200, sRankedEntities)
+    sRanking.ranksDetail = sRankedEntities
+    Response.OKResponse(res)(200, sRanking)
 
 # GET /user/:id/ranking/:rankingId
 exports.show = basicAuthentication _show
