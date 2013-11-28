@@ -71,7 +71,8 @@ basicAuthentication = Utility.authCurry hasPermission
 
 # GET /entity/search/
 exports.search = (req, res, next) ->
-    res.redirect "/#{Constants.API_VERSION}/search/?q=#{req.query['q']}"
+    Search = require('./search')
+    Search.searchHandler req, res, next
 
 # POST /entity - Please note, permission NOT required
 exports.create = (req, res, next) ->
