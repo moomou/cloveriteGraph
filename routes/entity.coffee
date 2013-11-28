@@ -218,13 +218,13 @@ exports.showUsers = basicAuthentication _showUsers
 
 # GET /entity/:id/attribute
 _listAttribute = (req, res, next) ->
-    await Entity.get req.params.id, defer(errE, entity)
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err.dbError
+    await Entity.get req.params.id, defer(err, entity)
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     await
         entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
             defer(err, nodes)
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err.dbError
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     rels = []
     blobs = []
@@ -269,7 +269,7 @@ _addAttribute = (req, res, next) ->
         Attribute.getOrCreate data, defer(errA, attr)
 
     err = errE or errA
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err.dbError
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     linkData = Link.normalizeData _und.clone(req.body || {})
     linkData['startend'] = Utility.getStartEndIndex(

@@ -585,7 +585,7 @@
   */
 
   _listAttribute = function(req, res, next) {
-    var blob, blobs, entity, err, errE, ind, linkData, node, nodes, rels, startendVal, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var blob, blobs, entity, err, ind, linkData, node, nodes, rels, startendVal, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -598,7 +598,7 @@
       Entity.get(req.params.id, __iced_deferrals.defer({
         assign_fn: (function() {
           return function() {
-            errE = arguments[0];
+            err = arguments[0];
             return entity = arguments[1];
           };
         })(),
@@ -606,7 +606,7 @@
       }));
       __iced_deferrals._fulfill();
     })(function() {
-      if (err.dbError) {
+      if (err) {
         return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue());
       }
       (function(__iced_k) {
@@ -629,7 +629,7 @@
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        if (err.dbError) {
+        if (err) {
           return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue());
         }
         rels = [];
@@ -724,7 +724,7 @@
       __iced_deferrals._fulfill();
     })(function() {
       err = errE || errA;
-      if (err.dbError) {
+      if (err) {
         return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue());
       }
       linkData = Link.normalizeData(_und.clone(req.body || {}));
