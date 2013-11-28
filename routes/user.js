@@ -69,6 +69,9 @@
       }));
       __iced_deferrals._fulfill();
     })(function() {
+      console.log(user._node.id);
+      console.log("HI");
+      console.log(other._node.id);
       isPublic = req.params.id === "public";
       if (errUser || errOther) {
         return cb(true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null);
@@ -85,15 +88,19 @@
           user: user
         });
       }
-      if (isPublic || (user && other && other._node.id === user._node.id)) {
-        return cb(false, null, reqWithUser);
+      if (user && other && other._node.id === user._node.id) {
+        return cb(false, null, reqWithUser, {
+          unauthenticated: false
+        });
       }
       console.log("Public View");
       return cb(false, null, _und.extend(reqWithUser, {
-        publicView: true
+        unauthenticated: true
       }));
     });
   };
+
+  basicAuthentication = Utility.authCurry(hasPermission);
 
   getLinkType = function(linkType, NodeClass) {
     if (NodeClass == null) {
@@ -121,7 +128,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 65
+          lineno: 71
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -133,7 +140,7 @@
         for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
           node = nodes[ind];
           nodeObj = new NodeClass(node);
-          if (req.publicView && nodeObj._node.data["private"]) {
+          if (req.unauthenticated && nodeObj._node.data["private"]) {
             continue;
           }
           blobs.push(nodeObj.serialize());
@@ -162,7 +169,7 @@
             return feeds = arguments[1];
           };
         })(),
-        lineno: 79
+        lineno: 85
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -194,7 +201,7 @@
             return result = arguments[1];
           };
         })(),
-        lineno: 85
+        lineno: 91
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -204,8 +211,6 @@
       return cb(null, newFeed);
     });
   };
-
-  basicAuthentication = Utility.authCurry(hasPermission);
 
   basicFeedGetter = function(feedType) {
     return function(req, res, next) {
@@ -225,7 +230,7 @@
               return feed = arguments[1];
             };
           })(),
-          lineno: 94
+          lineno: 98
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -258,7 +263,7 @@
               return receiver = arguments[1];
             };
           })(),
-          lineno: 103
+          lineno: 107
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -280,7 +285,7 @@
                 return result = arguments[1];
               };
             })(),
-            lineno: 108
+            lineno: 112
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -327,7 +332,7 @@
             return buf = arguments[1];
           };
         })(),
-        lineno: 123
+        lineno: 127
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -351,7 +356,7 @@
                   return user = arguments[1];
                 };
               })(),
-              lineno: 131
+              lineno: 135
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -394,28 +399,11 @@
   exports.getRanked = basicAuthentication(getLinkType(Constants.REL_RANKING, Ranking));
 
   exports.getSelf = basicAuthentication(function(req, res, next) {
-    var err, user, ___iced_passed_deferral, __iced_deferrals, __iced_k,
-      _this = this;
-    __iced_k = __iced_k_noop;
-    ___iced_passed_deferral = iced.findDeferral(arguments);
-    (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        filename: "user.coffee"
-      });
-      User.get(req.params.id, __iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            err = arguments[0];
-            return user = arguments[1];
-          };
-        })(),
-        lineno: 170
-      }));
-      __iced_deferrals._fulfill();
-    })(function() {
-      return res.json(user.serialize());
-    });
+    if (!req.unauthenticated) {
+      return Response.OKResponse(res)(200, req.user.serialize());
+    } else {
+      return Response.ErrorResponse(res)(401, ErrorDevMessage.permissionIssue());
+    }
   });
 
 }).call(this);

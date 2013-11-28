@@ -112,6 +112,7 @@ _create = (req, res, next) ->
             defer(err, ok)
         ranking.save defer(err)
 
+    console.log publicUser
     if publicUser
         console.log "LINKING TO PUBLIC USER"
         CypherLinkUtil.createLink publicUser._node, ranking._node,

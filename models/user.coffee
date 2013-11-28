@@ -69,6 +69,10 @@ module.exports = class User extends Neo
     constructor: (@_node) ->
         super @_node
 
+    serialize: (cb, extraData) ->
+        data = @_node.data
+        cb _und.omit data, ["accesstoken"]
+
 User.Name = 'nUser'
 User.INDEX_NAME = INDEX_NAME
 User.Indexes = Indexes
@@ -78,8 +82,10 @@ User.validateSchema = (data) ->
 
 User.deserialize = (data) ->
     Neo.deserialize UserSchema, data
- 
+
 User.create = (reqBody, cb) ->
+    # a user detail has to be private
+    reqBody.private = true
     Neo.create User, reqBody, Indexes, cb
 
 User.get = (id, cb) ->
@@ -90,7 +96,7 @@ User.get = (id, cb) ->
     else
         console.log "HI"
         Neo.find User, User.INDEX_NAME, 'username', id, cb
-    
+
 User.getOrCreate = (reqBody, cb) ->
     throw "Not Implemented"
 

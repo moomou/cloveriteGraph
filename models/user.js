@@ -76,6 +76,12 @@
       User.__super__.constructor.call(this, this._node);
     }
 
+    User.prototype.serialize = function(cb, extraData) {
+      var data;
+      data = this._node.data;
+      return cb(_und.omit(data, ["accesstoken"]));
+    };
+
     return User;
 
   })(Neo);
@@ -95,6 +101,7 @@
   };
 
   User.create = function(reqBody, cb) {
+    reqBody["private"] = true;
     return Neo.create(User, reqBody, Indexes, cb);
   };
 

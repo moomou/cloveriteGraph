@@ -28,6 +28,10 @@ hasPermission = (req, res, next, cb) ->
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
 
+    console.log user._node.id
+    console.log "HI"
+    console.log other._node.id
+
     isPublic = req.params.id == "public"
     if errUser or errOther
         return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null
@@ -47,12 +51,14 @@ hasPermission = (req, res, next, cb) ->
         reqWithUser = _und.extend _und.clone(req), user: user
 
     # The user if public or the user is the owner of the account
-    if isPublic or (user and other and other._node.id == user._node.id)
-        return cb false, null, reqWithUser
+    if user and other and other._node.id == user._node.id
+        return cb false, null, reqWithUser, unauthenticated: false
 
     # Grant permission only for public assets under the user
     console.log "Public View"
-    return cb false, null, _und.extend reqWithUser, publicView: true
+    return cb false, null, _und.extend reqWithUser, unauthenticated: true
+
+basicAuthentication = Utility.authCurry hasPermission
 
 getLinkType =
     (linkType, NodeClass = Entity) ->
@@ -69,7 +75,7 @@ getLinkType =
             blobs = []
             for node, ind in nodes
                 nodeObj = new NodeClass node
-                continue if req.publicView and nodeObj._node.data.private
+                continue if req.unauthenticated and nodeObj._node.data.private
                 blobs.push nodeObj.serialize()
 
             Response.OKResponse(res)(200, blobs)
@@ -86,8 +92,6 @@ addToFeed = (userId, newFeed, feedType, cb) ->
     await redis.lpush feedId, JSON.stringify(newFeed), defer(err, result)
     return cb true, null if not result
     return cb null, newFeed
-
-basicAuthentication = Utility.authCurry hasPermission
 
 basicFeedGetter =
     (feedType) ->
@@ -168,7 +172,9 @@ exports.getRanked = basicAuthentication getLinkType Constants.REL_RANKING, Ranki
 
 # GET /user/:id/
 exports.getSelf = basicAuthentication (req, res, next) ->
-    await User.get req.params.id, defer(err, user)
-    res.json user.serialize()
+    if not req.unauthenticated
+        Response.OKResponse(res)(200, req.user.serialize())
+    else
+        Response.ErrorResponse(res)(401, ErrorDevMessage.permissionIssue())
 
 ######################################
