@@ -74,16 +74,17 @@ app.namespace(app.version, () ->
     app.del('/entity/:id', routes.entity.del)
 
     # Entity User Method
-    app.get('/entity/:id/users', routes.entity.showUsers)
+    app.get('/entity/:id/user', routes.entity.showUsers)
+    app.get('/entity/:id/user/:username', routes.entity.showUserVoteDetail)
 
     # Entity Attribute Method
     app.post('/entity/:id/attribute', routes.entity.addAttribute)
     app.get('/entity/:id/attribute', routes.entity.listAttribute)
-    app.get('/entity/:eId/attribute/:aId', routes.entity.getAttribute)
-    app.put('/entity/:eId/attribute/:aId', routes.entity.updateAttributeLink)
-    app.del('/entity/:eId/attribute/:aId', routes.entity.delAttribute)
+    app.get('/entity/:id/attribute/:aId', routes.entity.getAttribute)
+    app.put('/entity/:id/attribute/:aId', routes.entity.updateAttributeLink)
+    app.del('/entity/:id/attribute/:aId', routes.entity.delAttribute)
 
-    app.post('/entity/:eId/attribute/:aId/vote', routes.entity.voteAttribute)
+    app.post('/entity/:id/attribute/:aId/vote', routes.entity.voteAttribute)
 
     # Entity Comment Method
     app.post('/entity/:id/comment', routes.entity.addComment)

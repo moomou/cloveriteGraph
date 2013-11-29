@@ -37,6 +37,7 @@
   LinkSchema = {
     srcURL: '',
     description: '',
+    disabled: false,
     value: '',
     veracity: 0
   };

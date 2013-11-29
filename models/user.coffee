@@ -71,7 +71,9 @@ module.exports = class User extends Neo
 
     serialize: (cb, extraData) ->
         data = @_node.data
-        cb _und.omit data, ["accesstoken"]
+        if cb
+            cb _und.omit data, ["accesstoken"]
+        _und.omit data, ["accesstoken"]
 
 User.Name = 'nUser'
 User.INDEX_NAME = INDEX_NAME

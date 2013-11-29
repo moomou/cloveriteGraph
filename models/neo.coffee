@@ -67,7 +67,9 @@ module.exports = class Neo
 
     del: (cb) ->
         cb ?= () ->
-        @_node.delete(cb, true)
+        # Remove all rels + node
+        delQuery = "START n=node(#{@_node.id}) MATCH n-[r]-() DELETE n, r;"
+        Neo.query null, delQuery, {}, cb
 
 Neo.MetaSchema = MetaSchema
 

@@ -51,7 +51,7 @@ module.exports = class Vote
         @data = data
 
         if not @data.time
-            @data.time = '' + new Date().getTime()
+            @data.time = '' + new Date().getTime() / 1000
 
 ###
 Static Method

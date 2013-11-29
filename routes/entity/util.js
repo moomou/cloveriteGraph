@@ -5,7 +5,7 @@
 */
 
 (function() {
-  var Attribute, Constants, Entity, Link, SchemaUtil, Tag, User, Utility, iced, __iced_k, __iced_k_noop, _und;
+  var Attribute, Constants, Entity, Link, Neo, SchemaUtil, THRESHOLD, Tag, User, Utility, iced, __iced_k, __iced_k_noop, _und;
 
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
@@ -15,6 +15,8 @@
   SchemaUtil = require('../../models/stdSchema');
 
   Constants = SchemaUtil.Constants;
+
+  Neo = require('../../models/neo');
 
   User = require('../../models/user');
 
@@ -51,7 +53,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 23
+        lineno: 25
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -75,7 +77,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rels, ind),
-            lineno: 33
+            lineno: 35
           }));
           (new Attribute(node)).serialize(__iced_deferrals.defer({
             assign_fn: (function(__slot_1, __slot_2) {
@@ -83,7 +85,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(attrBlobs, ind),
-            lineno: 34
+            lineno: 36
           }), entity._node.id);
         }
         __iced_deferrals._fulfill();
@@ -91,25 +93,25 @@
         var _i, _len;
         for (ind = _i = 0, _len = attrBlobs.length; _i < _len; ind = ++_i) {
           blob = attrBlobs[ind];
-          if (rels[ind]) {
+          if (rels[ind] && !rels[ind]._node.data.disabled) {
             linkData = {
               linkData: rels[ind].serialize()
             };
-          } else {
-            linkData = {
-              linkData: {}
-            };
+            _und.extend(blob, linkData);
           }
-          _und.extend(blob, linkData);
         }
-        console.log(attrBlobs);
+        attrBlobs = _und(attrBlobs).filter(function(i) {
+          return !_und(i.linkData).isEmpty();
+        });
         return cb(attrBlobs);
       });
     });
   };
 
+  THRESHOLD = 10;
+
   exports.cleanAttributes = function(entity, cb) {
-    var err, nodes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var cypher, err, ind, node, nodes, now, rel, rels, startendVal, vote, votesPerAttribute, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -136,12 +138,82 @@
       if (err) {
         return err;
       }
+      cypher = ["START s=node({entityId}), e=node({attrId})", "MATCH s-[r:" + Constants.REL_VOTED + "]-e", "RETURN COUNT(r) AS count;"];
+      votesPerAttribute = [];
+      (function(__iced_k) {
+        var _i, _len;
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "entity/util.coffee",
+          funcname: "cleanAttributes"
+        });
+        for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
+          node = nodes[ind];
+          Neo.query(null, cypher.join("\n"), {
+            entityId: entity._node.id,
+            attrId: node.id
+          }, __iced_deferrals.defer({
+            assign_fn: (function(__slot_1, __slot_2) {
+              return function() {
+                err = arguments[0];
+                return __slot_1[__slot_2] = arguments[1];
+              };
+            })(votesPerAttribute, ind),
+            lineno: 63
+          }));
+        }
+        __iced_deferrals._fulfill();
+      })(function() {
+        now = new Date().getTime() / 1000;
 
-      /*
-      # The logic here should be if the attribute is over
-      # if total attributeVote < day age of attribute and not over threshold
-      #   remove link
-      */
+        /*
+        # The logic here should be if an attribute is over 10800 (3 days) old
+        # and has no votes more than 3, remove link by marking as disabled
+        */
+        console.log(votesPerAttribute);
+        rels = {};
+        (function(__iced_k) {
+          var _i, _len;
+          __iced_deferrals = new iced.Deferrals(__iced_k, {
+            parent: ___iced_passed_deferral,
+            filename: "entity/util.coffee",
+            funcname: "cleanAttributes"
+          });
+          for (ind = _i = 0, _len = votesPerAttribute.length; _i < _len; ind = ++_i) {
+            vote = votesPerAttribute[ind];
+            vote = vote[0];
+            if (vote.count < THRESHOLD) {
+              console.log("examining...");
+              console.log(now - nodes[ind].data.createdAt);
+              if (now - nodes[ind].data.createdAt >= 10800) {
+                startendVal = Utility.getStartEndIndex(nodes[ind].id, Constants.REL_ATTRIBUTE, entity._node.id);
+                Link.find('startend', startendVal, __iced_deferrals.defer({
+                  assign_fn: (function(__slot_1, __slot_2) {
+                    return function() {
+                      err = arguments[0];
+                      return __slot_1[__slot_2] = arguments[1];
+                    };
+                  })(rels, ind),
+                  lineno: 84
+                }));
+              }
+            }
+          }
+          __iced_deferrals._fulfill();
+        })(function() {
+          var _i, _len, _ref;
+          console.log("HI");
+          _ref = _und(rels).values();
+          for (ind = _i = 0, _len = _ref.length; _i < _len; ind = ++_i) {
+            rel = _ref[ind];
+            console.log(rel);
+            rel._node.data.disabled = true;
+            console.log(rel);
+            rel.save();
+          }
+          return cb();
+        });
+      });
     });
   };
 

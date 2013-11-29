@@ -80,10 +80,12 @@
     };
 
     Neo.prototype.del = function(cb) {
+      var delQuery;
       if (cb == null) {
         cb = function() {};
       }
-      return this._node["delete"](cb, true);
+      delQuery = "START n=node(" + this._node.id + ") MATCH n-[r]-() DELETE n, r;";
+      return Neo.query(null, delQuery, {}, cb);
     };
 
     return Neo;
@@ -168,7 +170,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 125
+        lineno: 127
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -228,7 +230,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 156
+            lineno: 158
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -272,7 +274,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 170
+          lineno: 172
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -337,7 +339,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 213
+        lineno: 215
       }));
       __iced_deferrals._fulfill();
     })(function() {

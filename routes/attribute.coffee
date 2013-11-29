@@ -58,20 +58,6 @@ exports.del = (req, res, next) ->
 
     Response.OKResponse(res)(204)
 
-# POST /attribute/:id/:relation
-###
-    Connect another attribute to current one using [relation]
-    DATA : {
-        action: add/rm
-        other: attributeId,
-    }
-###
-
-# GET /attribute/:id/:relation
-###
-    List all attribute related to this attribute through [relation]
-###
-
 #GET /attribute/:id/entity
 exports.listEntity = (req, res, next) ->
     await Attribute.get req.params.id, defer(err, attr)

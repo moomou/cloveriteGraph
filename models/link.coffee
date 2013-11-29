@@ -29,6 +29,7 @@ LinkSchema = {
     description: '', #describing what this attribute is
 
     # calculated value
+    disabled: false,
     value: '',       #data value: string, number, and boolean
     veracity: 0      #whehter this link is factual or not
 }

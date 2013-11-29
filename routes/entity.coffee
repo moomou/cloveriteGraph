@@ -41,6 +41,7 @@ getRelationId = (path) ->
 hasPermission = (req, res, next, cb) ->
     ErrorResponse = Response.ErrorResponse(res)
 
+    console.log req.params
     if isNaN req.params.id
         return cb true, ErrorResponse(400, ErrorDevMessage.missingParam("id")), null
 
@@ -135,6 +136,7 @@ _show = (req, res, next) ->
     else
         entityBlob = entity.serialize(null, entityBlob)
 
+    await EntityUtil.cleanAttributes(entity, defer(_))
     Response.OKResponse(res)(200, entityBlob)
 
 exports.show = basicAuthentication _show
@@ -185,6 +187,7 @@ _del = (req, res, next) ->
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     await entity.del defer(err)
+    console.log err
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     Response.OKResponse(res)(204)
@@ -199,18 +202,31 @@ _showUsers = (req, res, next) ->
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     await
-        entity._node.getRelationshipNodes {type: Constants.REL_MODIFIED, direction:'in'},
+        entity._node.getRelationshipNodes [
+            {type: Constants.REL_VOTED, direction: "in"},
+            {type:Constants.REL_MODIFIED, direction: "in"},
+            {type:Constants.REL_CREATED, direction: "in"}],
             defer(err, nodes)
 
+    console.log err
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
-    blobs = []
 
+    blobs = []
     for node, ind in nodes
         blobs[ind] = (new User node).serialize()
 
     Response.OKResponse(res)(200, blobs)
 
 exports.showUsers = basicAuthentication _showUsers
+
+_showUserVoteDetail = (req, res, next) ->
+    await Entity.get req.params.id, defer(err, entity)
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
+
+    await entity.getVoteByUser req.user, defer(err, blobs)
+    Response.OKResponse(res)(200, blobs)
+
+exports.showUserVoteDetail = basicAuthentication _showUserVoteDetail
 
 ###
 # Entity Attribute Section
@@ -221,33 +237,7 @@ _listAttribute = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    await
-        entity._node.getRelationshipNodes {type: Constants.REL_ATTRIBUTE, direction:'in'},
-            defer(err, nodes)
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
-
-    rels = []
-    blobs = []
-
-    # TODO add error checking
-    await
-        for node, ind in nodes
-            startendVal = Utility.getStartEndIndex(node.id,
-                Constants.REL_ATTRIBUTE,
-                req.params.id
-            )
-
-            Link.find('startend', startendVal, defer(err, rels[ind]))
-            (new Attribute node).serialize defer(blobs[ind]), entity._node.id
-
-    for blob, ind in blobs
-        if rels[ind]
-            linkData = linkData:rels[ind].serialize()
-        else
-            linkData = linkData:{}
-
-        _und.extend(blob, linkData)
-
+    await EntityUtil.getEntityAttributes entity, defer(blobs)
     Response.OKResponse(res)(200, blobs)
 
 exports.listAttribute = basicAuthentication _listAttribute
@@ -339,9 +329,24 @@ _addAttribute = (req, res, next) ->
 
 exports.addAttribute = basicAuthentication _addAttribute
 
-# TODO DELETE /entity/:eId/attribute/:aId
+# DELETE /entity/:id/attribute/:aId
+# by marking the link as disabled
 _delAttribute = (req, res, next) ->
-    Response.ErrorResponse(res)(503, ErrorDevMessage.notImplemented())
+    await
+        Entity.get req.params.id, defer(errE, entity)
+        Attribute.get req.params.aId, defer(errA, attr)
+
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if errA or errE
+
+    startendVal = Utility.getStartEndIndex(attr._node.id,
+        Constants.REL_ATTRIBUTE,
+        entity._node.id)
+
+    await Link.find('startend', startendVal, defer(err, link))
+
+    link._node.data.disabled = true
+    link.save()
+    Response.OKResponse(res)(204)
 
 exports.delAttribute = basicAuthentication _delAttribute
 
@@ -349,10 +354,10 @@ exports.delAttribute = basicAuthentication _delAttribute
 _getAttribute =(req, res, next) ->
     ErrorResponse = Response.ErrorResponse(res)
 
-    entityId = req.params.eId
+    entityId = req.params.id
     attrId = req.params.aId
 
-    return ErrorResponse(400, ErrorDevMessage.missingParam("id")) if not attrId
+    return ErrorResponse(400, ErrorDevMessage.missingParam("id")) if not attrId?
 
     startendVal = Utility.getStartEndIndex(attrId,
         Constants.REL_ATTRIBUTE,
@@ -363,8 +368,7 @@ _getAttribute =(req, res, next) ->
         Link.find('startend', startendVal, defer(errLink, rel))
         Attribute.get attrId, defer(errAttr, attr)
 
-    err = errLink || errAttr
-    return ErrorResponse(500, ErrorDevMessage.dbIssue()) if err
+    return ErrorResponse(500, ErrorDevMessage.dbIssue()) if errLink || errAttr
 
     blob = {}
     await attr.serialize(defer(blob), entityId)
@@ -378,7 +382,7 @@ exports.getAttribute = basicAuthentication _getAttribute
 _updateAttributeLink = (req, res, next) ->
     ErrorResponse = Response.ErrorResponse(res)
 
-    entityId = req.params.eId
+    entityId = req.params.id
     attrId = req.params.aId
     linkData = _und.clone(req.body['linkData'] || {})
 
@@ -401,7 +405,7 @@ exports.updateAttributeLink = basicAuthentication _updateAttributeLink
 # POST /entity/:id/attribute/:id/vote
 exports.voteAttribute = (req, res, next) ->
     await
-        Entity.get req.params.eId, defer(errE, entity)
+        Entity.get req.params.id, defer(errE, entity)
         Attribute.get req.params.aId, defer(errA, attr)
         Utility.getUser req, defer(errUser, user)
 
@@ -415,14 +419,13 @@ exports.voteAttribute = (req, res, next) ->
     voteData.lang = req.headers['accept-language']
     voteData.attrId = attr.serialize().id
     voteData.attrName = attr.serialize().name
+    voteData.user = user._node.data.username if user
 
     vote = new Vote voteData
-    console.log vote
 
     entity.vote user, attr, vote, (err, voteTally) ->
         return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
         Response.OKResponse(res)(200, voteTally)
-
 
 ## TODO Update the following to use new forms
 ###

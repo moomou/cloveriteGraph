@@ -223,20 +223,6 @@
     });
   };
 
-
-  /*
-      Connect another attribute to current one using [relation]
-      DATA : {
-          action: add/rm
-          other: attributeId,
-      }
-  */
-
-
-  /*
-      List all attribute related to this attribute through [relation]
-  */
-
   exports.listEntity = function(req, res, next) {
     var attr, blob, blobs, err, ind, node, nodes, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
@@ -255,7 +241,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 76
+        lineno: 62
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -278,7 +264,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 81
+          lineno: 67
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -301,7 +287,7 @@
                   return __slot_1[__slot_2] = arguments[0];
                 };
               })(blobs, ind),
-              lineno: 87
+              lineno: 73
             }));
           }
           __iced_deferrals._fulfill();

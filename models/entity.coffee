@@ -40,23 +40,62 @@ SchemaValidation = {
     tags: SchemaUtil.optional('array') #'string')
 }
 
+entityAttrPosVoteRedisKey = (id, aId) -> "entity:#{id}::attr:#{aId}::positive"
+entityAttrNegVoteRedisKey = (id, aId) -> "entity:#{id}::attr:#{aId}::negative"
+
 module.exports = class Entity extends Neo
     constructor: (@_node) ->
         super @_node
+
+    getVoteByUser: (user = null, cb) ->
+        if not user
+            return cb(null, null)
+
+        userId = user._node.id
+        cypher = ["START s=node({entityId}), e=node({userId})",
+            "MATCH (s)-[r:#{Constants.REL_VOTED}]-(e)",
+            "RETURN r.attrId AS id, r.attrName AS name, r.tone AS vote ORDER BY r.attrId;"]
+
+        await
+            Neo.query null,
+                cypher.join("\n"),
+                {entityId: @_node.id, userId: userId},
+                defer(err, results)
+
+        return cb err, null if err
+        cb null, results
+
+    getVoteTally: (attr = null, cb) ->
+        return cb null, null if not attr
+
+        await
+            redis.get entityAttrPosVoteRedisKey(@_node.id, attr._node.id),
+                defer(errP, upVote)
+            redis.get entityAttrNegVoteRedisKey(@_node.id, attr._node.id),
+                defer(errN, downVote)
+
+        return cb errP || errN, null if errP || errN
+
+        voteTally = {
+            upVote: parseInt(upVote) or 0
+            downVote: parseInt(downVote) or 0
+        }
+
+        return cb null, voteTally
 
     vote: (user, attr, voteLink, cb) ->
         #Add a vote link between entity node and attr node
         #Records the vote in redis
         await
             @_node.createRelationshipTo attr._node,
-                voteLink.name,
+                Constants.REL_VOTED,
                 voteLink.data,
                 defer(err, rel)
 
             if user
                 voteLink.data.attribute = attr.serialize().name
                 user._node.createRelationshipTo @_node,
-                    voteLink.name,
+                    Constants.REL_VOTED,
                     voteLink.data,
                     defer(err, rel)
 
@@ -65,13 +104,15 @@ module.exports = class Entity extends Neo
         redis.incr "entity:#{@_node.id}::attr:#{attr._node.id}::#{voteLink.data.tone}"
 
         await
-            redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::positive", defer(errP, upVote)
-            redis.get "entity:#{@_node.id}::attr:#{attr._node.id}::negative", defer(errN, downVote)
+            redis.get entityAttrPosVoteRedisKey(@_node.id, attr._node.id),
+                defer(errP, upVote)
+            redis.get entityAttrNegVoteRedisKey(@_node.id, attr._node.id),
+                defer(errN, downVote)
 
-        return cb null, null if errP or errN
+        return cb (errP || errN), null if errP or errN
 
         voteTally = {
-            upVote: parseInt(upVote) or 0
+            upVote: parseInt(upVote) or 0,
             downVote: parseInt(downVote) or 0
         }
 

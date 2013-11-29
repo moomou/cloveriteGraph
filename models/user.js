@@ -79,7 +79,10 @@
     User.prototype.serialize = function(cb, extraData) {
       var data;
       data = this._node.data;
-      return cb(_und.omit(data, ["accesstoken"]));
+      if (cb) {
+        cb(_und.omit(data, ["accesstoken"]));
+      }
+      return _und.omit(data, ["accesstoken"]);
     };
 
     return User;

@@ -52,7 +52,7 @@
       console.log(data);
       this.data = data;
       if (!this.data.time) {
-        this.data.time = '' + new Date().getTime();
+        this.data.time = '' + new Date().getTime() / 1000;
       }
     }
 
