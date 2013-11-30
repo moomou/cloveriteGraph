@@ -63,13 +63,13 @@
     app.put('/user/:id/ranking/:rankingId', routes.ranking.edit);
     app["delete"]('/user/:id/ranking/:rankingId', routes.ranking["delete"]);
     app.get('/ranking/share/:shareToken', routes.ranking.shareView);
+    app.get('/ranking/:hashTag', routes.ranking.hashTagView);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
     app.get('/entity/:id', routes.entity.show);
     app.put('/entity/:id', routes.entity.edit);
     app.del('/entity/:id', routes.entity.del);
     app.get('/entity/:id/user', routes.entity.showUsers);
-    app.get('/entity/:id/user/:username', routes.entity.showUserVoteDetail);
     app.post('/entity/:id/attribute', routes.entity.addAttribute);
     app.get('/entity/:id/attribute', routes.entity.listAttribute);
     app.get('/entity/:id/attribute/:aId', routes.entity.getAttribute);

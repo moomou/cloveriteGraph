@@ -587,4 +587,96 @@
     }
   };
 
+  exports.hashTagView = function(req, res, next) {
+    var attrBlobs, cypherQuery, entities, entity, err, hashTag, ind, results, sEntities, sRanking, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    hashTag = req.params.hashTag;
+    cypherQuery = ["START n=node:{tagIndex}('name:{tagName}')", "MATCH (n)-[:" + Constants.REL_FORK + "]-()-[r:" + Constants.REL_RANK + "]-(e)", "RETURN DISTINCT ID(e) AS entityId, SUM(r.rank) AS rank, SORT BY rank"];
+    (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        filename: "ranking.coffee",
+        funcname: "hashTagView"
+      });
+      Neo.query(null, cypherQuery.join("\n"), {
+        tagIndex: Tag.INDEX_NAME,
+        tagName: hashTag
+      }, __iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            err = arguments[0];
+            return results = arguments[1];
+          };
+        })(),
+        lineno: 273
+      }));
+      __iced_deferrals._fulfill();
+    })(function() {
+      entities = [];
+      (function(__iced_k) {
+        var _i, _len;
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "ranking.coffee",
+          funcname: "hashTagView"
+        });
+        for (ind = _i = 0, _len = results.length; _i < _len; ind = ++_i) {
+          res = results[ind];
+          Entity.get(res.entityId, __iced_deferrals.defer({
+            assign_fn: (function(__slot_1, __slot_2) {
+              return function() {
+                err = arguments[0];
+                return __slot_1[__slot_2] = arguments[1];
+              };
+            })(entities, ind),
+            lineno: 278
+          }));
+        }
+        __iced_deferrals._fulfill();
+      })(function() {
+        attrBlobs = [];
+        (function(__iced_k) {
+          var _i, _len;
+          __iced_deferrals = new iced.Deferrals(__iced_k, {
+            parent: ___iced_passed_deferral,
+            filename: "ranking.coffee",
+            funcname: "hashTagView"
+          });
+          for (ind = _i = 0, _len = rankedEntities.length; _i < _len; ind = ++_i) {
+            entity = rankedEntities[ind];
+            EntityUtil.getEntityAttributes(entity, __iced_deferrals.defer({
+              assign_fn: (function(__slot_1, __slot_2) {
+                return function() {
+                  return __slot_1[__slot_2] = arguments[0];
+                };
+              })(attrBlobs, ind),
+              lineno: 283
+            }));
+          }
+          __iced_deferrals._fulfill();
+        })(function() {
+          var _i, _len;
+          sEntities = [];
+          for (ind = _i = 0, _len = entities.length; _i < _len; ind = ++_i) {
+            entity = entities[ind];
+            sEntities[ind] = entity.serialize(null, {
+              attributes: attrBlobs[ind]
+            });
+          }
+          sRanking = {
+            name: req.params.hashTag,
+            ranks: _und(results).map(function(r) {
+              return r.id;
+            }, {
+              ranksDetail: sEntities
+            })
+          };
+          return Response.OKResponse(res)(200, sRanking);
+        });
+      });
+    });
+  };
+
 }).call(this);

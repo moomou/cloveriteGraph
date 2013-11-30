@@ -260,3 +260,37 @@ exports.shareView = (req, res, next) ->
         _showDetail(req, res, next)
     else
         res.status(404).json error: "Not Found"
+
+exports.hashTagView = (req, res, next) ->
+    hashTag = req.params.hashTag
+    cypherQuery = ["START n=node:{tagIndex}('name:{tagName}')",
+        "MATCH (n)-[:#{Constants.REL_FORK}]-()-[r:#{Constants.REL_RANK}]-(e)",
+        "RETURN DISTINCT ID(e) AS entityId, SUM(r.rank) AS rank, SORT BY rank"]
+
+    await
+        Neo.query null,
+            cypherQuery.join("\n"),
+            {tagIndex: Tag.INDEX_NAME, tagName: hashTag},
+            defer(err, results)
+
+    entities = []
+    await
+        for res, ind in results
+            Entity.get res.entityId, defer(err, entities[ind])
+
+    attrBlobs = []
+    await
+        for entity, ind in rankedEntities
+            EntityUtil.getEntityAttributes(entity, defer(attrBlobs[ind]))
+
+    sEntities = []
+    for entity, ind in entities
+        sEntities[ind] = entity.serialize(null, attributes: attrBlobs[ind])
+
+    sRanking = {
+        name: req.params.hashTag,
+        ranks: _und(results).map (r) -> r.id,
+        ranksDetail: sEntities
+    }
+
+    Response.OKResponse(res)(200, sRanking)

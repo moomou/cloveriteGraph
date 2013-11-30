@@ -64,6 +64,7 @@ app.namespace(app.version, () ->
 
     # Sharing Ranking
     app.get('/ranking/share/:shareToken', routes.ranking.shareView)
+    app.get('/ranking/:hashTag', routes.ranking.hashTagView)
 
 # Entity Method
     app.get('/entity/search', routes.entity.search)
@@ -75,7 +76,7 @@ app.namespace(app.version, () ->
 
     # Entity User Method
     app.get('/entity/:id/user', routes.entity.showUsers)
-    app.get('/entity/:id/user/:username', routes.entity.showUserVoteDetail)
+    #app.get('/entity/:id/user/:username', routes.entity.showUserVoteDetail)
 
     # Entity Attribute Method
     app.post('/entity/:id/attribute', routes.entity.addAttribute)
