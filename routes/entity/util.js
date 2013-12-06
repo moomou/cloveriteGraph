@@ -168,7 +168,7 @@
 
         /*
         # The logic here should be if an attribute is over 10800 (3 days) old
-        # and has no votes more than 3, remove link by marking as disabled
+        # and has no votes more than 2, remove link by marking as disabled
         */
         console.log(votesPerAttribute);
         rels = {};
@@ -202,7 +202,6 @@
           __iced_deferrals._fulfill();
         })(function() {
           var _i, _len, _ref;
-          console.log("HI");
           _ref = _und(rels).values();
           for (ind = _i = 0, _len = _ref.length; _i < _len; ind = ++_i) {
             rel = _ref[ind];

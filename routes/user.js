@@ -46,7 +46,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "hasPermission"
       });
       User.get(req.params.id, __iced_deferrals.defer({
@@ -69,9 +69,6 @@
       }));
       __iced_deferrals._fulfill();
     })(function() {
-      console.log(user._node.id);
-      console.log("HI");
-      console.log(other._node.id);
       isPublic = req.params.id === "public";
       if (errUser || errOther) {
         return cb(true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null);
@@ -116,7 +113,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "user.coffee"
+          filename: "routes/user.coffee"
         });
         user._node.getRelationshipNodes({
           type: linkType,
@@ -128,7 +125,7 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 71
+          lineno: 67
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -159,7 +156,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "getFeed"
       });
       redis.lrange(feedId, 0, -1, __iced_deferrals.defer({
@@ -169,7 +166,7 @@
             return feeds = arguments[1];
           };
         })(),
-        lineno: 85
+        lineno: 81
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -191,7 +188,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "addToFeed"
       });
       redis.lpush(feedId, JSON.stringify(newFeed), __iced_deferrals.defer({
@@ -201,7 +198,7 @@
             return result = arguments[1];
           };
         })(),
-        lineno: 91
+        lineno: 87
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -221,7 +218,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "user.coffee"
+          filename: "routes/user.coffee"
         });
         getFeed(req.params.id, feedType, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -230,7 +227,7 @@
               return feed = arguments[1];
             };
           })(),
-          lineno: 98
+          lineno: 94
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -254,7 +251,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "user.coffee"
+          filename: "routes/user.coffee"
         });
         User.find("username", cleandFeed.to, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -263,7 +260,7 @@
               return receiver = arguments[1];
             };
           })(),
-          lineno: 107
+          lineno: 103
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -276,7 +273,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "user.coffee"
+            filename: "routes/user.coffee"
           });
           addToFeed(receiver, cleanedFeed, FeedClass.name, __iced_deferrals.defer({
             assign_fn: (function() {
@@ -285,7 +282,7 @@
                 return result = arguments[1];
               };
             })(),
-            lineno: 112
+            lineno: 108
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -322,7 +319,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "createUser"
       });
       crypto.randomBytes(16, __iced_deferrals.defer({
@@ -332,7 +329,7 @@
             return buf = arguments[1];
           };
         })(),
-        lineno: 127
+        lineno: 123
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -347,7 +344,7 @@
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral1,
-              filename: "user.coffee"
+              filename: "routes/user.coffee"
             });
             User.create(req.body, __iced_deferrals.defer({
               assign_fn: (function() {
@@ -356,7 +353,7 @@
                   return user = arguments[1];
                 };
               })(),
-              lineno: 135
+              lineno: 131
             }));
             __iced_deferrals._fulfill();
           })(function() {

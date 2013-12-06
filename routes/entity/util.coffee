@@ -67,7 +67,7 @@ exports.cleanAttributes = (entity, cb) ->
 
     ###
     # The logic here should be if an attribute is over 10800 (3 days) old
-    # and has no votes more than 3, remove link by marking as disabled
+    # and has no votes more than 2, remove link by marking as disabled
     ###
     console.log votesPerAttribute
     rels = {}
@@ -84,7 +84,6 @@ exports.cleanAttributes = (entity, cb) ->
                     )
                     Link.find('startend', startendVal, defer(err, rels[ind]))
 
-    console.log "HI"
     for rel, ind in _und(rels).values()
         console.log rel
         rel._node.data.disabled = true

@@ -28,10 +28,6 @@ hasPermission = (req, res, next, cb) ->
         User.get req.params.id, defer(errOther, other)
         Utility.getUser req, defer(errUser, user)
 
-    console.log user._node.id
-    console.log "HI"
-    console.log other._node.id
-
     isPublic = req.params.id == "public"
     if errUser or errOther
         return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null
