@@ -27,25 +27,15 @@
       INDEX_NAME: INDEX_NAME,
       INDEX_KEY: 'startend',
       INDEX_VALUE: ''
-    }, {
-      INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'srcURL',
-      INDEX_VALUE: ''
     }
   ];
 
   LinkSchema = {
-    srcURL: '',
-    description: '',
     disabled: false,
-    value: '',
     veracity: 0
   };
 
-  SchemaValidation = {
-    srcURL: SchemaUtil.required('string'),
-    description: SchemaUtil.optional('string')
-  };
+  SchemaValidation = {};
 
   module.exports = Link = (function(_super) {
     __extends(Link, _super);

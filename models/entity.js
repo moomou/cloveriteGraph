@@ -36,7 +36,6 @@
   ];
 
   EntitySchema = {
-    imgURL: '',
     name: 'Name of entity',
     description: '',
     type: '',
@@ -44,7 +43,6 @@
   };
 
   SchemaValidation = {
-    imgURL: SchemaUtil.optional('string'),
     name: SchemaUtil.required('string'),
     description: SchemaUtil.optional('string'),
     type: SchemaUtil.optional('string'),
@@ -96,7 +94,7 @@
               return results = arguments[1];
             };
           })(),
-          lineno: 62
+          lineno: 60
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -131,7 +129,7 @@
               return upVote = arguments[1];
             };
           })(),
-          lineno: 72
+          lineno: 70
         }));
         redis.get(entityAttrNegVoteRedisKey(_this._node.id, attr._node.id), __iced_deferrals.defer({
           assign_fn: (function() {
@@ -140,7 +138,7 @@
               return downVote = arguments[1];
             };
           })(),
-          lineno: 74
+          lineno: 72
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -173,7 +171,7 @@
               return rel = arguments[1];
             };
           })(),
-          lineno: 92
+          lineno: 90
         }));
         if (user) {
           voteLink.data.attribute = attr.serialize().name;
@@ -184,7 +182,7 @@
                 return rel = arguments[1];
               };
             })(),
-            lineno: 99
+            lineno: 97
           }));
         }
         __iced_deferrals._fulfill();
@@ -206,7 +204,7 @@
                 return upVote = arguments[1];
               };
             })(),
-            lineno: 107
+            lineno: 105
           }));
           redis.get(entityAttrNegVoteRedisKey(_this._node.id, attr._node.id), __iced_deferrals.defer({
             assign_fn: (function() {
@@ -215,7 +213,7 @@
                 return downVote = arguments[1];
               };
             })(),
-            lineno: 109
+            lineno: 107
           }));
           __iced_deferrals._fulfill();
         })(function() {

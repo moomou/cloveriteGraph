@@ -53,7 +53,8 @@ exports.isAdmin = isAdmin = (accessToken, cb) ->
         (err, res) ->
             cb(err, res)
 
-### High level function
+###
+# High level function
 ###
 exports.hasPermission = (user, other, cb) ->
     # No permission for nonexistant object

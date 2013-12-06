@@ -122,6 +122,8 @@ Neo.create = (Class, reqBody, indexes, cb) ->
     data = _und.omit(data, ToOmitKeys)
     _und.defaults(data, MetaSchema)
 
+    console.log data
+
     node = db.neo.createNode data
     obj = new Class(node)
 

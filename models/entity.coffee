@@ -25,7 +25,6 @@ Indexes = [
 
 EntitySchema = {
     # Cconfigured Values
-    imgURL: '',
     name: 'Name of entity',
     description: '',
     type: '',
@@ -33,7 +32,6 @@ EntitySchema = {
 }
 
 SchemaValidation = {
-    imgURL: SchemaUtil.optional('string'),
     name: SchemaUtil.required('string'),
     description: SchemaUtil.optional('string'),
     type: SchemaUtil.optional('string'),

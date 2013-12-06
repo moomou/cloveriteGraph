@@ -2,18 +2,39 @@
 ###
 # Retrieves data from remote source
 ###
-
-rest = require('restler')
+logger = require( '../global/logger').logger
+restler = require 'restler'
+cheerio = require 'cheerio'
 
 # Remote web service for reading numeric json data
 exports.getJSONData = (remoteAddress, cb) ->
-    return cb("N/A") if not remoteAddress
+    logger.debug "Remote getJSONData"
+    return cb("N/A", null) if not remoteAddress
 
-    rest.get(remoteAddress).on 'complete',
+    restler.get(remoteAddress).on 'complete',
         (remoteData, remoteRes) ->
             if not remoteRes?
-                cb("")
+                logger.warning "Remote: No data received"
+                cb "no data", null
             else if remoteRes.headers['content-type'].indexOf('application/json') isnt -1
-                cb(remoteData)
+                logger.debug "Remote: OK"
+                cb null, remoteData
             else
-                cb("N/A")
+                logger.warning "Remote: Not JSON"
+                cb "not json", null
+
+exports.getDOMData = (remoteAddress, selector, cb) ->
+    logger.debug "Remote getDOMData"
+    return cb("N/A") if not remoteAddress
+
+    restler.get(remoteAddress).on 'complete',
+        (remoteData, remoteRes) ->
+            if not remoteRes?
+                logger.warning "Remote: No data received"
+                cb "no data", null
+            else
+                console.log remoteData
+                $ = cheerio.load remoteData
+                selected = $(selector)
+                value = selected.html() or selected.text() or selected.val()
+                cb null, value

@@ -2,7 +2,7 @@
 #attribute model logic.
 
 _und = require 'underscore'
-Logger = require('util')
+Logger = require 'util'
 
 Setup = require './setup'
 Neo = require './neo'
@@ -19,28 +19,19 @@ Indexes = [
     },
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'description',
-        INDEX_VALUE: ''
-    },
-    {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'type',
+        INDEX_KEY: 'tone',
         INDEX_VALUE: ''
     }
 ]
 
-AttributeSchema = {
+AttributeSchema =
     name: 'Name of attribute',
     description: '',
-    type: '',            #data, quality, norm
     tone: 'positive'     #defaults to positive
-}
 
-SchemaValidation = {
-    name: SchemaUtil.required('string'),
-    type: SchemaUtil.optional('string'),
-    tone: SchemaUtil.optional('string')
-}
+SchemaValidation =
+    name: SchemaUtil.required 'string',
+    tone: SchemaUtil.optional 'string'
 
 #Private constructor
 module.exports = class Attribute extends Neo
@@ -56,16 +47,16 @@ module.exports = class Attribute extends Neo
             redis.get "entity:#{entityId}::attr:#{@_node.id}::positive", defer(err, upVote)
             redis.get "entity:#{entityId}::attr:#{@_node.id}::negative", defer(err, downVote)
 
-        voteTally = {
+        voteTally =
             upVote: parseInt(upVote) or 0
             downVote: parseInt(downVote) or 0
-        }
 
         super cb, voteTally
 
 ###
-Static Method
+# Static Method
 ###
+
 Attribute.Name = 'nAttribute'
 Attribute.INDEX_NAME = INDEX_NAME
 Attribute.Indexes = Indexes
@@ -83,7 +74,6 @@ Attribute.get = (id, cb) ->
     Neo.get Attribute, id, cb
 
 Attribute.getOrCreate = (reqBody, cb) ->
-    Logger.debug("Attribute getOrCreate")
     Neo.getOrCreate Attribute, reqBody, cb
 
 Attribute.put = (nodeId, reqBody, cb) ->

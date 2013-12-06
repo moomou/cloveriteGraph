@@ -14,7 +14,7 @@ app.use(express.methodOverride())
 app.use(useragent.express())
 app.use(app.router)
 
-#development only
+# development only
 if false and 'development' == app.get('env')
     app.use(express.errorHandler())
 
@@ -49,8 +49,8 @@ app.namespace(app.version, () ->
 
     app.get('/user/:id/recommendation', routes.user.getRecommendation)
     app.post('/user/:id/recommendation', routes.user.sendRecommendation)
-    
-        # Internal Channels 
+
+    # Internal Channels
     app.get('/user/:id/created', routes.user.getCreated)
     app.get('/user/:id/voted', routes.user.getVoted)
     app.get('/user/:id/commented', routes.user.getCommented)
@@ -66,8 +66,19 @@ app.namespace(app.version, () ->
     app.get('/ranking/share/:shareToken', routes.ranking.shareView)
     app.get('/ranking/:hashTag', routes.ranking.hashTagView)
 
+# Composed Content Method
+    app.post 'composed', routes.composed.create
+    app.get 'composed/:id', routes.composed.show
+    app.put 'composed/:id', routes.composed.update
+    app.del 'composed/:id', routes.composed.del
+
+    app.get 'composed/:id/related', routes.composed.getRelated
+
 # Entity Method
-    app.get('/entity/search', routes.entity.search)
+    app.get '/entity/search', routes.entity.search
+
+    # Searching specific entity for attribute & data
+    #app.get('/entity/:id/search', routes.entity.search)
 
     app.post('/entity', routes.entity.create)
     app.get('/entity/:id', routes.entity.show)
@@ -87,10 +98,11 @@ app.namespace(app.version, () ->
 
     app.post('/entity/:id/attribute/:aId/vote', routes.entity.voteAttribute)
 
-    # Entity Comment Method
-    app.post('/entity/:id/comment', routes.entity.addComment)
-    app.get('/entity/:id/comment', routes.entity.listComment)
-    app.del('/entity/:id/comment', routes.entity.delComment)
+    # Entity Data Method
+    app.post '/entity/:id/data', routes.entity.addData
+    app.get '/entity/:id/data', routes.entity.listData
+    app.get '/entity/:id/data/:dId', routes.entity.getData
+    #app.del '/entity/:id/data/:dId', routes.entity.delData
 
     # Entity Relation
     ## return entity connected by relation, can be prefix or exact match

@@ -64,6 +64,11 @@
     app["delete"]('/user/:id/ranking/:rankingId', routes.ranking["delete"]);
     app.get('/ranking/share/:shareToken', routes.ranking.shareView);
     app.get('/ranking/:hashTag', routes.ranking.hashTagView);
+    app.post('composed', routes.composed.create);
+    app.get('composed/:id', routes.composed.show);
+    app.put('composed/:id', routes.composed.update);
+    app.del('composed/:id', routes.composed.del);
+    app.get('composed/:id/related', routes.composed.getRelated);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
     app.get('/entity/:id', routes.entity.show);
@@ -76,9 +81,9 @@
     app.put('/entity/:id/attribute/:aId', routes.entity.updateAttributeLink);
     app.del('/entity/:id/attribute/:aId', routes.entity.delAttribute);
     app.post('/entity/:id/attribute/:aId/vote', routes.entity.voteAttribute);
-    app.post('/entity/:id/comment', routes.entity.addComment);
-    app.get('/entity/:id/comment', routes.entity.listComment);
-    app.del('/entity/:id/comment', routes.entity.delComment);
+    app.post('/entity/:id/data', routes.entity.addData);
+    app.get('/entity/:id/data', routes.entity.listData);
+    app.get('/entity/:id/data/:dId', routes.entity.getData);
     app.get('/entity/:id/:relation', routes.entity.listRelation);
     app.get('/entity/:id/relation', routes.entity.listRelation);
     app.post('/entity/:srcId/relation/entity/:dstId', routes.entity.linkEntity);

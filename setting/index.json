@@ -1,8 +1,9 @@
 {
     "nodeIndex": [
-        "nEntity",
         "nTag",
+        "nEntity",
         "nAttribute",
+        "nData",
         "nUser",
         "nRanking"
     ],

@@ -28,11 +28,7 @@
       INDEX_VALUE: ''
     }, {
       INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'description',
-      INDEX_VALUE: ''
-    }, {
-      INDEX_NAME: INDEX_NAME,
-      INDEX_KEY: 'type',
+      INDEX_KEY: 'tone',
       INDEX_VALUE: ''
     }
   ];
@@ -40,14 +36,13 @@
   AttributeSchema = {
     name: 'Name of attribute',
     description: '',
-    type: '',
     tone: 'positive'
   };
 
   SchemaValidation = {
-    name: SchemaUtil.required('string'),
-    type: SchemaUtil.optional('string'),
-    tone: SchemaUtil.optional('string')
+    name: SchemaUtil.required('string', {
+      tone: SchemaUtil.optional('string')
+    })
   };
 
   module.exports = Attribute = (function(_super) {
@@ -79,7 +74,7 @@
               return upVote = arguments[1];
             };
           })(),
-          lineno: 55
+          lineno: 46
         }));
         redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::negative", __iced_deferrals.defer({
           assign_fn: (function() {
@@ -88,7 +83,7 @@
               return downVote = arguments[1];
             };
           })(),
-          lineno: 56
+          lineno: 47
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -106,7 +101,7 @@
 
 
   /*
-  Static Method
+  # Static Method
   */
 
   Attribute.Name = 'nAttribute';
@@ -132,7 +127,6 @@
   };
 
   Attribute.getOrCreate = function(reqBody, cb) {
-    Logger.debug("Attribute getOrCreate");
     return Neo.getOrCreate(Attribute, reqBody, cb);
   };
 

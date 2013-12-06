@@ -8,13 +8,15 @@ _und = require('underscore')
 SchemaUtil = require('../../models/stdSchema')
 Constants = SchemaUtil.Constants
 
-Neo = require('../../models/neo')
+Neo = require '../../models/neo'
 
-User = require('../../models/user')
-Entity = require('../../models/entity')
-Attribute = require('../../models/attribute')
-Tag = require('../../models/tag')
-Link = require('../../models/link')
+User = require '../../models/user'
+Entity = require '../../models/entity'
+Data = require '../../models/data'
+Attribute = require '../../models/attribute'
+Tag = require '../../models/tag'
+Link = require '../../models/link'
+
 Utility = require '../utility'
 
 exports.getEntityAttributes = (entity, cb) ->
@@ -44,6 +46,21 @@ exports.getEntityAttributes = (entity, cb) ->
     attrBlobs = _und(attrBlobs).filter (i) -> not _und(i.linkData).isEmpty()
     cb attrBlobs
 
+exports.getEntityData = (entity, cb) ->
+    await
+        entity._node.getRelationshipNodes({type: Constants.REL_DATA, direction:'in'},
+            defer(err, nodes))
+    return err if err
+
+    sDataBlob = []
+
+    await
+        for node, ind in nodes
+            dataNode = new Data node
+            sDataBlob.push dataNode.serialize()
+
+    cb sDataBlob
+
 THRESHOLD = 10
 exports.cleanAttributes = (entity, cb) ->
     await
@@ -67,7 +84,7 @@ exports.cleanAttributes = (entity, cb) ->
 
     ###
     # The logic here should be if an attribute is over 10800 (3 days) old
-    # and has no votes more than 3, remove link by marking as disabled
+    # and has no votes more than 2, remove link by marking as disabled
     ###
     console.log votesPerAttribute
     rels = {}
@@ -84,7 +101,6 @@ exports.cleanAttributes = (entity, cb) ->
                     )
                     Link.find('startend', startendVal, defer(err, rels[ind]))
 
-    console.log "HI"
     for rel, ind in _und(rels).values()
         console.log rel
         rel._node.data.disabled = true

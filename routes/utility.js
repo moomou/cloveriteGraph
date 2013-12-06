@@ -110,7 +110,8 @@
   };
 
 
-  /* High level function
+  /*
+  # High level function
   */
 
   exports.hasPermission = function(user, other, cb) {
@@ -141,7 +142,7 @@
             return path = arguments[1];
           };
         })(),
-        lineno: 74
+        lineno: 75
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -173,7 +174,7 @@
                 return augReq = arguments[2];
               };
             })(),
-            lineno: 85
+            lineno: 86
           }));
           __iced_deferrals._fulfill();
         })(function() {

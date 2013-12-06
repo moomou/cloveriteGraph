@@ -5,23 +5,51 @@
 */
 
 (function() {
-  var rest;
+  var cheerio, logger, restler;
 
 
 
-  rest = require('restler');
+  logger = require('../global/logger').logger;
+
+  restler = require('restler');
+
+  cheerio = require('cheerio');
 
   exports.getJSONData = function(remoteAddress, cb) {
+    logger.debug("Remote getJSONData");
+    if (!remoteAddress) {
+      return cb("N/A", null);
+    }
+    return restler.get(remoteAddress).on('complete', function(remoteData, remoteRes) {
+      if (remoteRes == null) {
+        logger.warning("Remote: No data received");
+        return cb("no data", null);
+      } else if (remoteRes.headers['content-type'].indexOf('application/json') !== -1) {
+        logger.debug("Remote: OK");
+        return cb(null, remoteData);
+      } else {
+        logger.warning("Remote: Not JSON");
+        return cb("not json", null);
+      }
+    });
+  };
+
+  exports.getDOMData = function(remoteAddress, selector, cb) {
+    logger.debug("Remote getDOMData");
     if (!remoteAddress) {
       return cb("N/A");
     }
-    return rest.get(remoteAddress).on('complete', function(remoteData, remoteRes) {
+    return restler.get(remoteAddress).on('complete', function(remoteData, remoteRes) {
+      var $, selected, value;
       if (remoteRes == null) {
-        return cb("");
-      } else if (remoteRes.headers['content-type'].indexOf('application/json') !== -1) {
-        return cb(remoteData);
+        logger.warning("Remote: No data received");
+        return cb("no data", null);
       } else {
-        return cb("N/A");
+        console.log(remoteData);
+        $ = cheerio.load(remoteData);
+        selected = $(selector);
+        value = selected.html() || selected.text() || selected.val();
+        return cb(null, value);
       }
     });
   };

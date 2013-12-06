@@ -156,6 +156,7 @@
     data = Class.deserialize(reqBody);
     data = _und.omit(data, ToOmitKeys);
     _und.defaults(data, MetaSchema);
+    console.log(data);
     node = db.neo.createNode(data);
     obj = new Class(node);
     (function(__iced_k) {
@@ -170,7 +171,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 127
+        lineno: 129
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -230,7 +231,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 158
+            lineno: 160
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -274,7 +275,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 172
+          lineno: 174
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -339,7 +340,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 215
+        lineno: 217
       }));
       __iced_deferrals._fulfill();
     })(function() {

@@ -5,7 +5,7 @@
 */
 
 (function() {
-  var Attribute, Constants, Entity, Link, Neo, SchemaUtil, THRESHOLD, Tag, User, Utility, iced, __iced_k, __iced_k_noop, _und;
+  var Attribute, Constants, Data, Entity, Link, Neo, SchemaUtil, THRESHOLD, Tag, User, Utility, iced, __iced_k, __iced_k_noop, _und;
 
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
@@ -21,6 +21,8 @@
   User = require('../../models/user');
 
   Entity = require('../../models/entity');
+
+  Data = require('../../models/data');
 
   Attribute = require('../../models/attribute');
 
@@ -53,7 +55,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 25
+        lineno: 27
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -77,7 +79,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rels, ind),
-            lineno: 35
+            lineno: 37
           }));
           (new Attribute(node)).serialize(__iced_deferrals.defer({
             assign_fn: (function(__slot_1, __slot_2) {
@@ -85,7 +87,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(attrBlobs, ind),
-            lineno: 36
+            lineno: 38
           }), entity._node.id);
         }
         __iced_deferrals._fulfill();
@@ -104,6 +106,54 @@
           return !_und(i.linkData).isEmpty();
         });
         return cb(attrBlobs);
+      });
+    });
+  };
+
+  exports.getEntityData = function(entity, cb) {
+    var dataNode, err, ind, node, nodes, sDataBlob, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        filename: "entity/util.coffee",
+        funcname: "getEntityData"
+      });
+      entity._node.getRelationshipNodes({
+        type: Constants.REL_DATA,
+        direction: 'in'
+      }, __iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            err = arguments[0];
+            return nodes = arguments[1];
+          };
+        })(),
+        lineno: 51
+      }));
+      __iced_deferrals._fulfill();
+    })(function() {
+      if (err) {
+        return err;
+      }
+      sDataBlob = [];
+      (function(__iced_k) {
+        var _i, _len;
+        __iced_deferrals = new iced.Deferrals(__iced_k, {
+          parent: ___iced_passed_deferral,
+          filename: "entity/util.coffee",
+          funcname: "getEntityData"
+        });
+        for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
+          node = nodes[ind];
+          dataNode = new Data(node);
+          sDataBlob.push(dataNode.serialize());
+        }
+        __iced_deferrals._fulfill();
+      })(function() {
+        return cb(sDataBlob);
       });
     });
   };
@@ -131,7 +181,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 50
+        lineno: 67
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -159,7 +209,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(votesPerAttribute, ind),
-            lineno: 63
+            lineno: 80
           }));
         }
         __iced_deferrals._fulfill();
@@ -168,7 +218,7 @@
 
         /*
         # The logic here should be if an attribute is over 10800 (3 days) old
-        # and has no votes more than 3, remove link by marking as disabled
+        # and has no votes more than 2, remove link by marking as disabled
         */
         console.log(votesPerAttribute);
         rels = {};
@@ -194,7 +244,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(rels, ind),
-                  lineno: 84
+                  lineno: 101
                 }));
               }
             }
@@ -202,7 +252,6 @@
           __iced_deferrals._fulfill();
         })(function() {
           var _i, _len, _ref;
-          console.log("HI");
           _ref = _und(rels).values();
           for (ind = _i = 0, _len = _ref.length; _i < _len; ind = ++_i) {
             rel = _ref[ind];

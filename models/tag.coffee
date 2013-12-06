@@ -1,5 +1,5 @@
 #tag.coffee
-#tag model logic.
+
 _und = require 'underscore'
 
 Setup = require './setup'
@@ -17,21 +17,16 @@ Indexes = [
     }
 ]
 
-TagSchema = {
-    name: 'Name of Tag',
-}
+TagSchema =
+    name: 'Name of Tag'
 
-SchemaValidation = {
+SchemaValidation =
     name: SchemaUtil.required('string')
-}
 
 module.exports = class Tag extends Neo
     constructor: (@_node) ->
         super @_node
 
-###
-Static Method
-###
 Tag.Name = 'nTag'
 Tag.INDEX_NAME = INDEX_NAME
 Tag.Indexes = Indexes

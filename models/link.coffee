@@ -15,29 +15,16 @@ Indexes = [
         INDEX_NAME: INDEX_NAME,
         INDEX_KEY: 'startend',
         INDEX_VALUE: ''
-    },
-    {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'srcURL',
-        INDEX_VALUE: ''
     }
 ]
 
-LinkSchema = {
+LinkSchema =
     # configured value
-    srcURL: '',      #link to data source
-    description: '', #describing what this attribute is
-
     # calculated value
-    disabled: false,
-    value: '',       #data value: string, number, and boolean
+    disabled: false
     veracity: 0      #whehter this link is factual or not
-}
 
-SchemaValidation = {
-    srcURL: SchemaUtil.required('string'), #link to data source
-    description: SchemaUtil.optional('string'), #link to data source
-}
+SchemaValidation = {}
 
 module.exports = class Link extends Neo
     constructor: (@_node) ->
@@ -57,7 +44,7 @@ Link.normalizeName = (name) ->
 
 Link.normalizeData = (linkData) ->
     Link.deserialize(linkData)
-    #Link.fillMetaData 
+    #Link.fillMetaData
 
 Link.index = (rel, reqBody, cb = null) ->
     Neo.index(rel, Indexes, reqBody, cb)

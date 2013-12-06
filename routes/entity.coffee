@@ -11,22 +11,24 @@ Neo = require('../models/neo')
 User = require('../models/user')
 Entity = require('../models/entity')
 Attribute = require('../models/attribute')
+Data = require '../models/data'
 Tag = require('../models/tag')
 
 Vote = require('../models/vote')
 Link = require('../models/link')
-Comment = require('../models/comment')
 
 SchemaUtil = require('../models/stdSchema')
 Constants = SchemaUtil.Constants
 
 EntityUtil = require('./entity/util')
 
-Cypher = require('./cypher')
+DataRoute = require './data'
+
+Cypher = require './cypher'
 CypherBuilder = Cypher.CypherBuilder
 CypherLinkUtil = Cypher.CypherLinkUtil
 
-Response = require('./response')
+Response = require './response'
 ErrorDevMessage = Response.ErrorDevMessage
 
 Utility = require('./utility')
@@ -129,14 +131,19 @@ _show = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    if req.query['attr'] != "false"
-        await
-            EntityUtil.getEntityAttributes(entity, defer(attrBlobs))
-        entityBlob = entity.serialize(null, attributes: attrBlobs)
-    else
-        entityBlob = entity.serialize(null, entityBlob)
+    attrBlobs = null
+    dataBlobs = null
 
-    await EntityUtil.cleanAttributes(entity, defer(_))
+    await
+        if req.query['attribute'] != "false"
+            EntityUtil.getEntityAttributes entity, defer(attrBlobs)
+        if req.query['data'] != "false"
+            EntityUtil.getEntityData entity, defer(dataBlobs)
+
+    entityBlob = entity.serialize null,
+        attributes: attrBlobs
+        data: dataBlobs
+
     Response.OKResponse(res)(200, entityBlob)
 
 exports.show = basicAuthentication _show
@@ -197,6 +204,8 @@ exports.del = basicAuthentication _del
 ###
 # Entity Use Section
 ###
+
+# GET /entity/:id/user
 _showUsers = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
@@ -219,6 +228,7 @@ _showUsers = (req, res, next) ->
 
 exports.showUsers = basicAuthentication _showUsers
 
+# GET /entity/:id/user/:username
 _showUserVoteDetail = (req, res, next) ->
     await Entity.get req.params.id, defer(err, entity)
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
@@ -291,13 +301,6 @@ _addAttribute = (req, res, next) ->
         console.log existingLinkData
         console.log "__END__"
 
-        # Updating Remote Data
-        if existingLinkData.srcURL != linkData.srcURL
-            await Remote.getJSONData(linkData.srcURL, defer(value))
-            linkData.value = value
-            linkData.type =
-                if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
-
         linkData = _und.extend existingLinkData, linkData
 
         console.log "__MERGED__"
@@ -307,11 +310,6 @@ _addAttribute = (req, res, next) ->
         Link.put relId, linkData, ->
         rel = path.relationships[0]
     else
-        await Remote.getJSONData(linkData.srcURL, defer(value))
-        linkData.value = value
-        linkData.type =
-            if not isNaN(value) then Constants.ATTR_NUMERIC else Constants.ATTR_REFERENCE
-
         linkData = Link.fillMetaData(linkData)
         await CypherLinkUtil.createLink attr._node,
             entity._node,
@@ -427,56 +425,66 @@ exports.voteAttribute = (req, res, next) ->
         return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
         Response.OKResponse(res)(200, voteTally)
 
-## TODO Update the following to use new forms
 ###
-# Entity Comment Section
+# Entity Data Section
 ###
 
-# POST /entity/:id/comment
-_addComment = (req, res, next) ->
-    valid = Comment.validateSchema req.body
-    return res.status(400).json error: "Invalid input", input: req.body if not valid
+_addData = (req, res, next) ->
+    # Link the data node to the entity node
+    input = _und.clone req.body
+    value = null
+    delete input['id']
 
-    cleanedComment = Comment.fillMetaData Comment.deserialize req.body
-    cleanedComment.username =
-        if req.user then req.user.firstName + " " + req.user.lastName else "Anonymous"
-    cleanedComment.location =
-        req.header['x-real-ip'] or req.connection.remoteAddress
+    # Query remote src to get data, if applicable
+    if input.dataType == Data.DataType.TIME_SERIES
+        "" # Empty for now
+    else if input.dataType == Data.DataType.NUMBER
+        if input.srcType == Data.SrcType.JSON
+            await Remote.getJSONData input.srcUrl, defer(err, value)
+        else if input.srcType == Data.SrcType.DOM
+            await Remote.getDOMData input.srcUrl, input.selector, defer(err, value)
 
-    discussionId = getDiscussionId req.params.id
-    commentObjJson = JSON.stringify(cleanedComment)
-
-    console.log commentObjJson
+    input.value = value if value and not err
 
     await
-        redis.lpush discussionId, commentObjJson, defer(err, result)
+        Entity.get req.params.id, defer err, entity
+        Data.create input, defer err, data
 
-    return res.status(500).json error: "Unable to save comment" if err
-    return res.json(cleanedComment) if result
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-exports.addComment = basicAuthentication _addComment
+    await CypherLinkUtil.createLink data._node,
+            entity._node,
+            Constants.REL_DATA,
+            {},
+            defer(err, rel)
 
-# GET /entity/:id/comment
-_listComment = (req, res, next) ->
-    startIndex = req.params.start ? 0
-    discussionId = getDiscussionId req.params.id
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
+    Response.OKResponse(res)(200, data.serialize())
+
+exports.addData = basicAuthentication _addData
+
+_getData = (req, res, next) ->
+    req.params.id = req.params.dId
+    DataRoute.show req, res, next
+
+exports.getData = basicAuthentication _getData
+
+_listData = (req, res, next) ->
     await
-        redis.lrange discussionId, startIndex, startIndex + 25, defer(err, comments)
+        Entity.get req.params.id, defer err, entity
 
-    blobs = []
-    for comment, ind in comments
-        blobs[ind] = JSON.parse(comment)
+    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    res.json(blobs)
+    console.log "WHAT"
+    await EntityUtil.getEntityData entity, defer(blobs)
+    Response.OKResponse(res)(200, blobs)
 
-exports.listComment = basicAuthentication _listComment
+exports.listData = basicAuthentication _listData
 
-# DELETE /entity/:id/comment
-_delComment = (req, res, next) ->
-    res.status(503).json error: "Not Implemented"
+_delData = (req, res, next) ->
 
-exports.delComment = basicAuthentication _delComment
+exports.delData = basicAuthentication _delData
 
 ###
 # Entity Relation section

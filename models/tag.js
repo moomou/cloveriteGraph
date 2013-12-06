@@ -46,11 +46,6 @@
 
   })(Neo);
 
-
-  /*
-  Static Method
-  */
-
   Tag.Name = 'nTag';
 
   Tag.INDEX_NAME = INDEX_NAME;
