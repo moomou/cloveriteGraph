@@ -12,8 +12,8 @@ module.exports = class Composed extends RedisModel
     @Schema:
         title: ''
         profileIconUrl: ''
-        authorName: ''
-        authorProfileUrl: ''
+        authorName: []
+        authorProfileUrl: []
         hashTag: []
         dataChain: []
         entityId: []

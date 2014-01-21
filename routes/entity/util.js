@@ -42,7 +42,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "entity/util.coffee",
+        filename: "util.coffee",
         funcname: "getEntityAttributes"
       });
       entity._node.getRelationshipNodes({
@@ -66,7 +66,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "entity/util.coffee",
+          filename: "util.coffee",
           funcname: "getEntityAttributes"
         });
         for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
@@ -118,7 +118,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "entity/util.coffee",
+        filename: "util.coffee",
         funcname: "getEntityData"
       });
       entity._node.getRelationshipNodes({
@@ -143,7 +143,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "entity/util.coffee",
+          filename: "util.coffee",
           funcname: "getEntityData"
         });
         for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
@@ -158,6 +158,8 @@
     });
   };
 
+  exports.getEntityRanking = function(entity, cb) {};
+
   THRESHOLD = 10;
 
   exports.cleanAttributes = function(entity, cb) {
@@ -168,7 +170,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "entity/util.coffee",
+        filename: "util.coffee",
         funcname: "cleanAttributes"
       });
       entity._node.getRelationshipNodes({
@@ -181,7 +183,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 67
+        lineno: 69
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -194,7 +196,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "entity/util.coffee",
+          filename: "util.coffee",
           funcname: "cleanAttributes"
         });
         for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
@@ -209,7 +211,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(votesPerAttribute, ind),
-            lineno: 80
+            lineno: 82
           }));
         }
         __iced_deferrals._fulfill();
@@ -226,7 +228,7 @@
           var _i, _len;
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "entity/util.coffee",
+            filename: "util.coffee",
             funcname: "cleanAttributes"
           });
           for (ind = _i = 0, _len = votesPerAttribute.length; _i < _len; ind = ++_i) {
@@ -244,7 +246,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(rels, ind),
-                  lineno: 101
+                  lineno: 103
                 }));
               }
             }

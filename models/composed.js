@@ -29,8 +29,8 @@
     Composed.Schema = {
       title: '',
       profileIconUrl: '',
-      authorName: '',
-      authorProfileUrl: '',
+      authorName: [],
+      authorProfileUrl: [],
       hashTag: [],
       dataChain: [],
       entityId: []

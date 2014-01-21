@@ -61,6 +61,8 @@ exports.getEntityData = (entity, cb) ->
 
     cb sDataBlob
 
+exports.getEntityRanking = (entity, cb) ->
+
 THRESHOLD = 10
 exports.cleanAttributes = (entity, cb) ->
     await
