@@ -5,7 +5,8 @@
         "nAttribute",
         "nData",
         "nUser",
-        "nRanking"
+        "nRanking",
+        "nComposed"
     ],
     "relIndex": [
         "rVote",

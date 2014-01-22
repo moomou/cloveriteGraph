@@ -52,6 +52,7 @@ exports.Constants = Constants = {
     REL_LOCATION: '_LOCATION',
     REL_AWARD: '_AWARD',
     REL_ATTRIBUTE: '_ATTRIBUTE',
+    REL_COMPOSED: '_COMPOSED',
     REL_DATA: '_DATA',
     REL_FORKED: '_FORKED',
     REL_PARENT: '_PARENT',
