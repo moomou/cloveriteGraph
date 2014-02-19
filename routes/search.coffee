@@ -175,12 +175,17 @@ exports.searchHandler = (req, res, next) ->
             await Utility.hasPermission user, entity, defer(err, authorized)
             continue if not authorized
 
-            await EntityUtil.getEntityAttributes(entity, defer(attrBlobs))
-            entitySerialized = entity.serialize(null, attributes: attrBlobs)
+            await
+                EntityUtil.getEntityAttributes(entity, defer(attrBlobs))
+                EntityUtil.getEntityData entity, defer(dataBlobs)
+
+            entitySerialized = entity.serialize null,
+                attributes: attrBlobs
+                data: dataBlobs
 
             if not identified[entitySerialized.id] #do not duplicate result
                 blobResults.push(entitySerialized)
                 identified[entitySerialized.id] = true
-    
+
     # TODO Add next, & prev
     Response.OKResponse(res)(200, blobResults)

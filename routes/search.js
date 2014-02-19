@@ -402,12 +402,21 @@ _continue()
                                 return attrBlobs = arguments[0];
                               };
                             })(),
-                            lineno: 177
+                            lineno: 178
+                          }));
+                          EntityUtil.getEntityData(entity, __iced_deferrals.defer({
+                            assign_fn: (function() {
+                              return function() {
+                                return dataBlobs = arguments[0];
+                              };
+                            })(),
+                            lineno: 179
                           }));
                           __iced_deferrals._fulfill();
                         })(function() {
                           entitySerialized = entity.serialize(null, {
-                            attributes: attrBlobs
+                            attributes: attrBlobs,
+                            data: dataBlobs
                           });
                           return _next(!identified[entitySerialized.id] ? (blobResults.push(entitySerialized), identified[entitySerialized.id] = true) : void 0);
                         });
