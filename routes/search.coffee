@@ -156,9 +156,13 @@ exports.searchHandler = (req, res, next) ->
             continue if not authorized
 
             await
-                EntityUtil.getEntityAttributes(entity, defer(attrBlobs))
+                EntityUtil.getEntityAttributes entity, defer(attrBlobs)
+                EntityUtil.getEntityData entity, defer(dataBlobs)
 
-            entitySerialized = entity.serialize(null, attributes: attrBlobs)
+            entitySerialized = entity.serialize null,
+                attributes: attrBlobs
+                data: dataBlobs
+
             identified[sRanking.id].push(entitySerialized)
 
         return Response.OKResponse(res)(200, resultBlob)

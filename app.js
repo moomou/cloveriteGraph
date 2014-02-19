@@ -37,7 +37,7 @@
   addCORSHeaders = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host);
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,x-access-token");
+    res.header('Access-Control-Allow-Headers', 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,x-access-token');
     res.header('Access-Control-Allow-Credentials', 'true');
     return next();
   };
@@ -50,10 +50,13 @@
     app.get('/search/:type?', routes.search.searchHandler);
     app.post('/user/', routes.user.createUser);
     app.get('/user/:id', routes.user.getSelf);
-    app.get('/user/:id/request', routes.user.getRequest);
-    app.post('/user/:id/request', routes.user.sendRequest);
-    app.get('/user/:id/recommendation', routes.user.getRecommendation);
-    app.post('/user/:id/recommendation', routes.user.sendRecommendation);
+
+    /*
+    app.get('/user/:id/request', routes.user.getRequest)
+    app.post('/user/:id/request', routes.user.sendRequest)
+    app.get('/user/:id/recommendation', routes.user.getRecommendation)
+    app.post('/user/:id/recommendation', routes.user.sendRecommendation)
+    */
     app.get('/user/:id/created', routes.user.getCreated);
     app.get('/user/:id/voted', routes.user.getVoted);
     app.get('/user/:id/commented', routes.user.getCommented);

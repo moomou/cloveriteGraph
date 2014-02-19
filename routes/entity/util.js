@@ -42,7 +42,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "util.coffee",
+        filename: "entity/util.coffee",
         funcname: "getEntityAttributes"
       });
       entity._node.getRelationshipNodes({
@@ -66,7 +66,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "util.coffee",
+          filename: "entity/util.coffee",
           funcname: "getEntityAttributes"
         });
         for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
@@ -118,7 +118,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "util.coffee",
+        filename: "entity/util.coffee",
         funcname: "getEntityData"
       });
       entity._node.getRelationshipNodes({
@@ -143,7 +143,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "util.coffee",
+          filename: "entity/util.coffee",
           funcname: "getEntityData"
         });
         for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
@@ -170,7 +170,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "util.coffee",
+        filename: "entity/util.coffee",
         funcname: "cleanAttributes"
       });
       entity._node.getRelationshipNodes({
@@ -196,7 +196,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "util.coffee",
+          filename: "entity/util.coffee",
           funcname: "cleanAttributes"
         });
         for (ind = _i = 0, _len = nodes.length; _i < _len; ind = ++_i) {
@@ -228,7 +228,7 @@
           var _i, _len;
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "util.coffee",
+            filename: "entity/util.coffee",
             funcname: "cleanAttributes"
           });
           for (ind = _i = 0, _len = votesPerAttribute.length; _i < _len; ind = ++_i) {

@@ -21,34 +21,36 @@ if false and 'development' == app.get('env')
 app.version = '/v0'
 
 addCORSHeaders = (req, res, next) ->
-    res.header('Access-Control-Allow-Origin', req.headers.origin || req.headers.host)
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    res.header('Access-Control-Allow-Headers', "DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,x-access-token")
-    res.header('Access-Control-Allow-Credentials', 'true')
+    res.header 'Access-Control-Allow-Origin', req.headers.origin || req.headers.host
+    res.header 'Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS'
+    res.header 'Access-Control-Allow-Headers',
+        'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Referer,x-access-token'
+    res.header 'Access-Control-Allow-Credentials', 'true'
     next()
 
 app.namespace(app.version, () ->
 
 # Adding CORS
-    app.get('/*', addCORSHeaders)
-    app.post('/*', addCORSHeaders)
-    app.put('/*', addCORSHeaders)
-    app.delete('/*', addCORSHeaders)
+    app.get '/*', addCORSHeaders
+    app.post '/*', addCORSHeaders
+    app.put '/*', addCORSHeaders
+    app.delete '/*', addCORSHeaders
 
 # Search Handler for multiple resource
-    app.get('/search/:type?', routes.search.searchHandler)
+    app.get '/search/:type?', routes.search.searchHandler
 
 # User API
-    app.post('/user/', routes.user.createUser)
-    app.get('/user/:id', routes.user.getSelf)
+    app.post '/user/', routes.user.createUser
+    app.get '/user/:id', routes.user.getSelf
 
     # External Channels
     #app.get('/user/:id/discussion', routes.user.getDiscussion)
+    ###
     app.get('/user/:id/request', routes.user.getRequest)
     app.post('/user/:id/request', routes.user.sendRequest)
-
     app.get('/user/:id/recommendation', routes.user.getRecommendation)
     app.post('/user/:id/recommendation', routes.user.sendRecommendation)
+    ###
 
     # Internal Channels
     app.get('/user/:id/created', routes.user.getCreated)
@@ -62,7 +64,6 @@ app.namespace(app.version, () ->
     app.put '/user/:id/ranking/:rankingId', routes.ranking.edit
     app.delete '/user/:id/ranking/:rankingId', routes.ranking.delete
 
-    # Sharing Ranking
     app.get('/ranking/share/:shareToken', routes.ranking.shareView)
     app.get('/ranking/:hashTag', routes.ranking.hashTagView)
 
@@ -80,10 +81,10 @@ app.namespace(app.version, () ->
     # Searching specific entity for attribute & data
     #app.get('/entity/:id/search', routes.entity.search)
 
-    app.post('/entity', routes.entity.create)
-    app.get('/entity/:id', routes.entity.show)
-    app.put('/entity/:id', routes.entity.edit)
-    app.del('/entity/:id', routes.entity.del)
+    app.post '/entity', routes.entity.create
+    app.get '/entity/:id', routes.entity.show
+    app.put '/entity/:id', routes.entity.edit
+    app.del '/entity/:id', routes.entity.del
 
     # Entity User Method
     app.get('/entity/:id/user', routes.entity.showUsers)
