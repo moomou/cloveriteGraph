@@ -1,2 +1,0 @@
-exports.log =
-    level: "debug"
