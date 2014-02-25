@@ -2,10 +2,12 @@
 #
 # The base model that other model derives from.
 
-Logger = require 'util'
+Logger   = require 'util'
+_und     = require 'underscore'
 
-_und   = require 'underscore'
-db     = require('./setup').db
+Slug     = require '../util/slug'
+RedisKey = require('../config').RedisKey
+db       = require('./setup').db
 
 ###
 # Normal values related to transaction;
@@ -29,6 +31,10 @@ ToOmitKeys = [
     'contributors'
 ]
 
+
+# Start of class defn
+##
+
 module.exports = class Neo
     constructor: (@_node) ->
 
@@ -45,8 +51,8 @@ module.exports = class Neo
 
     # Returns error message if unsuccessful
     update: (newData) ->
-        console.log "Current Data VER: " + @_node.data.version
-        console.log "Input Data VER: " + newData.version
+        console.log "Existing VER: #{ @_node.data.version}"
+        console.log "Modifying VER: #{newData.version}"
 
         if newData.version != @_node.data.version
             return "Version number incorrect"
@@ -55,7 +61,10 @@ module.exports = class Neo
         if not @_node.data.private and newData.private
             return "Cannot take a public entity and set it to private"
 
+        # Remove old redis key
+        await db.redis.hdel RedisKey.slugToId, @_node.data.slug, defer(err)
         _und.extend @_node.data, newData
+
         return false
 
     save: (cb) ->
@@ -76,6 +85,10 @@ module.exports = class Neo
 
 Neo.MetaSchema = MetaSchema
 
+
+# Data cleaning, augmenting functions.
+##
+
 Neo.fillMetaData = (data) ->
     cData = _und.clone(data)
     _und.extend(cData, MetaSchema)
@@ -88,6 +101,7 @@ Neo.fillMetaData = (data) ->
 
 Neo.fillIndex = (indexes, data) ->
     result = _und.clone indexes
+    data   = _und.clone data
 
     _und(result).map (index) ->
         index['INDEX_VALUE'] = encodeURIComponent(data[index['INDEX_KEY']].trim())
@@ -104,6 +118,27 @@ Neo.deserialize = (ClassSchema, data) ->
     cleaned = _und.pick data, validKeys
     cleaned
 
+Neo.parseReqBody = (Class, reqBody) ->
+    user =  reqBody.user or "anonymous"
+
+    console.log "I LIKE YOU "
+    data      = _und.omit data, ToOmitKeys
+    data      = Class.deserialize reqBody
+    data.slug = Class.getSlugTitle reqBody
+
+    console.log "I LIKE YOU "
+    data.contributors ?= []
+
+    if user not in data.contributors
+        data.contributors.push user
+
+    console.log data
+    console.log "I LIKE YOU "
+    data
+
+# Data DB functions.
+##
+
 Neo.index = (node, indexes, reqBody, cb = null) ->
     console.log "~~~Indexing~~~"
     console.log reqBody
@@ -118,15 +153,11 @@ Neo.index = (node, indexes, reqBody, cb = null) ->
                 cb(null, ind) if cb
 
 Neo.create = (Class, reqBody, indexes, cb) ->
-    # Clean input data
-    data = Class.deserialize(reqBody)
-    data = _und.omit(data, ToOmitKeys)
-    _und.defaults(data, MetaSchema)
-
-    console.log data
+    data = Neo.parseReqBody Class, reqBody
+    _und.defaults data, MetaSchema
 
     node = db.neo.createNode data
-    obj = new Class(node)
+    obj  = new Class(node)
 
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr
@@ -135,13 +166,10 @@ Neo.create = (Class, reqBody, indexes, cb) ->
     Neo.index(node, Class.Indexes, obj.serialize())
 
     console.log "CREATED: " + Class.Name
-    return cb(null, obj)
 
-Neo.getRel = (Class, id, cb) ->
-    db.neo.getRelationshipById id,
-        (err, rel) ->
-            return cb(err, null) if err
-            cb(null, new Class rel)
+    # Update the slug
+    await db.redis.hset RedisKey.slugToId, node.data.slug, node.id, defer(err, res)
+    return cb(null, obj)
 
 Neo.get = (Class, id, cb) ->
     db.neo.getNodeById id,
@@ -150,46 +178,26 @@ Neo.get = (Class, id, cb) ->
             cb(null, new Class node)
 
 Neo.put = (Class, nodeId, reqBody, cb) ->
-    data = Class.deserialize(reqBody)
-    console.log "ID: " + nodeId
+    console.log reqBody
+
+    data         = Neo.parseReqBody Class, reqBody
+    data.version = reqBody.version
 
     Class.get nodeId, (err, obj) ->
         return cb(dbError: err, null) if err
         errMsg = obj.update(data)
 
         if not errMsg
-            console.log "Saving..."
-            await obj.save defer(saveErr)
+            await obj.save defer saveErr
+
             Neo.index(obj._node, Class.Indexes, obj.serialize())
-            return cb(saveErr, null) if saveErr
-            return cb(null, obj)
+
+            if saveErr
+                cb(saveErr, null)
+            else
+                cb(null, obj)
         else
-            console.log "Failed"
-            return cb(validationError: errMsg, obj)
-
-Neo.putRel = (Class, relId, reqBody, cb) ->
-    data = Class.deserialize(reqBody)
-
-    Class.get relId, (err, obj) ->
-        return cb(err, null) if err
-        obj._node.data = data
-        await obj._node.save(defer(err))
-
-        if not err
-            Neo.index(obj._node, Class.Indexes, obj.serialize())
-            cb(null, obj)
-        else
-            console.log "Failed"
-            cb(err, obj)
-
-Neo.findRel = (Class, indexName, key, value, cb) ->
-    db.neo.getIndexedRelationship indexName,
-        key,
-        value,
-        (err, node) ->
-            return cb(err, null) if err
-            return cb(null, new Class node) if node
-            return cb(null, null)
+            return cb validationError: errMsg, obj
 
 Neo.find = (Class, indexName, key, value, cb) ->
     Logger.debug("Neo Find Index: " + indexName)
@@ -225,7 +233,42 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
     #Not found, create
     return Class.create(reqBody, cb)
 
-# Node Specific #
+
+# Relation DB functions
+##
+
+Neo.getRel = (Class, id, cb) ->
+    db.neo.getRelationshipById id,
+        (err, rel) ->
+            return cb(err, null) if err
+            cb(null, new Class rel)
+
+Neo.putRel = (Class, relId, reqBody, cb) ->
+    data = Class.deserialize(reqBody)
+
+    Class.get relId, (err, obj) ->
+        return cb(err, null) if err
+        obj._node.data = data
+        await obj._node.save(defer(err))
+
+        if not err
+            Neo.index(obj._node, Class.Indexes, obj.serialize())
+            cb(null, obj)
+        else
+            console.log "Failed"
+            cb(err, obj)
+
+Neo.findRel = (Class, indexName, key, value, cb) ->
+    db.neo.getIndexedRelationship indexName,
+        key,
+        value,
+        (err, node) ->
+            return cb(err, null) if err
+            return cb(null, new Class node) if node
+            return cb(null, null)
+
+
+# Node Specific
 Neo.query = (Class, query, params, cb) ->
     db.neo.query query,
         params,

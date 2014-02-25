@@ -5,8 +5,7 @@
 
 _und = require('underscore')
 
-SchemaUtil = require('../../models/stdSchema')
-Constants  = SchemaUtil.Constants
+Constants  = require('../../config').Constants
 
 Neo        = require '../../models/neo'
 

@@ -3,17 +3,17 @@
 # Routes to interacting with attribute
 
 require('source-map-support').install()
-_und                                    = require('underscore')
+_und            = require('underscore')
 
-Neo                                     = require('../models/neo')
-Entity                                  = require('../models/entity')
-Attribute                               = require('../models/attribute')
-Tag                                     = require('../models/tag')
+Neo             = require('../models/neo')
+Entity          = require('../models/entity')
+Attribute       = require('../models/attribute')
+Tag             = require('../models/tag')
 
-Constants                               = require('../config').Constants
+Constants       = require('../config').Constants
 
-Response                                = require('./util/response')
-ErrorDevMessage                         = Response.ErrorDevMessage
+Response        = require('./util/response')
+ErrorDevMessage = Response.ErrorDevMessage
 
 # GET /attribute/search/
 exports.search = (req, res, next) ->

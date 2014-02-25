@@ -5,16 +5,14 @@
 */
 
 (function() {
-  var Attribute, Constants, Data, Entity, Link, Neo, SchemaUtil, THRESHOLD, Tag, User, getStartEndIndex, iced, __iced_k, __iced_k_noop, _und;
+  var Attribute, Constants, Data, Entity, Link, Neo, THRESHOLD, Tag, User, getStartEndIndex, iced, __iced_k, __iced_k_noop, _und;
 
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
 
   _und = require('underscore');
 
-  SchemaUtil = require('../../models/stdSchema');
-
-  Constants = SchemaUtil.Constants;
+  Constants = require('../../config').Constants;
 
   Neo = require('../../models/neo');
 
@@ -57,7 +55,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 28
+        lineno: 27
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -81,7 +79,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rels, ind),
-            lineno: 38
+            lineno: 37
           }));
           (new Attribute(node)).serialize(__iced_deferrals.defer({
             assign_fn: (function(__slot_1, __slot_2) {
@@ -89,7 +87,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(attrBlobs, ind),
-            lineno: 39
+            lineno: 38
           }), entity._node.id);
         }
         __iced_deferrals._fulfill();
@@ -133,7 +131,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 52
+        lineno: 51
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -185,7 +183,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 70
+        lineno: 69
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -213,7 +211,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(votesPerAttribute, ind),
-            lineno: 83
+            lineno: 82
           }));
         }
         __iced_deferrals._fulfill();
@@ -248,7 +246,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(rels, ind),
-                  lineno: 104
+                  lineno: 103
                 }));
               }
             }

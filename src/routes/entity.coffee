@@ -20,6 +20,8 @@ Vote            = require '../models/vote'
 Link            = require '../models/link'
 
 Constants       = require('../config').Constants
+Slug            = require '../util/slug'
+NumUtil         = require '../util/numUtil'
 
 EntityUtil      = require './entity/util'
 
@@ -43,31 +45,34 @@ getRelationId = (path) ->
 
 hasPermission = (req, res, next, cb) ->
     ErrorResponse = Response.ErrorResponse(res)
-
     console.log req.params
-    if isNaN req.params.id
-        return cb true, ErrorResponse(400, ErrorDevMessage.missingParam("id")), null
+    await Slug.resolveSlug req.params.id, defer(err, resolvedId)
+
+    if not NumUtil.isNum resolvedId
+        return cb true, ErrorResponse(400, ErrorDevMessage.dataValidationIssue("id")), null
 
     await
-        Entity.get req.params.id, defer(errEntity, entity)
+        Entity.get resolvedId, defer(errEntity, entity)
         Permission.getUser req, defer(errUser, user)
 
     err = errUser or errEntity
-
     return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if err
+
+    req = _und.extend _und.clone(req), resolvedId: resolvedId
 
     # Return authorized if not private and user is anonymous
     return cb false, null, req if not entity._node.data.private and not user
 
     await Permission.hasPermission user, entity, defer(err, authorized)
+    return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if err
 
-    if err
-        return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null
     if not authorized
         return cb true, ErrorResponse(401, ErrorDevMessage.permissionIssue()), null
 
     # Returns a new shallow copy of req with user if authenticated
-    reqWithUser = _und.extend _und.clone(req), user: user
+    reqWithUser = _und.extend _und.clone(req),
+        user: user
+
     return cb false, null, reqWithUser
 
 basicAuthentication = Permission.authCurry hasPermission
@@ -82,9 +87,11 @@ exports.create = (req, res, next) ->
     await Permission.getUser req, defer(err, user)
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
+    console.log "Creating Entity"
+
     # anonymous user cannot create private entity
     req.body.private = false if not user
-    console.log "Creating Entity"
+    req.body.user    = user
 
     errs = []
     tagObjs = []
@@ -128,7 +135,7 @@ exports.create = (req, res, next) ->
 
 # GET /entity/:id
 _show = (req, res, next) ->
-    await Entity.get req.params.id, defer(err, entity)
+    await Entity.get req.resolvedId, defer err, entity
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     attrBlobs = null
@@ -140,6 +147,7 @@ _show = (req, res, next) ->
         if req.query.data != "false"
             EntityUtil.getEntityData entity, defer(dataBlobs)
 
+    console.log " I dont believe it"
     entityBlob = entity.serialize null,
         attributes: attrBlobs
         data: dataBlobs
@@ -150,7 +158,9 @@ exports.show = basicAuthentication _show
 
 # PUT /entity/:id
 _edit = (req, res, next) ->
-    await Entity.put req.params.id, req.body, defer(err, entity)
+    req.body.user = req.user
+    await Entity.put req.resolvedId, req.body, defer(err, entity)
+
     if err
         return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err.dbError
         return Response.ErrorResponse(res)(400, err.validationError) if err.validationError

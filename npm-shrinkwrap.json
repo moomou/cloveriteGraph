@@ -617,6 +617,37 @@
     "hashids": {
       "version": "0.3.1",
       "from": "hashids@"
+    },
+    "slug": {
+      "version": "0.4.2",
+      "from": "slug@",
+      "resolved": "https://registry.npmjs.org/slug/-/slug-0.4.2.tgz",
+      "dependencies": {
+        "unicode": {
+          "version": "0.5.3",
+          "from": "unicode@>= 0.3.1",
+          "resolved": "https://registry.npmjs.org/unicode/-/unicode-0.5.3.tgz",
+          "dependencies": {
+            "bufferstream": {
+              "version": "0.6.2",
+              "from": "bufferstream@>= 0.6.2",
+              "resolved": "https://registry.npmjs.org/bufferstream/-/bufferstream-0.6.2.tgz",
+              "dependencies": {
+                "bufferjs": {
+                  "version": "2.0.0",
+                  "from": "bufferjs@>= 2.0.0",
+                  "resolved": "https://registry.npmjs.org/bufferjs/-/bufferjs-2.0.0.tgz"
+                },
+                "buffertools": {
+                  "version": "2.0.1",
+                  "from": "buffertools@>= 1.0.3",
+                  "resolved": "https://registry.npmjs.org/buffertools/-/buffertools-2.0.1.tgz"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

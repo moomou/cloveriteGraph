@@ -2,15 +2,15 @@
 #
 # Defines the fields of entity
 
-Logger    = require 'util'
-_und      = require 'underscore'
+Logger     = require 'util'
+_und       = require 'underscore'
 
-redis     = require('./setup').db.redis
+redis      = require('./setup').db.redis
 
+Slug       = require '../util/slug'
 SchemaUtil = require './stdSchema'
-Constants = require('../config').Constants
-Neo       = require './neo'
-
+Neo        = require './neo'
+Constants  = require('../config').Constants
 
 INDEX_NAME = 'nEntity'
 Indexes = [
@@ -26,20 +26,18 @@ Indexes = [
     }
 ]
 
-EntitySchema = {
+EntitySchema =
     # Cconfigured Values
-    name: 'Name of entity',
-    description: '',
-    type: '',
-    tags: ['']
-}
+    name                 : 'Name of entity'
+    description          : ''
+    type                 : ''
+    tags                 : ['']
 
-SchemaValidation = {
-    name: SchemaUtil.required('string'),
-    description: SchemaUtil.optional('string'),
-    type: SchemaUtil.optional('string'),
-    tags: SchemaUtil.optional('array') #'string')
-}
+SchemaValidation =
+    name        : SchemaUtil.required('string')
+    description : SchemaUtil.optional('string')
+    type        : SchemaUtil.optional('string')
+    tags        : SchemaUtil.optional('array')
 
 entityAttrPosVoteRedisKey = (id, aId) -> "entity:#{id}::attr:#{aId}::positive"
 entityAttrNegVoteRedisKey = (id, aId) -> "entity:#{id}::attr:#{aId}::negative"
@@ -47,7 +45,6 @@ entityAttrNegVoteRedisKey = (id, aId) -> "entity:#{id}::attr:#{aId}::negative"
 module.exports = class Entity extends Neo
     constructor: (@_node) ->
         super @_node
-
     getVoteByUser: (user = null, cb) ->
         if not user
             return cb(null, null)
@@ -77,10 +74,9 @@ module.exports = class Entity extends Neo
 
         return cb errP || errN, null if errP || errN
 
-        voteTally = {
+        voteTally =
             upVote: parseInt(upVote) or 0
             downVote: parseInt(downVote) or 0
-        }
 
         return cb null, voteTally
 
@@ -132,20 +128,27 @@ module.exports = class Entity extends Neo
 ###
 Static Method
 ###
-Entity.Name = 'nEntity'
+Entity.NodeType   = 'nEntity'
+Entity.Name       = 'nEntity'
+Entity.Indexes    = Indexes
 Entity.INDEX_NAME = INDEX_NAME
-Entity.Indexes = Indexes
 
 Entity.validateSchema = (data) ->
     SchemaUtil.validate SchemaValidation, data
+
+Entity.getSlugTitle = (data) ->
+    Slug.slugify data.name
 
 Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data
 
 Entity.create = (reqBody, cb) ->
     tags = reqBody.tags or []
-    reqBody.tags = _und.filter tags, (tag) -> tag and _und.isString(tag)
+
+    reqBody.private = false if not reqBody.user
+    reqBody.tags    = _und.filter tags, (tag) -> tag and _und.isString(tag)
     reqBody.tags.push Constants.TAG_GLOBAL
+
     Neo.create Entity, reqBody, Indexes, cb
 
 Entity.get = (id, cb) ->

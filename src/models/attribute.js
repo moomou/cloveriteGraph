@@ -62,7 +62,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/attribute.coffee",
+          filename: "attribute.coffee",
           funcname: "Attribute.serialize"
         });
         redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::positive", __iced_deferrals.defer({
