@@ -13,7 +13,7 @@
 
   Entity = require('../models/entity');
 
-  Data = require('../models/Data');
+  Data = require('../models/data');
 
   Ranking = require('../models/ranking');
 

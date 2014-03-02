@@ -8,7 +8,7 @@ _und            = require('underscore')
 
 Neo             = require('../models/neo')
 Entity          = require('../models/entity')
-Data            = require('../models/Data')
+Data            = require('../models/data')
 Ranking         = require('../models/ranking')
 Vote            = require('../models/vote')
 Attribute       = require('../models/attribute')
