@@ -8,6 +8,7 @@ _und            = require('underscore')
 
 Neo             = require('../models/neo')
 Entity          = require('../models/entity')
+Data            = require('../models/Data')
 Ranking         = require('../models/ranking')
 Vote            = require('../models/vote')
 Attribute       = require('../models/attribute')
@@ -29,6 +30,7 @@ searchableClass =
     entity    : Entity
     attribute : Attribute
     tag       : Tag
+    data      : Data
 
 searchFunc =
     cypher : Neo.query
@@ -78,6 +80,7 @@ cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip =
     for relName, ind in relMatches
         relationship = Constants.REL_ATTRIBUTE
         relMatchQ.push "MATCH (n)<-[:#{relationship}]-(other) WHERE other.name=~'(?i)#{decodeURIComponent relName}'"
+
     relMatchQ = if relMatchQ then relMatchQ.join(' WITH n as n ') else ""
 
     switch searchClass
