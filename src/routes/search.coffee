@@ -64,6 +64,7 @@ queryAnalyzer = (searchClass, query) ->
 cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip = 0, limit = 1000) ->
     console.log "mainMatches: #{mainMatches}"
     console.log "relationMatches: #{relMatches}"
+    console.log "Skipping: #{skip}"
 
     # potential injection attack
     startNodeQ = do () ->
@@ -71,8 +72,6 @@ cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip =
             start + "\"%23#{name}\"~0.65,"
         , "")
         "START n=node:__indexName__('name:(#{startingNodes})')"
-
-    console.log "TESTING: #{skip}"
 
     endQ      = "RETURN DISTINCT n AS result SKIP #{skip} LIMIT #{limit};"
     relMatchQ = []
@@ -85,7 +84,7 @@ cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip =
 
     switch searchClass
         when Data
-            return [startNodeQ, "MATCH (n)-[:_DATA]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n')
+            return [startNodeQ, "MATCH (n)-[:_DATA]->(entity) WITH entity as n", endQ].join('\n')
         when Tag
             return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n')
         when Attribute

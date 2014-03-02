@@ -95,6 +95,7 @@
     }
     console.log("mainMatches: " + mainMatches);
     console.log("relationMatches: " + relMatches);
+    console.log("Skipping: " + skip);
     startNodeQ = (function() {
       var startingNodes;
       startingNodes = _und(mainMatches).reduce(function(start, name) {
@@ -102,7 +103,6 @@
       }, "");
       return "START n=node:__indexName__('name:(" + startingNodes + ")')";
     })();
-    console.log("TESTING: " + skip);
     endQ = "RETURN DISTINCT n AS result SKIP " + skip + " LIMIT " + limit + ";";
     relMatchQ = [];
     for (ind = _i = 0, _len = relMatches.length; _i < _len; ind = ++_i) {
@@ -113,7 +113,7 @@
     relMatchQ = relMatchQ ? relMatchQ.join(' WITH n as n ') : "";
     switch (searchClass) {
       case Data:
-        return [startNodeQ, "MATCH (n)-[:_DATA]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n');
+        return [startNodeQ, "MATCH (n)-[:_DATA]->(entity) WITH entity as n", endQ].join('\n');
       case Tag:
         return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n');
       case Attribute:
@@ -150,7 +150,7 @@
             return attrBlobs = arguments[0];
           };
         })(),
-        lineno: 105
+        lineno: 104
       }));
       EntityUtil.getEntityData(entity, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -158,7 +158,7 @@
             return dataBlobs = arguments[0];
           };
         })(),
-        lineno: 106
+        lineno: 105
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -217,7 +217,7 @@
                   return authorized = arguments[1];
                 };
               })(),
-              lineno: 119
+              lineno: 118
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -242,7 +242,7 @@ _continue()
                       return entitySerialized = arguments[0];
                     };
                   })(),
-                  lineno: 121
+                  lineno: 120
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -291,7 +291,7 @@ _continue()
             return user = arguments[1];
           };
         })(),
-        lineno: 150
+        lineno: 149
       }));
       if (rankingQuery) {
         rankingName = encodeURIComponent(_und.escape(cleanedQuery.substr(8).trim()));
@@ -303,7 +303,7 @@ _continue()
               return result = arguments[1];
             };
           })(),
-          lineno: 162
+          lineno: 161
         }));
       } else {
         for (ind = _i = 0, _len = searchClasses.length; _i < _len; ind = ++_i) {
@@ -318,7 +318,7 @@ _continue()
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, results, ind),
-            lineno: 172
+            lineno: 171
           }));
         }
       }
@@ -349,7 +349,7 @@ _continue()
                   return serialized = arguments[0];
                 };
               })(),
-              lineno: 183
+              lineno: 182
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -393,7 +393,7 @@ _continue()
                         return serialized = arguments[0];
                       };
                     })(),
-                    lineno: 187
+                    lineno: 186
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {
