@@ -5,6 +5,7 @@
 _und       = require 'underscore'
 Logger     = require 'util'
 
+Slug       = require '../util/slug'
 Neo        = require './neo'
 SchemaUtil = require './stdSchema'
 
@@ -55,6 +56,9 @@ Data.DataType =
     NUMBER      : 'number'
     TIME_SERIES : 'timeseries'
     FILE        : 'file'
+
+Data.getSlugTitle = (data) ->
+    Slug.slugify data.name
 
 Data.deserialize = (data) ->
     Neo.deserialize DataSchema, data

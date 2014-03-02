@@ -458,8 +458,10 @@ _addData = (req, res, next) ->
         Entity.get req.params.id, defer err, entity
         Data.create input, defer err, data
 
+    console.log "HI THERE"
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
+    console.log "HI THERE"
     await CypherLinkUtil.createLink data._node,
         entity._node,
         Constants.REL_DATA,
