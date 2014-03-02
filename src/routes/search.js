@@ -95,7 +95,7 @@
     startNodeQ = (function() {
       var startingNodes;
       startingNodes = _und(mainMatches).reduce(function(start, name) {
-        return start + ("\"#" + name + "\"~0.65,");
+        return start + ("\"%23" + name + "\"~0.65,");
       }, "");
       return "START n=node:__indexName__('name:(" + startingNodes + ")')";
     })();
