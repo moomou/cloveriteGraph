@@ -5,10 +5,7 @@
 _und       = require 'underscore'
 Logger     = require 'util'
 
-Setup      = require './setup'
 Neo        = require './neo'
-redis      = Setup.db.redis
-
 SchemaUtil = require './stdSchema'
 
 INDEX_NAME = 'nData'
@@ -31,21 +28,21 @@ Indexes = [
 ]
 
 DataSchema =
-    name: ''
-    dataType: ''    # text, image, video, fixed numeric, timeseries, file
-    srcUrl: ''      # src url
-    srcType: ''     # data type: Binary, DOM, or json
-    selector: ''    # a CSS selector if applicable
-    value: ''
+    name     : ''
+    dataType : '' # text, image, video, fixed numeric, timeseries, file
+    srcUrl   : '' # src url
+    srcType  : '' # data type - Binary, DOM, or json
+    selector : '' # a CSS selector if applicable
+    value    : ''
 
 #Private constructor
 module.exports = class Data extends Neo
     constructor: (@_node) ->
         super @_node
 
-Data.Name = 'nData'
+Data.Name       = 'nData'
 Data.INDEX_NAME = INDEX_NAME
-Data.Indexes = Indexes
+Data.Indexes    = Indexes
 
 Data.SrcType =
     JSON   : 'json'

@@ -112,6 +112,8 @@
     }
     relMatchQ = relMatchQ ? relMatchQ.join(' WITH n as n ') : "";
     switch (searchClass) {
+      case Data:
+        return [startNodeQ, "MATCH (n)-[:_DATA]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n');
       case Tag:
         return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n');
       case Attribute:
@@ -148,7 +150,7 @@
             return attrBlobs = arguments[0];
           };
         })(),
-        lineno: 103
+        lineno: 105
       }));
       EntityUtil.getEntityData(entity, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -156,7 +158,7 @@
             return dataBlobs = arguments[0];
           };
         })(),
-        lineno: 104
+        lineno: 106
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -215,7 +217,7 @@
                   return authorized = arguments[1];
                 };
               })(),
-              lineno: 117
+              lineno: 119
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -240,7 +242,7 @@ _continue()
                       return entitySerialized = arguments[0];
                     };
                   })(),
-                  lineno: 119
+                  lineno: 121
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -289,7 +291,7 @@ _continue()
             return user = arguments[1];
           };
         })(),
-        lineno: 148
+        lineno: 150
       }));
       if (rankingQuery) {
         rankingName = encodeURIComponent(_und.escape(cleanedQuery.substr(8).trim()));
@@ -301,7 +303,7 @@ _continue()
               return result = arguments[1];
             };
           })(),
-          lineno: 160
+          lineno: 162
         }));
       } else {
         for (ind = _i = 0, _len = searchClasses.length; _i < _len; ind = ++_i) {
@@ -316,7 +318,7 @@ _continue()
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, results, ind),
-            lineno: 170
+            lineno: 172
           }));
         }
       }
@@ -347,7 +349,7 @@ _continue()
                   return serialized = arguments[0];
                 };
               })(),
-              lineno: 181
+              lineno: 183
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -391,7 +393,7 @@ _continue()
                         return serialized = arguments[0];
                       };
                     })(),
-                    lineno: 185
+                    lineno: 187
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {

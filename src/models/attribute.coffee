@@ -24,9 +24,9 @@ Indexes = [
 ]
 
 AttributeSchema =
-    name: 'Name of attribute',
-    description: '',
-    tone: 'positive'     #defaults to positive
+    name        : 'Attribute Name'
+    description : ''
+    tone        : 'positive' #defaults to positive
 
 SchemaValidation =
     name: SchemaUtil.required 'string',
@@ -56,9 +56,9 @@ module.exports = class Attribute extends Neo
 # Static Method
 ###
 
-Attribute.Name = 'nAttribute'
+Attribute.Name       = 'nAttribute'
 Attribute.INDEX_NAME = INDEX_NAME
-Attribute.Indexes = Indexes
+Attribute.Indexes    = Indexes
 
 Attribute.validateSchema = (data) ->
     SchemaUtil.validate SchemaValidation, data

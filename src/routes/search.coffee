@@ -84,6 +84,8 @@ cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip =
     relMatchQ = if relMatchQ then relMatchQ.join(' WITH n as n ') else ""
 
     switch searchClass
+        when Data
+            return [startNodeQ, "MATCH (n)-[:_DATA]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n')
         when Tag
             return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n')
         when Attribute

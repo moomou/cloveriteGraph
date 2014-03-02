@@ -439,7 +439,6 @@ exports.voteAttribute = (req, res, next) ->
 # Entity Data Section
 ###
 _addData = (req, res, next) ->
-    # Link the data node to the entity node
     input = _und.clone req.body
     value = null
     delete input['id']
