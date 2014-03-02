@@ -155,6 +155,7 @@
     console.log("I LIKE YOU ");
     data = _und.omit(data, ToOmitKeys);
     data = Class.deserialize(reqBody);
+    console.log("I LIKE YOU ");
     data.slug = Class.getSlugTitle(reqBody);
     console.log("I LIKE YOU ");
     if (data.contributors == null) {
@@ -213,7 +214,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 161
+        lineno: 163
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -236,7 +237,7 @@
               return res = arguments[1];
             };
           })(),
-          lineno: 170
+          lineno: 172
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -282,7 +283,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 190
+            lineno: 192
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -336,7 +337,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 226
+        lineno: 228
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -382,7 +383,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 251
+          lineno: 253
         }));
         __iced_deferrals._fulfill();
       })(function() {

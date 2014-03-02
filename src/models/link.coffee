@@ -2,6 +2,7 @@
 _und         = require 'underscore'
 redis        = require('./setup').db.redis
 
+Slug         = require '../util/slug'
 Constants    = require('../config').Constants
 Neo          = require './neo'
 
@@ -31,6 +32,9 @@ Static Method
 ###
 Link.Name = 'rLink'
 Link.INDEX_NAME = INDEX_NAME
+
+Link.getSlugTitle = (data) ->
+    if data.name then Slug.slugify data.name else ""
 
 Link.deserialize = (data) ->
     Neo.deserialize(LinkSchema, data)

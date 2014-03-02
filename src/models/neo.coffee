@@ -124,6 +124,8 @@ Neo.parseReqBody = (Class, reqBody) ->
     console.log "I LIKE YOU "
     data      = _und.omit data, ToOmitKeys
     data      = Class.deserialize reqBody
+    console.log "I LIKE YOU "
+
     data.slug = Class.getSlugTitle reqBody
 
     console.log "I LIKE YOU "
