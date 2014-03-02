@@ -98,7 +98,7 @@
     console.log("Skipping: " + skip);
     startNodeQ = (function() {
       var startingNodes;
-      startingNodes = _und(mainMatches).reduce(function(start, name) {
+      startingNodes = _und(mainMatches.concat(relMatches)).reduce(function(start, name) {
         return start + ("\"%23" + name + "\"~0.65,");
       }, "");
       return "START n=node:__indexName__('name:(" + startingNodes + ")')";
