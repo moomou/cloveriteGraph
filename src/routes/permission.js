@@ -37,7 +37,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "permission.coffee",
+        filename: "routes/permission.coffee",
         funcname: "getUser"
       });
       redis.get(accessToken, __iced_deferrals.defer({
@@ -60,7 +60,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "permission.coffee",
+          filename: "routes/permission.coffee",
           funcname: "getUser"
         });
         User.get(neoUserId, __iced_deferrals.defer({
@@ -119,7 +119,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "permission.coffee",
+        filename: "routes/permission.coffee",
         funcname: "hasPermission"
       });
       hasLink(user._node, other._node, Constants.REL_ACCESS, "all", __iced_deferrals.defer({
@@ -151,7 +151,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "permission.coffee"
+            filename: "routes/permission.coffee"
           });
           hasPermission(req, res, next, __iced_deferrals.defer({
             assign_fn: (function() {

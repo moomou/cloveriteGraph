@@ -25,68 +25,68 @@ Permission      = require('./permission')
 OTHER_SPLIT_REGEX = /\bwith\b/
 REL_SPLIT_REGEX   = /\bvia\b/
 
-searchableClass = {
-    entity: Entity,
-    attribute: Attribute,
-    tag: Tag
-}
+searchableClass =
+    entity    : Entity
+    attribute : Attribute
+    tag       : Tag
 
-searchFunc = {
-    cypher: Neo.query,
-    lucene: Neo.search
-}
+searchFunc =
+    cypher : Neo.query
+    lucene : Neo.search
 
+# Splits the query into relationship cypher queries
 queryAnalyzer = (searchClass, query) ->
-    #Splits the query into relationship cypher queries
-    mainQuery = otherQuery = relQuery = ''
+    query     = decodeURI query
+    mainQuery = relQuery = contributorQuery = ''
 
     console.log "query: #{query}"
-    [mainQuery, remainder] = query.split(OTHER_SPLIT_REGEX)
 
+    [query, contributorQuery] = query.split '@'
+    console.log "Searching Contributor #{contributorQuery}"
+
+    [mainQuery, remainder]    = query.split ' '
     console.log "mainQuery: #{mainQuery}"
-    [otherQuery, remainder] = remainder.split(REL_SPLIT_REGEX) if remainder
 
-    console.log "otherQuery: #{otherQuery}"
-    console.log "relQuery: #{remainder}"
+    relQuery = remainder.split '#' if remainder
+    console.log "relQuery: #{relQuery}"
 
-    mainQuery = encodeURIComponent _und.escape mainQuery.trim() unless not mainQuery
+    mainQuery = _und(mainQuery.split '#').map((part) ->
+        encodeURIComponent _und.escape part.trim()) if mainQuery
 
-    otherQuery = otherQuery.split(',')
+    relQuery = _und(relQuery)
         .map((item) -> encodeURIComponent _und.escape item.trim())
-        .filter((item) -> item unless not item) unless not otherQuery
+        .filter((item) -> item) if relQuery
 
-    relQuery = remainder.split(',')
-        .map((item) -> encodeURIComponent _und.escape item.trim())
-        .filter((item) -> item unless not item) unless not remainder
+    return cypherQueryConstructor(searchClass, mainQuery, relQuery)
 
-    return cypherQueryConstructor(searchClass, mainQuery, otherQuery, relQuery)
-
-cypherQueryConstructor = (searchClass, name = '', otherMatches = [], relMatches = [], skip = 0, limit = 1000) ->
-    console.log "name: #{name}"
-    console.log "otherMatches: #{otherMatches}"
+cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip = 0, limit = 1000) ->
+    console.log "mainMatches: #{mainMatches}"
     console.log "relationMatches: #{relMatches}"
 
-    #potential injection attack
-    startNodeQ = "START n=node:__indexName__('name:#{name}~0.65')"
-    endQ = "RETURN DISTINCT n AS result SKIP #{skip} LIMIT #{limit};"
+    # potential injection attack
+    startNodeQ = do () ->
+        startingNodes = _und(mainMatches).reduce((start, name) ->
+            start + "\"#{name}\"~0.65,"
+        , "")
+        "START n=node:__indexName__('name:(#{startingNodes})')"
 
-    otherMatchQ = []
+    console.log "TESTING: #{skip}"
 
-    for otherName, ind in otherMatches
-        if ind < relMatches.length
-            relationship = relMatches[ind]
-        else
-            relationship = Constants.REL_ATTRIBUTE
-        otherMatchQ.push("MATCH (n)<-[:#{relationship}]-(other) WHERE other.name=~'(?i)#{decodeURIComponent otherName}'")
+    endQ      = "RETURN DISTINCT n AS result SKIP #{skip} LIMIT #{limit};"
+    relMatchQ = []
 
-    otherMatchQ = otherMatchQ.join(' WITH n as n ')
+    for relName, ind in relMatches
+        relationship = Constants.REL_ATTRIBUTE
+        relMatchQ.push "MATCH (n)<-[:#{relationship}]-(other) WHERE other.name=~'(?i)#{decodeURIComponent relName}'"
+    relMatchQ = if relMatchQ then relMatchQ.join(' WITH n as n ') else ""
 
     switch searchClass
         when Tag
-            return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", otherMatchQ, "WITH n as n", endQ].join('\n')
+            return [startNodeQ, "MATCH (n)-[:_TAG]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n')
         when Attribute
-            return [startNodeQ, "MATCH (n)-[:_ATTRIBUTE]->(entity) WITH entity as n", otherMatchQ, "WITH n as n", endQ].join('\n')
-        else [startNodeQ, otherMatchQ, "WITH n as n", endQ].join('\n')
+            return [startNodeQ, "MATCH (n)-[:_ATTRIBUTE]->(entity) WITH entity as n", relMatchQ, "WITH n as n", endQ].join('\n')
+        else
+            [startNodeQ, relMatchQ, "WITH n as n", endQ].join('\n')
 
 luceneQueryContructor = (query) ->
     queryString = []
@@ -96,10 +96,39 @@ luceneQueryContructor = (query) ->
 
     return queryString.join("AND")
 
+serializeEntity = (entity, cb) ->
+    await
+        EntityUtil.getEntityAttributes entity, defer attrBlobs
+        EntityUtil.getEntityData entity, defer dataBlobs
+
+    cb entity.serialize null,
+        attributes : attrBlobs
+        data       : dataBlobs
+
+serializeSearchResult = (user, searchResult, identified, cb) ->
+    identified  ?= []
+    blobResults  = []
+
+    for obj, ind in searchResult
+        entity = new Entity obj.result
+
+        await Permission.hasPermission user, entity, defer err, authorized
+        continue if not authorized
+        await serializeEntity entity, defer entitySerialized
+
+        # do not duplicate result
+        if not identified[entitySerialized.id]
+            blobResults.push entitySerialized
+            identified[entitySerialized.id] = true
+
+    console.log "ME OK?"
+    cb([blobResults, identified])
+
 # GET /search/:type
 exports.searchHandler = (req, res, next) ->
     Response.OKResponse(res)(200, {}) unless req.query.q
-    queryParams = Fields.parseQuery req
+
+    queryParams  = Fields.parseQuery req
     cleanedQuery = req.query.q.trim()
 
     if req.params.type
@@ -108,29 +137,31 @@ exports.searchHandler = (req, res, next) ->
         searchClasses = _und.values searchableClass
 
     results = []
-    errs = []
+    errs    = []
 
     rankingQuery = cleanedQuery.indexOf("ranking:") >= 0
 
-    #serial searches, continue only if no result
+    # Serial searches, continue only if no result
     await
         Permission.getUser req, defer(errU, user)
 
+        # TODO Don't want if else, should be functional;
         if rankingQuery
             rankingName = encodeURIComponent _und.escape cleanedQuery.substr(8).trim()
-            cQuery = "START n=node:nRanking('name:#{rankingName}~0.25') MATCH (n)-[r:_RANK]->(x)
+            cQuery =
+                "START n=node:nRanking('name:#{rankingName}~0.25') MATCH (n)-[r:_RANK]->(x)
                 RETURN DISTINCT n AS ranking, r.rank AS rank, x AS entity ORDER BY ID(n), r.rank;"
 
             Neo.query Ranking,
                 cQuery,
                 {},
-                defer(errs[ind], rankingResult)
-
-        # TODO Don't want if else, should be functional;
+                defer errs, result
         else
             for searchClass, ind in searchClasses
-                query = queryAnalyzer(searchClass, cleanedQuery)
-                console.log query
+                query = queryAnalyzer searchClass, cleanedQuery
+                console.log "Query: \n #{query.replace('__indexName__', searchClass.INDEX_NAME)}"
+                console.log "=================="
+
                 Neo.query searchClass,
                     query.replace('__indexName__', searchClass.INDEX_NAME),
                     {},
@@ -139,55 +170,20 @@ exports.searchHandler = (req, res, next) ->
     err = _und.find errs, (err) -> err
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    resultBlob = []
-    identified = {}
-
-    if rankingQuery
-        for item, ind in rankingResult
-            sRanking = (new Ranking item.ranking).serialize()
-
-            if not identified[sRanking.id]
-                sRanking.entities = identified[sRanking.id] = []
-                resultBlob.push(sRanking)
-
-            entity = (new Entity item.entity)
-
-            await
-                Permission.hasPermission user, entity, defer(err, authorized)
-
-            continue if not authorized
-
-            await
-                EntityUtil.getEntityAttributes entity, defer(attrBlobs)
-                EntityUtil.getEntityData entity, defer(dataBlobs)
-
-            entitySerialized = entity.serialize null,
-                attributes: attrBlobs
-                data: dataBlobs
-
-            identified[sRanking.id].push(entitySerialized)
-
-        return Response.OKResponse(res)(200, resultBlob)
-
     blobResults = []
-    for result, indX in results
-        for obj, indY in result #always return entity results
-            entity = (new Entity obj.result)
-
-            await Permission.hasPermission user, entity, defer(err, authorized)
-            continue if not authorized
-
-            await
-                EntityUtil.getEntityAttributes(entity, defer(attrBlobs))
-                EntityUtil.getEntityData entity, defer(dataBlobs)
-
-            entitySerialized = entity.serialize null,
-                attributes: attrBlobs
-                data: dataBlobs
-
-            if not identified[entitySerialized.id] #do not duplicate result
-                blobResults.push(entitySerialized)
-                identified[entitySerialized.id] = true
+    identified  = []
 
     # TODO Add next, & prev
+    if rankingQuery
+        entities = _und(results).map (result) -> result.entity
+        await serializeSearchResult user, entities, identified, defer serialized
+        [blobResults, identified] = serialized
+    else
+        for result, ind in results
+            await serializeSearchResult user, result, identified, defer serialized
+            [blobResults[ind], identified] = serialized if serialized.length == 2
+
+        # flatten results
+        blobResults = _und(blobResults).flatten()
+
     Response.OKResponse(res)(200, blobResults)
