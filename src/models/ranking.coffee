@@ -10,6 +10,7 @@
 _und       = require 'underscore'
 Logger     = require 'util'
 
+Slug       = require '../util/slug'
 Neo        = require './neo'
 redis      = require('./setup').db.redis
 
@@ -54,6 +55,9 @@ Ranking.Indexes = Indexes
 
 Ranking.validateSchema = (data) ->
     SchemaUtil.validate SchemaValidation, data
+
+Ranking.getSlugTitle = (data) ->
+    Slug.slugify data.name
 
 Ranking.deserialize = (data) ->
     Neo.deserialize RankingSchema, data

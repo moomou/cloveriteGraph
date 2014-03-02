@@ -318,9 +318,9 @@ _addAttribute = (req, res, next) ->
         console.log linkData
         console.log "__END__"
 
-        console.log "ME OK so far" 
+        console.log "ME OK so far"
         Link.put relId, linkData, ->
-        console.log "ME OK so far" 
+        console.log "ME OK so far"
         rel = path.relationships[0]
     else
         linkData = Link.fillMetaData(linkData)

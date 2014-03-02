@@ -6,6 +6,7 @@ _und       = require 'underscore'
 
 redis      = require('./setup').db.redis
 
+Slug       = require '../util/slug'
 Neo        = require './neo'
 SchemaUtil = require './stdSchema'
 
@@ -41,6 +42,9 @@ module.exports = class Composed extends Neo
 
     @validateSchema = (data) ->
         SchemaUtil.validate _SchemaValidation, data
+
+    @getSlugTitle = (data) ->
+        Slug.slugify data.name
 
     @deserialize = (data) ->
         Neo.deserialize _Schema , data

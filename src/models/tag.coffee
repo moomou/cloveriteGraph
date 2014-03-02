@@ -4,8 +4,8 @@ _und       = require 'underscore'
 
 redis      = require('./setup').db.redis
 
+Slug       = require '../util/slug'
 Neo        = require './neo'
-
 SchemaUtil = require './stdSchema'
 
 INDEX_NAME = 'nTag'
@@ -31,6 +31,9 @@ module.exports = class Tag extends Neo
 Tag.Name = 'nTag'
 Tag.INDEX_NAME = INDEX_NAME
 Tag.Indexes = Indexes
+
+Tag.getSlugTitle = (data) ->
+    Slug.slugify data.name
 
 Tag.deserialize = (data) ->
     Neo.deserialize TagSchema, data
