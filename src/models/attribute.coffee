@@ -6,6 +6,7 @@ _und       = require 'underscore'
 
 redis      = require('./setup').db.redis
 
+Slug       = require '../util/slug'
 Neo        = require './neo'
 SchemaUtil = require './stdSchema'
 
@@ -59,6 +60,9 @@ module.exports = class Attribute extends Neo
 Attribute.Name       = 'nAttribute'
 Attribute.INDEX_NAME = INDEX_NAME
 Attribute.Indexes    = Indexes
+
+Attribute.getSlugTitle = (data) ->
+    Slug.slugify data.name
 
 Attribute.validateSchema = (data) ->
     SchemaUtil.validate SchemaValidation, data
