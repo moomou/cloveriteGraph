@@ -8,6 +8,7 @@ b-cov
 *.gz
 *.swp
 *.map
+bootstrap/venv
 
 pids
 logs

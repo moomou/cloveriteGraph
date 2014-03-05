@@ -15,8 +15,9 @@
   };
 
   exports.RedisKey = {
-    shareTokens: "shareTokens",
-    slugToId: '_slug_to_id'
+    shareToken: "_sharetoken_",
+    slugToId: "_slug_to_id_",
+    superToken: "_supertoken_"
   };
 
   exports.Constants = Constants = {

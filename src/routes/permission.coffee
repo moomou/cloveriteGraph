@@ -10,6 +10,8 @@ Attribute  = require('../models/attribute')
 Tag        = require('../models/tag')
 Link       = require('../models/link')
 
+RedisKey = require('../config').RedisKey
+
 ###
 # Reads http header to get access token
 # Exchange this token for a user unique identifier
@@ -39,7 +41,7 @@ exports.getUser = getUser = (req, cb) ->
 # Permission Related Stuff
 ###
 exports.isAdmin = isAdmin = (accessToken, cb) ->
-    redis.sismember "superToken",
+    redis.sismember RedisKey.superToken,
         accessToken,
         (err, res) ->
             cb(err, res)

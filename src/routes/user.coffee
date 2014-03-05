@@ -116,30 +116,31 @@ basicFeedSetter =
 # Internal API for creating userNode
 ###
 exports.createUser = (req, res, next) ->
+    ErrorResponse = Response.ErrorResponse(res)
+
     console.log "In Create user"
     valid = User.validateSchema req.body
-    return res.status(400).json error: "Invalid input", input: req.body if not valid
+    return ErrorResponse 400, ErrorDevMessage.dataValidationIssue("Missing required data") if not valid
 
     accessToken = req.headers['x-access-token'] ? "none"
 
-    # unique user id
+    # generate unique user id
     await crypto.randomBytes 16, defer(ex, buf)
     userToken = buf.toString('hex')
     userToken = req.body.accessToken = "user_#{userToken}"
 
     # Access token, after user logs in
-    # points to the neo4j userNode Id
+    # points to the neo4j userNode Id.
     Permission.isAdmin accessToken, (err, isSuperAwesome) ->
         if isSuperAwesome
             await User.create req.body, defer(err, user)
             userObj = user.serialize()
 
             redis.set userToken, userObj.id, (err, result) ->
-                return res.json error: err if err
-                return res.status(201).json userObj
+            Response.OKResponse(res)(201, userObj)
         else
             console.log "You are not awesome."
-            res.status(403).json error: "Permission Denied"
+            ErrorResponse 403, ErrorDevMessage.permissionIssue("Not admin")
 
 # GET /user/:id/discussion
 exports.getDiscussion = basicAuthentication basicFeedGetter "discussionFeed"
@@ -168,11 +169,9 @@ exports.getCommented = basicAuthentication getLinkType Constants.REL_COMMENTED
 # GET /user/:id/ranking
 exports.getRanked = basicAuthentication getLinkType Constants.REL_RANKING, Ranking
 
-# GET /user/:id/
+# GET /user/
 exports.getSelf = basicAuthentication (req, res, next) ->
     if not req.unauthenticated
         Response.OKResponse(res)(200, req.user.serialize())
     else
         Response.ErrorResponse(res)(401, ErrorDevMessage.permissionIssue())
-
-######################################

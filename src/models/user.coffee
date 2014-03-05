@@ -16,22 +16,7 @@ INDEX_NAME = 'nUser'
 Indexes = [
     {
         INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'reputation',
-        INDEX_VALUE: ''
-    },
-    {
-        INDEX_NAME: INDEX_NAME,
         INDEX_KEY: 'accessToken',
-        INDEX_VALUE: ''
-    },
-    {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'lastname',
-        INDEX_VALUE: ''
-    },
-    {
-        INDEX_NAME: INDEX_NAME,
-        INDEX_KEY: 'firstname',
         INDEX_VALUE: ''
     },
     {
@@ -50,8 +35,6 @@ UserSchema =
     # Configured Values
     email               : ''
     username            : ''
-    firstname           : ''
-    lastname            : ''
 
     # Calculated Values
     accessToken         : ''
@@ -62,8 +45,8 @@ UserSchema =
 SchemaValidation =
     email     : SchemaUtil.required('string')
     username  : SchemaUtil.required('string')
-    firstname : SchemaUtil.required('string')
-    lastname  : SchemaUtil.required('string')
+
+ToOmitKeys = ["contributors", "slug"]
 
 # Private constructor
 module.exports = class User extends Neo
@@ -72,22 +55,25 @@ module.exports = class User extends Neo
 
     serialize: (cb, extraData) ->
         data = @_node.data
-        if cb
-            cb _und.omit data, ["accesstoken"]
-        _und.omit data, ["accesstoken"]
+        _und.extend data, id: @_node.id, extraData
 
-User.Name = 'nUser'
+        if cb
+            cb _und.omit data, ToOmitKeys
+        else
+            _und.omit data, ToOmitKeys
+
+User.Name       = 'nUser'
 User.INDEX_NAME = INDEX_NAME
-User.Indexes = Indexes
+User.Indexes    = Indexes
 
 User.validateSchema = (data) ->
     SchemaUtil.validate SchemaValidation, data
 
 User.deserialize = (data) ->
-    Neo.deserialize UserSchema, data
+    cleaned = Neo.deserialize UserSchema, data
+    _und.omit cleaned, ToOmitKeys
 
 User.create = (reqBody, cb) ->
-    # a user detail has to be private
     reqBody.private = true
     Neo.create User, reqBody, Indexes, cb
 
@@ -97,7 +83,6 @@ User.get = (id, cb) ->
     if digitOnly
         Neo.get User, id, cb
     else
-        console.log "HI"
         Neo.find User, User.INDEX_NAME, 'username', id, cb
 
 User.getOrCreate = (reqBody, cb) ->

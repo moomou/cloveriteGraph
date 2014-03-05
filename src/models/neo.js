@@ -20,6 +20,7 @@
   /*
   # Normal values related to transaction;
   # Permission not implemented here
+  #
   */
 
   MetaSchema = {
@@ -80,7 +81,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 64
+          lineno: 65
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -98,6 +99,7 @@
         this._node.data.createdAt = new Date().getTime() / 1000;
       }
       this._node.data.version += 1;
+      console.log("saving...");
       return this._node.save(function(err) {
         return cb(err);
       });
@@ -144,7 +146,7 @@
     data = _und.clone(data);
     validKeys = ['id', 'version', 'private'];
     validKeys = _und.union(_und.keys(ClassSchema), validKeys);
-    _und.defaults(data, ClassSchema);
+    cleaned = _und.defaults(data, ClassSchema);
     cleaned = _und.pick(data, validKeys);
     return cleaned;
   };
@@ -152,20 +154,17 @@
   Neo.parseReqBody = function(Class, reqBody) {
     var data, user;
     user = reqBody.user || "anonymous";
-    console.log("I LIKE YOU ");
-    data = _und.omit(data, ToOmitKeys);
     data = Class.deserialize(reqBody);
-    console.log("I LIKE YOU ");
-    data.slug = Class.getSlugTitle(reqBody);
-    console.log("I LIKE YOU ");
+    if (Class.getSlugTitle) {
+      data.slug = Class.getSlugTitle(reqBody);
+    }
+    data = _und.omit(data, ToOmitKeys);
     if (data.contributors == null) {
       data.contributors = [];
     }
     if (__indexOf.call(data.contributors, user) < 0) {
       data.contributors.push(user);
     }
-    console.log(data);
-    console.log("I LIKE YOU ");
     return data;
   };
 
@@ -214,14 +213,13 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 163
+        lineno: 160
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (saveErr) {
         return cb(saveErr, null);
       }
-      console.log("Starting to index");
       Neo.index(node, Class.Indexes, obj.serialize());
       console.log("CREATED: " + Class.Name);
       (function(__iced_k) {
@@ -237,7 +235,7 @@
               return res = arguments[1];
             };
           })(),
-          lineno: 172
+          lineno: 167
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -283,7 +281,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 192
+            lineno: 187
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -337,7 +335,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 228
+        lineno: 223
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -383,7 +381,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 253
+          lineno: 248
         }));
         __iced_deferrals._fulfill();
       })(function() {

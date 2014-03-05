@@ -12,6 +12,7 @@ db       = require('./setup').db
 ###
 # Normal values related to transaction;
 # Permission not implemented here
+#
 ###
 MetaSchema =
     createdAt    : -1    # time created
@@ -75,6 +76,8 @@ module.exports = class Neo
             @_node.data.createdAt = new Date().getTime() / 1000
 
         @_node.data.version += 1
+
+        console.log "saving..."
         @_node.save (err) -> cb err
 
     del: (cb) ->
@@ -114,28 +117,22 @@ Neo.deserialize = (ClassSchema, data) ->
     validKeys = ['id', 'version', 'private']
     validKeys = _und.union(_und.keys(ClassSchema), validKeys)
 
-    _und.defaults data, ClassSchema
+    cleaned = _und.defaults data, ClassSchema
     cleaned = _und.pick data, validKeys
     cleaned
 
 Neo.parseReqBody = (Class, reqBody) ->
     user =  reqBody.user or "anonymous"
 
-    console.log "I LIKE YOU "
-    data      = _und.omit data, ToOmitKeys
     data      = Class.deserialize reqBody
-    console.log "I LIKE YOU "
+    data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
 
-    data.slug = Class.getSlugTitle reqBody
-
-    console.log "I LIKE YOU "
+    data = _und.omit data, ToOmitKeys
     data.contributors ?= []
 
     if user not in data.contributors
         data.contributors.push user
 
-    console.log data
-    console.log "I LIKE YOU "
     data
 
 # Data DB functions.
@@ -164,9 +161,7 @@ Neo.create = (Class, reqBody, indexes, cb) ->
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr
 
-    console.log "Starting to index"
     Neo.index(node, Class.Indexes, obj.serialize())
-
     console.log "CREATED: " + Class.Name
 
     # Update the slug

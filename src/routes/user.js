@@ -301,17 +301,15 @@
   */
 
   exports.createUser = function(req, res, next) {
-    var accessToken, buf, ex, userToken, valid, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref,
+    var ErrorResponse, accessToken, buf, ex, userToken, valid, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
+    ErrorResponse = Response.ErrorResponse(res);
     console.log("In Create user");
     valid = User.validateSchema(req.body);
     if (!valid) {
-      return res.status(400).json({
-        error: "Invalid input",
-        input: req.body
-      });
+      return ErrorResponse(400, ErrorDevMessage.dataValidationIssue("Missing required data"));
     }
     accessToken = (_ref = req.headers['x-access-token']) != null ? _ref : "none";
     (function(__iced_k) {
@@ -327,7 +325,7 @@
             return buf = arguments[1];
           };
         })(),
-        lineno: 125
+        lineno: 127
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -351,25 +349,17 @@
                   return user = arguments[1];
                 };
               })(),
-              lineno: 133
+              lineno: 135
             }));
             __iced_deferrals._fulfill();
           })(function() {
             userObj = user.serialize();
-            return __iced_k(redis.set(userToken, userObj.id, function(err, result) {
-              if (err) {
-                return res.json({
-                  error: err
-                });
-              }
-              return res.status(201).json(userObj);
-            }));
+            redis.set(userToken, userObj.id, function(err, result) {});
+            return __iced_k(Response.OKResponse(res)(201, userObj));
           });
         } else {
           console.log("You are not awesome.");
-          return __iced_k(res.status(403).json({
-            error: "Permission Denied"
-          }));
+          return __iced_k(ErrorResponse(403, ErrorDevMessage.permissionIssue("Not admin")));
         }
       });
     });

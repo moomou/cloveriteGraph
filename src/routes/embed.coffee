@@ -39,23 +39,8 @@ ErrorDevMessage = Response.ErrorDevMessage
 Permission      = require './permission'
 
 _show = (req, res, next) ->
-    if req.query.id
-        slugs = req.query.id.split(" ").map -> encodeURIComponent slug
-        await redis.hget Constants.RedisKey.slugToId, slugs, defer err, ids
-
-        if not result
-            Response.OKResponse(res)(404)
-        else
-            [entityId, dataId] = ids.split ","
-
-            await
-                if entityId
-                    Entity.get req.params.id, defer(err, entity)
-                if dataId[0] == "a"
-                    EntityUtil.getEntityAttributes entity, defer(attrBlobs)
-                else
-                    EntityUtil.getEntityData entity, defer(dataBlobs)
-    else
-        Response.OKResponse(res)(200)
+    entityId = req.query.entity
+    data     = req.query.data
+    Response.OKResponse(res)(200)
 
 exports.show = _show
