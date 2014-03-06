@@ -52,30 +52,35 @@
   };
 
   queryAnalyzer = function(searchClass, query) {
-    var contributorQuery, mainQuery, relQuery, remainder, _ref, _ref1;
+    var contributorQuery, mainQuery, relQuery, remainder, _ref;
     query = decodeURI(query);
     mainQuery = relQuery = contributorQuery = '';
     console.log("query: " + query);
     _ref = query.split('@'), query = _ref[0], contributorQuery = _ref[1];
     console.log("Searching Contributor " + contributorQuery);
-    _ref1 = query.split(' '), mainQuery = _ref1[0], remainder = _ref1[1];
-    console.log("mainQuery: " + mainQuery);
-    if (remainder) {
-      relQuery = remainder.split('#');
+    if (query.trim().indexOf(' ') > 0) {
+      mainQuery = query.substr(0, query.indexOf(' '));
+      remainder = query.substr(query.indexOf(' ') + 1);
+    } else {
+      mainQuery = query;
+      remainder = null;
     }
-    console.log("relQuery: " + relQuery);
     if (mainQuery) {
-      mainQuery = _und(mainQuery.split('#')).map(function(part) {
+      mainQuery = _und(mainQuery.split(',')).map(function(part) {
         return encodeURIComponent(_und.escape(part.trim()));
+      }).filter(function(item) {
+        return item;
       });
     }
     if (relQuery) {
-      relQuery = _und(relQuery).map(function(item) {
+      relQuery = _und(relQuery.split(',')).map(function(item) {
         return encodeURIComponent(_und.escape(item.trim()));
       }).filter(function(item) {
         return item;
       });
     }
+    console.log("mainQuery: " + mainQuery);
+    console.log("relQuery: " + relQuery);
     return cypherQueryConstructor(searchClass, mainQuery, relQuery);
   };
 
@@ -99,7 +104,7 @@
     startNodeQ = (function() {
       var startingNodes;
       startingNodes = _und(mainMatches.concat(relMatches)).reduce(function(start, name) {
-        return start + ("\"%23" + name + "\"~0.65,");
+        return start + ("\"" + name + "\"~0.65,");
       }, "");
       return "START n=node:__indexName__('name:(" + startingNodes + ")')";
     })();
@@ -141,7 +146,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "search.coffee",
+        filename: "routes/search.coffee",
         funcname: "serializeEntity"
       });
       EntityUtil.getEntityAttributes(entity, __iced_deferrals.defer({
@@ -150,7 +155,7 @@
             return attrBlobs = arguments[0];
           };
         })(),
-        lineno: 104
+        lineno: 111
       }));
       EntityUtil.getEntityData(entity, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -158,7 +163,7 @@
             return dataBlobs = arguments[0];
           };
         })(),
-        lineno: 105
+        lineno: 112
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -207,7 +212,7 @@
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
-              filename: "search.coffee",
+              filename: "routes/search.coffee",
               funcname: "serializeSearchResult"
             });
             Permission.hasPermission(user, entity, __iced_deferrals.defer({
@@ -217,7 +222,7 @@
                   return authorized = arguments[1];
                 };
               })(),
-              lineno: 118
+              lineno: 125
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -233,7 +238,7 @@ _continue()
               (function(__iced_k) {
                 __iced_deferrals = new iced.Deferrals(__iced_k, {
                   parent: ___iced_passed_deferral,
-                  filename: "search.coffee",
+                  filename: "routes/search.coffee",
                   funcname: "serializeSearchResult"
                 });
                 serializeEntity(entity, __iced_deferrals.defer({
@@ -242,7 +247,7 @@ _continue()
                       return entitySerialized = arguments[0];
                     };
                   })(),
-                  lineno: 120
+                  lineno: 127
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -281,7 +286,7 @@ _continue()
       var _i, _len;
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "search.coffee",
+        filename: "routes/search.coffee",
         funcname: "searchHandler"
       });
       Permission.getUser(req, __iced_deferrals.defer({
@@ -291,7 +296,7 @@ _continue()
             return user = arguments[1];
           };
         })(),
-        lineno: 149
+        lineno: 156
       }));
       if (rankingQuery) {
         rankingName = encodeURIComponent(_und.escape(cleanedQuery.substr(8).trim()));
@@ -303,7 +308,7 @@ _continue()
               return result = arguments[1];
             };
           })(),
-          lineno: 161
+          lineno: 168
         }));
       } else {
         for (ind = _i = 0, _len = searchClasses.length; _i < _len; ind = ++_i) {
@@ -318,7 +323,7 @@ _continue()
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, results, ind),
-            lineno: 171
+            lineno: 178
           }));
         }
       }
@@ -340,7 +345,7 @@ _continue()
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
-              filename: "search.coffee",
+              filename: "routes/search.coffee",
               funcname: "searchHandler"
             });
             serializeSearchResult(user, entities, identified, __iced_deferrals.defer({
@@ -349,7 +354,7 @@ _continue()
                   return serialized = arguments[0];
                 };
               })(),
-              lineno: 182
+              lineno: 189
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -384,7 +389,7 @@ _continue()
                 (function(__iced_k) {
                   __iced_deferrals = new iced.Deferrals(__iced_k, {
                     parent: ___iced_passed_deferral,
-                    filename: "search.coffee",
+                    filename: "routes/search.coffee",
                     funcname: "searchHandler"
                   });
                   serializeSearchResult(user, result, identified, __iced_deferrals.defer({
@@ -393,7 +398,7 @@ _continue()
                         return serialized = arguments[0];
                       };
                     })(),
-                    lineno: 186
+                    lineno: 193
                   }));
                   __iced_deferrals._fulfill();
                 })(function() {

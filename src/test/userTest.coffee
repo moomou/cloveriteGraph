@@ -17,13 +17,13 @@ describe 'User', () ->
         api.post("#{apiVersion}/user")
             .set("x-access-token", "superman")
             .send({
-                username: "TEST_#{randomId}", email: "#{randomId}@me.com",
-                firstname: "me", lastname: "me"
+                username: "TEST_#{randomId}"
+                email: "#{randomId}@me.com"
             })
             .expect(201)
             .end (err, res) ->
                 response = JSON.parse(res.text)
-                assert.isNumber response.id
+                assert.isNumber response.payload.id
                 userId = response.id
                 done()
 
@@ -31,8 +31,8 @@ describe 'User', () ->
         api.post("#{apiVersion}/user")
             .set("x-access-token", "wonder woman")
             .send({
-                username: "TEST_#{randomId}", email: "#{randomId}@me.com",
-                firstname: "me", lastname: "me"
+                username: "TEST_#{randomId}"
+                email: "#{randomId}@me.com"
             })
             .expect(403, done)
             
@@ -40,6 +40,6 @@ describe 'User', () ->
         api.post("#{apiVersion}/user")
             .set("x-access-token", "superman")
             .send({
-                username: "TEST_#{randomId}", email: "#{randomId}@me.com"
+                username: "TEST_#{randomId}"
             })
             .expect(400, done)

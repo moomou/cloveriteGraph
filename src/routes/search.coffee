@@ -46,20 +46,27 @@ queryAnalyzer = (searchClass, query) ->
     [query, contributorQuery] = query.split '@'
     console.log "Searching Contributor #{contributorQuery}"
 
-    [mainQuery, remainder]    = query.split ' '
-    console.log "mainQuery: #{mainQuery}"
+    if (query.trim().indexOf(' ') > 0)
+        mainQuery = query.substr 0, query.indexOf(' ')
+        remainder = query.substr query.indexOf(' ')+1
+    else
+        mainQuery = query
+        remainder = null
 
-    relQuery = remainder.split '#' if remainder
+    if mainQuery
+        mainQuery = _und(mainQuery.split ',')
+            .map((part) -> encodeURIComponent _und.escape part.trim())
+            .filter((item) -> item)
+
+    if relQuery
+        relQuery = _und(relQuery.split ',')
+            .map((item) -> encodeURIComponent _und.escape item.trim())
+            .filter((item) -> item)
+
+    console.log "mainQuery: #{mainQuery}"
     console.log "relQuery: #{relQuery}"
 
-    mainQuery = _und(mainQuery.split '#').map((part) ->
-        encodeURIComponent _und.escape part.trim()) if mainQuery
-
-    relQuery = _und(relQuery)
-        .map((item) -> encodeURIComponent _und.escape item.trim())
-        .filter((item) -> item) if relQuery
-
-    return cypherQueryConstructor(searchClass, mainQuery, relQuery)
+    cypherQueryConstructor searchClass, mainQuery, relQuery
 
 cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip = 0, limit = 1000) ->
     console.log "mainMatches: #{mainMatches}"
@@ -69,7 +76,7 @@ cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip =
     # potential injection attack
     startNodeQ = do () ->
         startingNodes = _und(mainMatches.concat(relMatches)).reduce((start, name) ->
-            start + "\"%23#{name}\"~0.65,"
+            start + "\"#{name}\"~0.65,"
         , "")
         "START n=node:__indexName__('name:(#{startingNodes})')"
 
