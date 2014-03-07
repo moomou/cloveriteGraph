@@ -44,7 +44,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "hasPermission"
       });
       User.get(req.params.id, __iced_deferrals.defer({
@@ -111,7 +111,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "user.coffee"
+          filename: "routes/user.coffee"
         });
         user._node.getRelationshipNodes({
           type: linkType,
@@ -154,7 +154,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "getFeed"
       });
       redis.lrange(feedId, 0, -1, __iced_deferrals.defer({
@@ -186,7 +186,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "addToFeed"
       });
       redis.lpush(feedId, JSON.stringify(newFeed), __iced_deferrals.defer({
@@ -216,7 +216,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "user.coffee"
+          filename: "routes/user.coffee"
         });
         getFeed(req.params.id, feedType, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -249,7 +249,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "user.coffee"
+          filename: "routes/user.coffee"
         });
         User.find("username", cleandFeed.to, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -271,7 +271,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "user.coffee"
+            filename: "routes/user.coffee"
           });
           addToFeed(receiver, cleanedFeed, FeedClass.name, __iced_deferrals.defer({
             assign_fn: (function() {
@@ -315,7 +315,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "user.coffee",
+        filename: "routes/user.coffee",
         funcname: "createUser"
       });
       crypto.randomBytes(16, __iced_deferrals.defer({
@@ -340,7 +340,7 @@
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral1,
-              filename: "user.coffee"
+              filename: "routes/user.coffee"
             });
             User.create(req.body, __iced_deferrals.defer({
               assign_fn: (function() {
@@ -354,7 +354,7 @@
             __iced_deferrals._fulfill();
           })(function() {
             userObj = user.serialize();
-            redis.set(userToken, userObj.id, function(err, result) {});
+            redis.hset(userToken, "id", userObj.id, function(err, result) {});
             return __iced_k(Response.OKResponse(res)(201, userObj));
           });
         } else {

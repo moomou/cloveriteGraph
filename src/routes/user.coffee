@@ -126,7 +126,7 @@ exports.createUser = (req, res, next) ->
 
     # generate unique user id
     await crypto.randomBytes 16, defer(ex, buf)
-    userToken = buf.toString('hex')
+    userToken = buf.toString 'hex'
     userToken = req.body.accessToken = "user_#{userToken}"
 
     # Access token, after user logs in
@@ -136,7 +136,7 @@ exports.createUser = (req, res, next) ->
             await User.create req.body, defer(err, user)
             userObj = user.serialize()
 
-            redis.set userToken, userObj.id, (err, result) ->
+            redis.hset userToken, "id", userObj.id, (err, result) ->
             Response.OKResponse(res)(201, userObj)
         else
             console.log "You are not awesome."
