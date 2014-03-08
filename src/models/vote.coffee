@@ -1,6 +1,7 @@
 #vote.coffee
 
-_und       = require 'underscore'
+Logger   = require 'util'
+_und     = require 'underscore'
 
 SchemaUtil = require './stdSchema'
 Constants  = require('../config').Constants
@@ -40,12 +41,10 @@ module.exports = class Vote
     constructor: (voteData) ->
         @name = Constants.REL_VOTED
 
-        console.log "Cleaning..."
+        Logger.debug "Creating vote data: #{voteData}"
         data = _und.clone voteData
         data = _und.defaults data, VoteSchema
         data = _und.pick data, _und.keys VoteSchema
-
-        console.log data
 
         @data = data
 

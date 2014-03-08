@@ -37,8 +37,8 @@ module.exports = class Composed extends Neo
         super @_node
     
     @INDEX_NAME = INDEX_NAME
-    @Name = INDEX_NAME
-    @Indexes = Indexes
+    @Name       = INDEX_NAME
+    @Indexes    = Indexes
 
     @validateSchema = (data) ->
         SchemaUtil.validate _SchemaValidation, data

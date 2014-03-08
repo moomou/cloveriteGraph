@@ -1,8 +1,9 @@
 # rank.coffee
 _und      = require 'underscore'
 
-Neo       = require './neo'
+Slug      = require '../util/slug'
 Constants = require('../config').Constants
+Neo       = require './neo'
 
 INDEX_NAME = 'rRank'
 Indexes = [
@@ -18,10 +19,9 @@ Indexes = [
     }
 ]
 
-RankSchema = {
-    rank: -1,
-    rankingName: 'New Ranking',
-}
+RankSchema =
+    rank: -1
+    rankingName: 'New Ranking'
 
 module.exports = class Rank extends Neo
     constructor: (@_node) ->
@@ -32,6 +32,9 @@ Static Method
 ###
 Rank.Name = 'rRank'
 Rank.INDEX_NAME = INDEX_NAME
+
+Rank.getSlugTitle = (data) ->
+    if data.name then Slug.slugify data.name else ""
 
 Rank.deserialize = (data) ->
     Neo.deserialize RankSchema, data

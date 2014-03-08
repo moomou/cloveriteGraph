@@ -41,7 +41,6 @@ module.exports = class Neo
 
     # cb should be last!
     serialize: (cb, extraData) ->
-        console.log "Serializing"
         extraData ?= {}
         data = @_node.data
 
@@ -52,8 +51,8 @@ module.exports = class Neo
 
     # Returns error message if unsuccessful
     update: (newData) ->
-        console.log "Existing VER: #{ @_node.data.version}"
-        console.log "Modifying VER: #{newData.version}"
+        Logger.debug "Existing VER: #{ @_node.data.version}"
+        Logger.debug "Modifying VER: #{newData.version}"
 
         if newData.version != @_node.data.version
             return "Version number incorrect"
@@ -77,7 +76,7 @@ module.exports = class Neo
 
         @_node.data.version += 1
 
-        console.log "saving..."
+        Logger.debug "Saving: #{Logger.inspect @_node.data}"
         @_node.save (err) -> cb err
 
     del: (cb) ->
@@ -106,32 +105,36 @@ Neo.fillIndex = (indexes, data) ->
     result = _und.clone indexes
     data   = _und.clone data
 
-    _und(result).map (index) ->
-        index['INDEX_VALUE'] = encodeURIComponent(data[index['INDEX_KEY']].trim())
+    result = _und(result).filter (index) ->
+        index.INDEX_VALUE = encodeURIComponent data[index.INDEX_KEY].trim()
 
-    _und.filter(result, (index) -> not _und.isUndefined index['INDEX_VALUE'])
+    _und(result).filter (index) ->
+        not _und.isUndefined index.INDEX_VALUE
 
 Neo.deserialize = (ClassSchema, data) ->
     data = _und.clone data
 
     validKeys = ['id', 'version', 'private']
-    validKeys = _und.union(_und.keys(ClassSchema), validKeys)
+    validKeys = _und.union _und.keys(ClassSchema), validKeys
 
     cleaned = _und.defaults data, ClassSchema
-    cleaned = _und.pick data, validKeys
-    cleaned
+
+    _und.pick data, validKeys
 
 Neo.parseReqBody = (Class, reqBody) ->
-    user =  reqBody.user or "anonymous"
+    if reqBody.user
+        user = reqBody.user.serialize()
+    else
+        user = username: "anonymous"
 
-    data      = Class.deserialize reqBody
-    data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
-
+    data = Class.deserialize reqBody
     data = _und.omit data, ToOmitKeys
+
+    data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
     data.contributors ?= []
 
-    if user not in data.contributors
-        data.contributors.push user
+    if user and user not in data.contributors
+        data.contributors.push user.username
 
     data
 
@@ -139,11 +142,12 @@ Neo.parseReqBody = (Class, reqBody) ->
 ##
 
 Neo.index = (node, indexes, reqBody, cb = null) ->
-    console.log "~~~Indexing~~~"
-    console.log reqBody
+    Logger.debug "%%%~~~Indexing~~~%%%"
+    Logger.debug "Data: #{Logger.inspect reqBody}"
 
     for index, i in Neo.fillIndex(indexes, reqBody)
-        console.log index
+        Logger.debug "Index: #{Logger.inspect index}"
+
         node.index index.INDEX_NAME,
             index.INDEX_KEY,
             index.INDEX_VALUE,
@@ -161,8 +165,9 @@ Neo.create = (Class, reqBody, indexes, cb) ->
     await obj.save defer(saveErr)
     return cb(saveErr, null) if saveErr
 
-    Neo.index(node, Class.Indexes, obj.serialize())
-    console.log "CREATED: " + Class.Name
+    Logger.debug "CREATED: #{Class.Name}"
+
+    Neo.index node, Class.Indexes, obj.serialize()
 
     # Update the slug
     await db.redis.hset RedisKey.slugToId, node.data.slug, node.id, defer(err, res)
@@ -175,7 +180,7 @@ Neo.get = (Class, id, cb) ->
             cb(null, new Class node)
 
 Neo.put = (Class, nodeId, reqBody, cb) ->
-    console.log reqBody
+    Logger.debug "#{Class} put: #{Logger.inspect reqBody}"
 
     data         = Neo.parseReqBody Class, reqBody
     data.version = reqBody.version
@@ -197,9 +202,10 @@ Neo.put = (Class, nodeId, reqBody, cb) ->
             return cb validationError: errMsg, obj
 
 Neo.find = (Class, indexName, key, value, cb) ->
-    Logger.debug("Neo Find Index: " + indexName)
-    Logger.debug("Neo Find Key: " + key)
-    Logger.debug("Neo Find Key: " + value)
+    Logger.debug "Neo Find Index: #{indexName}"
+    Logger.debug "Neo Find Key: #{key}"
+    Logger.debug "Neo Find Value: #{value}"
+    Logger.debug "Neo CB : #{cb}"
 
     db.neo.getIndexedNode indexName,
         key,
@@ -210,26 +216,23 @@ Neo.find = (Class, indexName, key, value, cb) ->
             return cb(null, null)
 
 Neo.getOrCreate = (Class, reqBody, cb) ->
-    if reqBody['id']
-        return Class.get reqBody['id'], cb
+    if reqBody.id
+        return Class.get reqBody.id, cb
 
-    Logger.debug 'Neo Get or Create'
-    Logger.debug Class
+    Logger.debug "#{Class}Get or Create"
 
-    # No Id provided, search for it
     await Neo.find Class,
         Class.INDEX_NAME,
-        'name',
-        reqBody['name'],
-        defer(err, obj)
+        'slug',
+        Class.getSlugTitle(reqBody),
+        defer err, obj
 
     if obj
         Logger.debug "Neo Find Returned " + Class.Name + ": " + reqBody.toString()
-        return cb(null, obj) if obj
-
-    #Not found, create
-    return Class.create(reqBody, cb)
-
+        cb null, obj
+    else
+        Logger.debug "Neo didn't find anything"
+        Class.create reqBody, cb
 
 # Relation DB functions
 ##
@@ -252,7 +255,7 @@ Neo.putRel = (Class, relId, reqBody, cb) ->
             Neo.index(obj._node, Class.Indexes, obj.serialize())
             cb(null, obj)
         else
-            console.log "Failed"
+            Logger.error "#{Class} putRel Failed"
             cb(err, obj)
 
 Neo.findRel = (Class, indexName, key, value, cb) ->

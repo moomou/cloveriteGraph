@@ -87,27 +87,37 @@ exports.create = (req, res, next) ->
     await Permission.getUser req, defer(err, user)
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    console.log "Creating Entity"
+    Logger.debug "Creating Entity"
 
-    # anonymous user cannot create private entity
-    req.body.private = false if not user
-    req.body.user    = user
+    reqBody         = _und.clone req.body
+    reqBody.user    = user
+    reqBody.private = false if not user
 
-    errs = []
-    tagObjs = []
+    reqBody.tags = _und.filter reqBody.tags,
+        (tag) -> tag and _und.isString(tag)
 
-    # Create Entity and Tags
+    reqBody.tags.push Constants.TAG_GLOBAL
+
+    errs        = []
+    tagObjs     = []
+
     await
-        Entity.create req.body, defer(err, entity)
-
-    await # Change once figure out tags
-        for tagName, ind in entity.serialize().tags
-            Tag.getOrCreate tagName, defer(errs[ind], tagObjs[ind])
+        Entity.create reqBody, defer err, entity
+        for tagName, ind in reqBody.tags
+            Tag.getOrCreate tagName, defer errs[ind], tagObjs[ind]
 
     err = err or _und.find(errs, (err) -> err)
     return next(err) if err
 
-    linkData = Link.fillMetaData({})
+    linkData = Link.fillMetaData {}
+
+    # link user
+    if user
+        await CypherLinkUtil.createMultipleLinks user._node,
+            entity._node,
+            [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
+            linkData,
+            defer(err, rels)
 
     # "tag" entity
     for tagObj, ind in tagObjs
@@ -121,17 +131,8 @@ exports.create = (req, res, next) ->
                 Constants.REL_TAG,
                 linkData,
                 (err, rel) ->
-
-    # User is not defined for anonymous users
-    if user
-        await CypherLinkUtil.createMultipleLinks user._node,
-            entity._node,
-            [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
-            linkData,
-            defer(err, rels)
-
-    await entity.serialize defer blob
-    Response.OKResponse(res)(201, blob)
+    
+    Response.OKResponse(res)(201, entity.serialize())
 
 # GET /entity/:id
 _show = (req, res, next) ->

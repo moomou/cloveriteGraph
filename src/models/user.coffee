@@ -66,6 +66,9 @@ User.Name       = 'nUser'
 User.INDEX_NAME = INDEX_NAME
 User.Indexes    = Indexes
 
+#User.getSlugTitle = (data) ->
+#    throw "User getSlug Not Implemented"
+
 User.validateSchema = (data) ->
     SchemaUtil.validate SchemaValidation, data
 
@@ -86,7 +89,7 @@ User.get = (id, cb) ->
         Neo.find User, User.INDEX_NAME, 'username', id, cb
 
 User.getOrCreate = (reqBody, cb) ->
-    throw "Not Implemented"
+    throw "User getOrCreate Not Implemented"
 
 User.put = (nodeId, reqBody, cb) ->
     Neo.put User, nodeId, reqBody, cb

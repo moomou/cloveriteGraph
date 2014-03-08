@@ -109,7 +109,7 @@
   };
 
   User.getOrCreate = function(reqBody, cb) {
-    throw "Not Implemented";
+    throw "User getOrCreate Not Implemented";
   };
 
   User.put = function(nodeId, reqBody, cb) {

@@ -1,3 +1,8 @@
+# Schema related.
+#
+# 
+
+Logger  = require 'util'
 _und    = require 'underscore'
 Hashids = require 'hashids'
 
@@ -20,22 +25,19 @@ validationSchema = (required, validator) ->
 # Does not check for required vs optional
 exports.validate = (schemaValidation, input) ->
     result = _und.map schemaValidation, (value, key) ->
-        console.log key
+        Logger.debug "Validing: #{key}"
+
         if value.required
-            console.log "REQUIRED"
             return false if not input[key]
             [valid, _] = value.validator(true, input[key])
             valid
         else if key in input
-            console.log "OPTIONAL"
             [valid, _] = value.validator(true, input[key])
             valid
         else
             true
-    console.log result
-    return false if _und.contains(result, false)
-    console.log "VALID"
-    return true
+
+    not _und.contains(result, false)
 
 exports.required = () ->
     validationSchema true, arguments

@@ -287,15 +287,8 @@
   };
 
   Entity.create = function(reqBody, cb) {
-    var tags;
-    tags = reqBody.tags || [];
-    if (!reqBody.user) {
-      reqBody["private"] = false;
-    }
-    reqBody.tags = _und.filter(tags, function(tag) {
-      return tag && _und.isString(tag);
-    });
-    reqBody.tags.push(Constants.TAG_GLOBAL);
+    Logger.debug("Setting private to: " + reqBody["private"]);
+    Logger.debug("Input: " + (Logger.inspect(reqBody)));
     return Neo.create(Entity, reqBody, Indexes, cb);
   };
 

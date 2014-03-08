@@ -45,6 +45,7 @@ entityAttrNegVoteRedisKey = (id, aId) -> "entity:#{id}::attr:#{aId}::negative"
 module.exports = class Entity extends Neo
     constructor: (@_node) ->
         super @_node
+
     getVoteByUser: (user = null, cb) ->
         if not user
             return cb(null, null)
@@ -54,11 +55,10 @@ module.exports = class Entity extends Neo
             "MATCH (s)-[r:#{Constants.REL_VOTED}]-(e)",
             "RETURN r.attrId AS id, r.attrName AS name, r.tone AS vote ORDER BY r.attrId;"]
 
-        await
-            Neo.query null,
-                cypher.join("\n"),
-                {entityId: @_node.id, userId: userId},
-                defer(err, results)
+        await Neo.query null,
+            cypher.join("\n"),
+            {entityId: @_node.id, userId: userId},
+            defer(err, results)
 
         return cb err, null if err
         cb null, results
@@ -143,19 +143,15 @@ Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data
 
 Entity.create = (reqBody, cb) ->
-    tags = reqBody.tags or []
-
-    reqBody.private = false if not reqBody.user
-    reqBody.tags    = _und.filter tags, (tag) -> tag and _und.isString(tag)
-    reqBody.tags.push Constants.TAG_GLOBAL
-
+    Logger.debug "Setting private to: #{reqBody.private}"
+    Logger.debug "Input: #{Logger.inspect reqBody}"
     Neo.create Entity, reqBody, Indexes, cb
 
 Entity.get = (id, cb) ->
     Neo.get Entity, id, cb
 
 Entity.getOrCreate = (reqBody, cb) ->
-    Logger.debug("Entity getOrCreate")
+    Logger.debug "Entity getOrCreate"
     Neo.getOrCreate Entity, reqBody, cb
 
 Entity.put = (nodeId, reqBody, cb) ->

@@ -1,10 +1,12 @@
 #link.coffee
-_und         = require 'underscore'
-redis        = require('./setup').db.redis
 
-Slug         = require '../util/slug'
-Constants    = require('../config').Constants
-Neo          = require './neo'
+Logger    = require 'util'
+_und      = require 'underscore'
+redis     = require('./setup').db.redis
+
+Slug      = require '../util/slug'
+Constants = require('../config').Constants
+Neo       = require './neo'
 
 INDEX_NAME = 'rLink'
 Indexes = [
@@ -55,9 +57,9 @@ Link.fillMetaData = (linkData) ->
 
     linkData.createdAt =
         linkData.modifiedAt = new Date().getTime() / 1000
-
     linkData.version += 1
-    return linkData
+
+    linkData
 
 Link.find = (key, value, cb) ->
     Neo.findRel(Link, Link.INDEX_NAME, key, value, cb)
@@ -66,11 +68,10 @@ Link.get = (id, cb) ->
     Neo.getRel(Link, id, cb)
 
 Link.put = (relId, reqBody, cb) ->
-    console.log "Link PUT: "
-    Neo.put(Link, relId, reqBody, cb)
+    Neo.put Link, relId, reqBody, cb
 
 Link.create = (reqBody, cb) ->
-    linkName  = Link.normalizeName(reqBody['name'])
+    linkName = Link.normalizeName(reqBody['name'])
     linkData = Link.normalizeData(reqBody['data'])
 
     res = {
@@ -78,5 +79,7 @@ Link.create = (reqBody, cb) ->
         data: linkData
     }
 
-    cb(null, res) if cb
-    res
+    if cb
+        cb(null, res)
+    else
+        res
