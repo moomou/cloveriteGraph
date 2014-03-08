@@ -23,7 +23,7 @@
       debugging: 'blue'
     },
     logLevel: "debug",
-    logFile: "" + (os.tmpdir()) + "api.log"
+    logFile: "" + (os.tmpdir()) + "/api.log"
   };
 
   exports.Security = {
