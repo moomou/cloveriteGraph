@@ -2,11 +2,11 @@
 #
 # Defines the field and schema of the user object in neo4j.
 
-Logger     = require 'util'
 _und       = require 'underscore'
 
 redis      = require('./setup').db.redis
 
+Logger     = require '../util/logger'
 Neo        = require './neo'
 Constants  = require('../config').Constants
 SchemaUtil = require './stdSchema'

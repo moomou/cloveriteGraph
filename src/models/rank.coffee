@@ -1,6 +1,10 @@
 # rank.coffee
+#
+# For managing rank 
+
 _und      = require 'underscore'
 
+Logger    = require '../util/logger'
 Slug      = require '../util/slug'
 Constants = require('../config').Constants
 Neo       = require './neo'

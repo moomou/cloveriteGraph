@@ -2,11 +2,11 @@
 #
 # Defines the fields of entity
 
-Logger     = require 'util'
 _und       = require 'underscore'
 
 redis      = require('./setup').db.redis
 
+Logger     = require '../util/logger'
 Slug       = require '../util/slug'
 SchemaUtil = require './stdSchema'
 Neo        = require './neo'
@@ -143,8 +143,6 @@ Entity.deserialize = (data) ->
     Neo.deserialize EntitySchema, data
 
 Entity.create = (reqBody, cb) ->
-    Logger.debug "Setting private to: #{reqBody.private}"
-    Logger.debug "Input: #{Logger.inspect reqBody}"
     Neo.create Entity, reqBody, Indexes, cb
 
 Entity.get = (id, cb) ->

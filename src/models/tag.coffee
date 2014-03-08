@@ -4,7 +4,7 @@ _und       = require 'underscore'
 
 redis      = require('./setup').db.redis
 
-Logger     = require 'util'
+Logger     = require '../util/logger'
 Slug       = require '../util/slug'
 Neo        = require './neo'
 SchemaUtil = require './stdSchema'

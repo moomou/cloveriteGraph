@@ -11,7 +11,7 @@
 
   redis = require('../models/setup').db.redis;
 
-  Logger = require('util');
+  Logger = require('../util/logger');
 
   Permission = require('./permission');
 
@@ -44,7 +44,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/user.coffee",
+        filename: "user.coffee",
         funcname: "hasPermission"
       });
       User.get(req.params.id, __iced_deferrals.defer({
@@ -54,7 +54,7 @@
             return other = arguments[1];
           };
         })(),
-        lineno: 29
+        lineno: 28
       }));
       Permission.getUser(req, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -63,7 +63,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 30
+        lineno: 29
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -88,7 +88,7 @@
           unauthenticated: false
         });
       }
-      console.log("Public View");
+      Logger.info("Public View");
       return cb(false, null, _und.extend(reqWithUser, {
         unauthenticated: true
       }));
@@ -111,7 +111,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/user.coffee"
+          filename: "user.coffee"
         });
         user._node.getRelationshipNodes({
           type: linkType,
@@ -154,7 +154,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/user.coffee",
+        filename: "user.coffee",
         funcname: "getFeed"
       });
       redis.lrange(feedId, 0, -1, __iced_deferrals.defer({
@@ -186,7 +186,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/user.coffee",
+        filename: "user.coffee",
         funcname: "addToFeed"
       });
       redis.lpush(feedId, JSON.stringify(newFeed), __iced_deferrals.defer({
@@ -216,7 +216,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/user.coffee"
+          filename: "user.coffee"
         });
         getFeed(req.params.id, feedType, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -249,7 +249,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/user.coffee"
+          filename: "user.coffee"
         });
         User.find("username", cleandFeed.to, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -271,7 +271,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "routes/user.coffee"
+            filename: "user.coffee"
           });
           addToFeed(receiver, cleanedFeed, FeedClass.name, __iced_deferrals.defer({
             assign_fn: (function() {
@@ -305,8 +305,8 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
+    Logger.debug("In Create user");
     ErrorResponse = Response.ErrorResponse(res);
-    console.log("In Create user");
     valid = User.validateSchema(req.body);
     if (!valid) {
       return ErrorResponse(400, ErrorDevMessage.dataValidationIssue("Missing required data"));
@@ -315,7 +315,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/user.coffee",
+        filename: "user.coffee",
         funcname: "createUser"
       });
       crypto.randomBytes(16, __iced_deferrals.defer({
@@ -325,7 +325,7 @@
             return buf = arguments[1];
           };
         })(),
-        lineno: 127
+        lineno: 129
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -340,7 +340,7 @@
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral1,
-              filename: "routes/user.coffee"
+              filename: "user.coffee"
             });
             User.create(req.body, __iced_deferrals.defer({
               assign_fn: (function() {
@@ -349,7 +349,7 @@
                   return user = arguments[1];
                 };
               })(),
-              lineno: 135
+              lineno: 137
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -358,7 +358,7 @@
             return __iced_k(Response.OKResponse(res)(201, userObj));
           });
         } else {
-          console.log("You are not awesome.");
+          Logger.info("Non admin tried to create user!");
           return __iced_k(ErrorResponse(403, ErrorDevMessage.permissionIssue("Not admin")));
         }
       });

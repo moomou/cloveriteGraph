@@ -1,8 +1,8 @@
 #vote.coffee
 
-Logger   = require 'util'
-_und     = require 'underscore'
+_und       = require 'underscore'
 
+Logger     = require '../util/logger'
 SchemaUtil = require './stdSchema'
 Constants  = require('../config').Constants
 

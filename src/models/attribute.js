@@ -7,11 +7,11 @@
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
 
-  Logger = require('util');
-
   _und = require('underscore');
 
   redis = require('./setup').db.redis;
+
+  Logger = require('../util/logger');
 
   Slug = require('../util/slug');
 

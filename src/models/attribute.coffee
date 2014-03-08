@@ -1,11 +1,11 @@
 #attribute.coffee
 #attribute model logic.
 
-Logger     = require 'util'
 _und       = require 'underscore'
 
 redis      = require('./setup').db.redis
 
+Logger     = require '../util/logger'
 Slug       = require '../util/slug'
 Neo        = require './neo'
 SchemaUtil = require './stdSchema'

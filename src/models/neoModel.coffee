@@ -1,7 +1,7 @@
-Logger = require 'util'
 
 _und   = require 'underscore'
 
+Logger = require '../util/logger'
 db     = require('./setup').db
 
 class Neo

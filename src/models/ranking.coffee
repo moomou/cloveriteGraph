@@ -8,8 +8,8 @@
 #                      }
 
 _und       = require 'underscore'
-Logger     = require 'util'
 
+Logger     = require '../util/logger'
 Slug       = require '../util/slug'
 Neo        = require './neo'
 redis      = require('./setup').db.redis

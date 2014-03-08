@@ -5,16 +5,17 @@
 
 _und = require('underscore')
 
-Constants  = require('../../config').Constants
+Constants = require('../../config').Constants
+Logger    = require '../../util/logger'
 
-Neo        = require '../../models/neo'
+Neo       = require '../../models/neo'
 
-User       = require '../../models/user'
-Entity     = require '../../models/entity'
-Data       = require '../../models/data'
-Attribute  = require '../../models/attribute'
-Tag        = require '../../models/tag'
-Link       = require '../../models/link'
+User      = require '../../models/user'
+Entity    = require '../../models/entity'
+Data      = require '../../models/data'
+Attribute = require '../../models/attribute'
+Tag       = require '../../models/tag'
+Link      = require '../../models/link'
 
 exports.getStartEndIndex = getStartEndIndex = (start, rel, end) ->
     "#{start}_#{rel}_#{end}"
@@ -88,14 +89,13 @@ exports.cleanAttributes = (entity, cb) ->
     # The logic here should be if an attribute is over 10800 (3 days) old
     # and has no votes more than 2, remove link by marking as disabled
     ###
-    console.log votesPerAttribute
+    Logger.debug "Votes per attribute: #{votesPerAttribute}"
+
     rels = {}
     await
         for vote, ind in votesPerAttribute
             vote = vote[0]
             if vote.count < THRESHOLD
-                console.log "examining..."
-                console.log(now - (nodes[ind].data.createdAt))
                 if now - nodes[ind].data.createdAt >= 10800
                     startendVal = getStartEndIndex(nodes[ind].id,
                         Constants.REL_ATTRIBUTE,
@@ -104,9 +104,7 @@ exports.cleanAttributes = (entity, cb) ->
                     Link.find('startend', startendVal, defer(err, rels[ind]))
 
     for rel, ind in _und(rels).values()
-        console.log rel
         rel._node.data.disabled = true
-        console.log rel
         rel.save()
 
     cb()

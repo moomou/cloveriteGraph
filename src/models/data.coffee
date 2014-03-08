@@ -3,8 +3,8 @@
 # Model for data.
 
 _und       = require 'underscore'
-Logger     = require 'util'
 
+Logger     = require '../util/logger'
 Slug       = require '../util/slug'
 Neo        = require './neo'
 SchemaUtil = require './stdSchema'

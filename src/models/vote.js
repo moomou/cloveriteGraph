@@ -4,9 +4,9 @@
 
 
 
-  Logger = require('util');
-
   _und = require('underscore');
+
+  Logger = require('../util/logger');
 
   SchemaUtil = require('./stdSchema');
 

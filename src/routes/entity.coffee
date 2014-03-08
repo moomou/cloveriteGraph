@@ -5,7 +5,7 @@
 _und            = require('underscore')
 redis           = require('../models/setup').db.redis
 
-Logger          = require 'util'
+Logger          = require '../util/logger'
 Remote          = require '../remote/remote'
 
 Neo             = require '../models/neo'
@@ -45,7 +45,6 @@ getRelationId = (path) ->
 
 hasPermission = (req, res, next, cb) ->
     ErrorResponse = Response.ErrorResponse(res)
-    console.log req.params
     await Slug.resolveSlug req.params.id, defer(err, resolvedId)
 
     if not NumUtil.isNum resolvedId
@@ -148,7 +147,6 @@ _show = (req, res, next) ->
         if req.query.data != "false"
             EntityUtil.getEntityData entity, defer(dataBlobs)
 
-    console.log " I dont believe it"
     entityBlob = entity.serialize null,
         attributes: attrBlobs
         data: dataBlobs
@@ -205,7 +203,6 @@ _del = (req, res, next) ->
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     await entity.del defer(err)
-    console.log err
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     Response.OKResponse(res)(204)
@@ -228,7 +225,6 @@ _showUsers = (req, res, next) ->
             {type:Constants.REL_CREATED, direction: "in"}],
             defer(err, nodes)
 
-    console.log err
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
     blobs = []
@@ -289,9 +285,7 @@ _addAttribute = (req, res, next) ->
         req.params.id
     )
 
-    console.log "__NEW__"
-    console.log linkData
-    console.log "__END__"
+    Logger.debug "New Link Data: #{linkData}"
 
     # hasLink returns the link if it exists
     await CypherLinkUtil.hasLink entity._node,
@@ -309,19 +303,13 @@ _addAttribute = (req, res, next) ->
 
         existingLinkData = link.serialize()
 
-        console.log "__EXISTING__"
-        console.log existingLinkData
-        console.log "__END__"
+        Logger.debug "EXISTING linkdata:  #{existingLinkData}"
 
         linkData = _und.extend existingLinkData, linkData
 
-        console.log "__MERGED__"
-        console.log linkData
-        console.log "__END__"
+        Logger.debug "MERGED linkdata: #{linkData}"
 
-        console.log "ME OK so far"
         Link.put relId, linkData, ->
-        console.log "ME OK so far"
         rel = path.relationships[0]
     else
         linkData = Link.fillMetaData(linkData)
@@ -333,8 +321,7 @@ _addAttribute = (req, res, next) ->
 
         return next(err) if err
 
-    console.log "INDEXING LINK..."
-    Link.index(rel, linkData)
+    Link.index rel, linkData
 
     await attr.serialize defer blob
     _und.extend blob, linkData: linkData
@@ -463,10 +450,8 @@ _addData = (req, res, next) ->
         Entity.get req.params.id, defer err, entity
         Data.create input, defer err, data
 
-    console.log "HI THERE"
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    console.log "HI THERE"
     await CypherLinkUtil.createLink data._node,
         entity._node,
         Constants.REL_DATA,
@@ -490,7 +475,6 @@ _listData = (req, res, next) ->
 
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    console.log "WHAT"
     await EntityUtil.getEntityData entity, defer(blobs)
     Response.OKResponse(res)(200, blobs)
 

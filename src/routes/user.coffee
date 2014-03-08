@@ -5,23 +5,22 @@ _und            = require('underscore')
 crypto          = require('crypto')
 redis           = require('../models/setup').db.redis
 
-Logger          = require('util')
-Permission      = require('./permission')
+Logger          = require '../util/logger'
+Permission      = require './permission'
 
-User            = require('../models/user')
-Entity          = require('../models/entity')
-Attribute       = require('../models/attribute')
-Tag             = require('../models/tag')
+User            = require '../models/user'
+Entity          = require '../models/entity'
+Attribute       = require '../models/attribute'
+Tag             = require '../models/tag'
 
-Request         = require('../models/request')
-Recommendation  = require('../models/recommendation')
-Ranking         = require('../models/ranking')
+Request         = require '../models/request'
+Recommendation  = require '../models/recommendation'
+Ranking         = require '../models/ranking'
 
 Constants       = require('../config').Constants
 
-Response        = require('./util/response')
+Response        = require './util/response'
 ErrorDevMessage = Response.ErrorDevMessage
-
 
 hasPermission = (req, res, next, cb) ->
     ErrorResponse = Response.ErrorResponse(res)
@@ -53,7 +52,8 @@ hasPermission = (req, res, next, cb) ->
         return cb false, null, reqWithUser, unauthenticated: false
 
     # Grant permission only for public assets under the user
-    console.log "Public View"
+    Logger.info "Public View"
+
     return cb false, null, _und.extend reqWithUser, unauthenticated: true
 
 basicAuthentication = Permission.authCurry hasPermission
@@ -116,11 +116,13 @@ basicFeedSetter =
 # Internal API for creating userNode
 ###
 exports.createUser = (req, res, next) ->
-    ErrorResponse = Response.ErrorResponse(res)
+    Logger.debug "In Create user"
 
-    console.log "In Create user"
-    valid = User.validateSchema req.body
-    return ErrorResponse 400, ErrorDevMessage.dataValidationIssue("Missing required data") if not valid
+    ErrorResponse = Response.ErrorResponse(res)
+    valid         = User.validateSchema req.body
+
+    if not valid
+        return ErrorResponse 400, ErrorDevMessage.dataValidationIssue("Missing required data")
 
     accessToken = req.headers['x-access-token'] ? "none"
 
@@ -139,7 +141,7 @@ exports.createUser = (req, res, next) ->
             redis.hset userToken, "id", userObj.id, (err, result) ->
             Response.OKResponse(res)(201, userObj)
         else
-            console.log "You are not awesome."
+            Logger.info "Non admin tried to create user!"
             ErrorResponse 403, ErrorDevMessage.permissionIssue("Not admin")
 
 # GET /user/:id/discussion

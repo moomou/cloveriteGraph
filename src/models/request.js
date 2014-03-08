@@ -6,7 +6,7 @@
 
   _und = require('underscore');
 
-  Logger = require('util');
+  Logger = require('../util/logger');
 
   Setup = require('./setup');
 

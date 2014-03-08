@@ -6,11 +6,11 @@
 
 
 
-  Logger = require('util');
-
   _und = require('underscore');
 
   redis = require('./setup').db.redis;
+
+  Logger = require('../util/logger');
 
   Neo = require('./neo');
 

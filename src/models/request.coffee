@@ -1,8 +1,8 @@
 #request.coffee
 
 _und       = require 'underscore'
-Logger     = require 'util'
 
+Logger     = require '../util/logger'
 Setup      = require './setup'
 Neo        = require './neo'
 

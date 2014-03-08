@@ -1,27 +1,67 @@
 supertest = require('supertest')
 
-chai = require('chai')
+chai   = require('chai')
 should = chai.should()
 assert = chai.assert
+app    = require('../app').app
 
-app = require('../app').app
-
-api = supertest(app)
+api        = supertest(app)
 apiVersion = app.version
 
-userId = 53
-accessToken = "user_d06dbc5cf2449cec33ff2aad1c4c9632"
-ranks = [18, 19, 20]
-
 describe 'Rank', () ->
-    rankId = null
-    it 'should return 201 when creating new rank', (done) ->
+    entityIds = []
+    rankId    = null
+    userToken = null
+    username  = null
+    userId    = null
+
+    # Populating entity in db
+    before (done) ->
+        randomId = '#'+(Math.random()*0xFFFFFF<<0).toString(16)
+
+        api.post("#{apiVersion}/entity/")
+            .send(name: randomId)
+            .end (err, res) ->
+                response = JSON.parse(res.text)
+                entityIds.push response.payload.id
+                done()
+
+    # Populating entity 2 in db
+    before (done) ->
+        randomId = '#'+(Math.random()*0xFFFFFF<<0).toString(16)
+
+        api.post("#{apiVersion}/entity/")
+            .send(name: randomId)
+            .end (err, res) ->
+                response = JSON.parse(res.text)
+                entityIds.push response.payload.id
+                done()
+
+    # Populating user in db
+    before (done) ->
+        api.post("#{apiVersion}/user")
+            .set("x-access-token", "superman")
+            .send({
+                username: "TEST_rankTestUser"
+                email: "rankTestUser@cloverite.com"
+            })
+            .end (err, res) ->
+                response  = JSON.parse res.text
+                userToken = response.payload.accessToken
+                username  = response.payload.username
+                userId    = response.payload.id
+                done()
+
+    it 'should return 201 when creating new ranking', (done) ->
         api.post("#{apiVersion}/user/#{userId}/ranking")
-            .send({name: "TEST_ranking", ranks: ranks})
-            .set('x-access-token', accessToken)
+            .send({name: "TEST_ranking", ranks: entityIds})
+            .set('x-access-token', userToken)
             .expect(201)
             .end (err, res) ->
-                console.log res.text
                 response = JSON.parse(res.text)
-                console.log response
+
+                response.payload.should.have.id
+                response.payload.ranks.should.eql entityIds
+                response.payload.contributors.should.eql [username]
+
                 done()

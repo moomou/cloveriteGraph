@@ -2,10 +2,23 @@
 #
 # Contains constants and other misc. settings for the api server.
 
+os      = require 'os'
 Hashids = require 'hashids'
 
-exports.log =
-    level: "debug"
+exports.Winston =
+    customLevels :
+        debugging : 0
+        debug     : 1
+        info      : 2
+        error     : 3
+    color:
+        silly     : 'white'
+        debug     : 'white'
+        info      : 'green'
+        error     : 'red'
+        debugging : 'blue'
+    logLevel     : "debug"
+    logFile      : "#{os.tmpdir()}api.log"
 
 exports.Security =
     hashids: new Hashids("Trust.Aspire.Succeed.Profit", 10)

@@ -7,9 +7,9 @@
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
 
-  Logger = require('util');
-
   _und = require('underscore');
+
+  Logger = require('../util/logger');
 
   db = require('./setup').db;
 
@@ -137,7 +137,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/neoModel.coffee",
+          filename: "neoModel.coffee",
           funcname: "Node.create"
         });
         _save(obj, __iced_deferrals.defer({
@@ -190,7 +190,7 @@
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
-              filename: "models/neoModel.coffee"
+              filename: "neoModel.coffee"
             });
             _save(obj(__iced_deferrals.defer({
               assign_fn: (function() {
@@ -301,7 +301,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/neoModel.coffee"
+          filename: "neoModel.coffee"
         });
         obj._node.save(__iced_deferrals.defer({
           assign_fn: (function() {
@@ -364,7 +364,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "models/neoModel.coffee",
+        filename: "neoModel.coffee",
         funcname: "getOrCreate"
       });
       Neo.find(Class, Class.INDEX_NAME, 'name', reqBody['name'], __iced_deferrals.defer({

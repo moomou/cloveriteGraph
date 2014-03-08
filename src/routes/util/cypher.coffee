@@ -1,5 +1,6 @@
 #Construction Cypher Queries and
-_und = require('underscore')
+_und   = require('underscore')
+Logger = require '../../util/logger'
 
 class CypherQueryBuilder
     instance = null
@@ -31,16 +32,21 @@ class CypherLinkUtil
             1,              # depth
             'shortestPath', #algo - cannot change?
             (err, path) ->
-                console.log "hasLink finished"
+                Logger.debugging "Cypher hasLink finished"
                 return cb(err, null) if err
                 if path then cb(null, path) else cb(null, false)
 
     @createLink: (startNode, otherNode, linkType, linkData, cb) ->
-        console.log "Creating linkType: #{linkType}"
+        Logger.debug "Creating linkType: #{linkType}"
+        Logger.debug "StartingNode: #{startNode.id}"
+        Logger.debug "OtherNode: #{otherNode.id}"
+        Logger.debug "LinkType: #{linkType}"
+
         startNode.createRelationshipTo otherNode,
             linkType,
             linkData,
             (err, link) ->
+                Logger.debug "Finished with err: #{err}"
                 return cb(new Error("Unable to create link"), null) if err
                 return cb(null, link)
 
@@ -70,14 +76,11 @@ class CypherLinkUtil
                 "all",
                 defer(err, path)
         if err
-            console.log "UpdateLink ERR"
+            Logger.error "UpdateLink ERR #{err}"
             return cb("Unable to retrieve link", null)
         else if not path
-            console.log "UpdateLink Didn't find path"
-            return cb("Link does not exist", null)
-
-        console.log "UpdateLinking..."
-        console.log linkData
+            Logger.debug "UpdateLink Didn't find path"
+            return cb "Link does not exist", null
 
         relId = @getRelationId path
         Class.put relId, linkData, cb

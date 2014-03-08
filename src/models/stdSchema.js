@@ -5,11 +5,11 @@
 
 
 
-  Logger = require('util');
-
   _und = require('underscore');
 
   Hashids = require('hashids');
+
+  Logger = require('../util/logger');
 
   _validator = function(valid, validate, input) {
     if (!valid) {

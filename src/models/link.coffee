@@ -1,9 +1,9 @@
 #link.coffee
 
-Logger    = require 'util'
 _und      = require 'underscore'
 redis     = require('./setup').db.redis
 
+Logger     = require '../util/logger'
 Slug      = require '../util/slug'
 Constants = require('../config').Constants
 Neo       = require './neo'

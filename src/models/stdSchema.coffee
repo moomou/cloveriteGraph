@@ -2,9 +2,10 @@
 #
 # 
 
-Logger  = require 'util'
 _und    = require 'underscore'
 Hashids = require 'hashids'
+
+Logger  = require '../util/logger'
 
 _validator = (valid, validate, input) ->
     return [false, input] if not valid

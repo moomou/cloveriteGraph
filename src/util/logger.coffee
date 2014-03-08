@@ -1,4 +1,14 @@
-config = require '../config'
-Log    = require 'log'
+_und    = require 'underscore'
+winston = require 'winston'
 
-exports.logger = new Log config.log.level
+config  = require '../config'
+
+logger = new (winston.Logger)({
+    levels: config.Winston.customLevels
+    transports: [
+        new (winston.transports.Console)(level: config.Winston.logLevel)
+        new (winston.transports.File)(filename: config.Winston.logFile)
+    ]
+})
+
+_und.extend exports, logger

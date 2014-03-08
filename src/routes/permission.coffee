@@ -1,16 +1,22 @@
 #Utility.coffee
-_und       = require('underscore')
+_und           = require('underscore')
 
-redis      = require('../models/setup').db.redis
+redis          = require('../models/setup').db.redis
 
-Constants  = require('../config').Constants
-User       = require('../models/user')
-Entity     = require('../models/entity')
-Attribute  = require('../models/attribute')
-Tag        = require('../models/tag')
-Link       = require('../models/link')
+Constants      = require('../config').Constants
+Logger         = require '../util/logger'
 
-RedisKey = require('../config').RedisKey
+User           = require('../models/user')
+Entity         = require('../models/entity')
+Attribute      = require('../models/attribute')
+Tag            = require('../models/tag')
+Link           = require('../models/link')
+
+Cypher         = require './util/cypher'
+CypherBuilder  = Cypher.CypherBuilder
+CypherLinkUtil = Cypher.CypherLinkUtil
+
+RedisKey       = require('../config').RedisKey
 
 ###
 # Reads http header to get access token
@@ -26,10 +32,10 @@ exports.getUser = getUser = (req, cb) ->
     err = user = null
 
     if not neoUserId # Anonymous users
-        console.log "No such user"
-        return cb(null, null)
+        Logger.debug "No such user"
+        return cb null, null
 
-    console.log "Utility.getUser #{neoUserId}"
+    Logger.debug "Utility.getUser #{neoUserId}"
     await User.get neoUserId, defer(err, user)
 
     if err
@@ -61,17 +67,19 @@ exports.hasPermission = (user, other, cb) ->
     if not user
         return cb(null, false)
 
-    await
-        hasLink user._node,
-            other._node,
-            Constants.REL_ACCESS,
-            "all",
-            defer(err, path)
+    await CypherLinkUtil.hasLink user._node,
+        other._node,
+        Constants.REL_ACCESS,
+        "all",
+        defer err, path
 
-    if not path
-        cb(null, false)
+    if err
+        cb err, null
     else
-        cb(null, true)
+        if path
+            cb null, true
+        else
+            cb null, false
 
 exports.authCurry =
     (hasPermission) ->

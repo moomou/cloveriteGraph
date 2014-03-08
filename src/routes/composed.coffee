@@ -6,11 +6,12 @@
 require('source-map-support').install()
 _und = require('underscore')
 
-Neo        = require('../models/neo')
-Entity     = require('../models/entity')
-Composed   = require('../models/composed')
-Tag        = require('../models/tag')
-Link       = require('../models/link')
+Logger     = require '../util/logger'
+Neo        = require '../models/neo'
+Entity     = require '../models/entity'
+Composed   = require '../models/composed'
+Tag        = require '../models/tag'
+Link       = require '../models/link'
 Constants  = require('../config').Constants
 
 Cypher         = require './util/cypher'
@@ -31,10 +32,8 @@ _create = (req, res, next) ->
 
     await
         for tagName, ind in composed.serialize().tags
-            console.log tagName
             Tag.getOrCreate tagName, defer(errs[ind], tagObjs[ind])
         for entityId, ind in composed.serialize().entityId
-            console.log entityId
             Entity.get entityId, defer(_, entityObjs[ind])
 
     err = _und.find(errs, (err) -> err) or err

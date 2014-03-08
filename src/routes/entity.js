@@ -9,7 +9,7 @@
 
   redis = require('../models/setup').db.redis;
 
-  Logger = require('util');
+  Logger = require('../util/logger');
 
   Remote = require('../remote/remote');
 
@@ -67,11 +67,10 @@
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     ErrorResponse = Response.ErrorResponse(res);
-    console.log(req.params);
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "hasPermission"
       });
       Slug.resolveSlug(req.params.id, __iced_deferrals.defer({
@@ -81,7 +80,7 @@
             return resolvedId = arguments[1];
           };
         })(),
-        lineno: 48
+        lineno: 47
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -91,7 +90,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "hasPermission"
         });
         Entity.get(resolvedId, __iced_deferrals.defer({
@@ -101,7 +100,7 @@
               return entity = arguments[1];
             };
           })(),
-          lineno: 54
+          lineno: 53
         }));
         Permission.getUser(req, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -110,7 +109,7 @@
               return user = arguments[1];
             };
           })(),
-          lineno: 55
+          lineno: 54
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -127,7 +126,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "routes/entity.coffee",
+            filename: "entity.coffee",
             funcname: "hasPermission"
           });
           Permission.hasPermission(user, entity, __iced_deferrals.defer({
@@ -137,7 +136,7 @@
                 return authorized = arguments[1];
               };
             })(),
-            lineno: 65
+            lineno: 64
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -172,7 +171,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "create"
       });
       Permission.getUser(req, __iced_deferrals.defer({
@@ -182,7 +181,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 86
+        lineno: 85
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -205,7 +204,7 @@
         var _i, _len, _ref;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "create"
         });
         Entity.create(reqBody, __iced_deferrals.defer({
@@ -215,7 +214,7 @@
               return entity = arguments[1];
             };
           })(),
-          lineno: 104
+          lineno: 103
         }));
         _ref = reqBody.tags;
         for (ind = _i = 0, _len = _ref.length; _i < _len; ind = ++_i) {
@@ -227,7 +226,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, tagObjs, ind),
-            lineno: 106
+            lineno: 105
           }));
         }
         __iced_deferrals._fulfill();
@@ -244,7 +243,7 @@
             (function(__iced_k) {
               __iced_deferrals = new iced.Deferrals(__iced_k, {
                 parent: ___iced_passed_deferral,
-                filename: "routes/entity.coffee",
+                filename: "entity.coffee",
                 funcname: "create"
               });
               CypherLinkUtil.createMultipleLinks(user._node, entity._node, [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED], linkData, __iced_deferrals.defer({
@@ -254,7 +253,7 @@
                     return rels = arguments[1];
                   };
                 })(),
-                lineno: 119
+                lineno: 118
               }));
               __iced_deferrals._fulfill();
             })(__iced_k);
@@ -284,7 +283,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_show"
       });
       Entity.get(req.resolvedId, __iced_deferrals.defer({
@@ -294,7 +293,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 138
+        lineno: 137
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -306,7 +305,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_show"
         });
         if (req.query.attribute !== "false") {
@@ -316,7 +315,7 @@
                 return attrBlobs = arguments[0];
               };
             })(),
-            lineno: 146
+            lineno: 145
           }));
         }
         if (req.query.data !== "false") {
@@ -326,12 +325,11 @@
                 return dataBlobs = arguments[0];
               };
             })(),
-            lineno: 148
+            lineno: 147
           }));
         }
         __iced_deferrals._fulfill();
       })(function() {
-        console.log(" I dont believe it");
         entityBlob = entity.serialize(null, {
           attributes: attrBlobs,
           data: dataBlobs
@@ -352,7 +350,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_edit"
       });
       Entity.put(req.resolvedId, req.body, __iced_deferrals.defer({
@@ -362,7 +360,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 162
+        lineno: 160
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -380,7 +378,7 @@
         var _i, _len, _ref;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_edit"
         });
         _ref = entity.serialize().tags;
@@ -393,7 +391,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, tagObjs, ind),
-            lineno: 173
+            lineno: 171
           }));
         }
         __iced_deferrals._fulfill();
@@ -433,7 +431,7 @@
               (function(__iced_k) {
                 __iced_deferrals = new iced.Deferrals(__iced_k, {
                   parent: ___iced_passed_deferral,
-                  filename: "routes/entity.coffee",
+                  filename: "entity.coffee",
                   funcname: "_edit"
                 });
                 CypherLinkUtil.hasLink(tagObj._node, entity._node, Constants.REL_ATTRIBUTE, "all", __iced_deferrals.defer({
@@ -443,7 +441,7 @@
                       return pathExists = arguments[1];
                     };
                   })(),
-                  lineno: 187
+                  lineno: 185
                 }));
                 __iced_deferrals._fulfill();
               })(function() {
@@ -456,7 +454,7 @@
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
-              filename: "routes/entity.coffee",
+              filename: "entity.coffee",
               funcname: "_edit"
             });
             entity.serialize(__iced_deferrals.defer({
@@ -465,7 +463,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 196
+              lineno: 194
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -486,7 +484,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_del"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -496,7 +494,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 203
+        lineno: 201
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -506,7 +504,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_del"
         });
         entity.del(__iced_deferrals.defer({
@@ -515,11 +513,10 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 206
+          lineno: 204
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        console.log(err);
         if (err) {
           return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue());
         }
@@ -543,7 +540,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_showUsers"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -553,7 +550,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 220
+        lineno: 217
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -563,7 +560,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_showUsers"
         });
         entity._node.getRelationshipNodes([
@@ -584,12 +581,11 @@
               return nodes = arguments[1];
             };
           })(),
-          lineno: 228
+          lineno: 225
         }));
         __iced_deferrals._fulfill();
       })(function() {
         var _i, _len;
-        console.log(err);
         if (err) {
           return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue());
         }
@@ -613,7 +609,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_showUserVoteDetail"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -623,7 +619,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 243
+        lineno: 239
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -633,7 +629,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_showUserVoteDetail"
         });
         entity.getVoteByUser(req.user, __iced_deferrals.defer({
@@ -643,7 +639,7 @@
               return blobs = arguments[1];
             };
           })(),
-          lineno: 246
+          lineno: 242
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -667,7 +663,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_listAttribute"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -677,7 +673,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 257
+        lineno: 253
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -687,7 +683,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_listAttribute"
         });
         EntityUtil.getEntityAttributes(entity, __iced_deferrals.defer({
@@ -696,7 +692,7 @@
               return blobs = arguments[0];
             };
           })(),
-          lineno: 260
+          lineno: 256
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -721,7 +717,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_addAttribute"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -731,7 +727,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 278
+        lineno: 274
       }));
       Attribute.getOrCreate(data, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -740,7 +736,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 279
+        lineno: 275
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -750,13 +746,11 @@
       }
       linkData = Link.normalizeData(_und.clone(req.body || {}));
       linkData['startend'] = EntityUtil.getStartEndIndex(attr._node.id, Constants.REL_ATTRIBUTE, req.params.id);
-      console.log("__NEW__");
-      console.log(linkData);
-      console.log("__END__");
+      Logger.debug("New Link Data: " + linkData);
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_addAttribute"
         });
         CypherLinkUtil.hasLink(entity._node, attr._node, Constants.REL_ATTRIBUTE, "all", __iced_deferrals.defer({
@@ -766,7 +760,7 @@
               return path = arguments[1];
             };
           })(),
-          lineno: 300
+          lineno: 294
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -776,7 +770,7 @@
             (function(__iced_k) {
               __iced_deferrals = new iced.Deferrals(__iced_k, {
                 parent: ___iced_passed_deferral,
-                filename: "routes/entity.coffee",
+                filename: "entity.coffee",
                 funcname: "_addAttribute"
               });
               Link.get(relId, __iced_deferrals.defer({
@@ -786,21 +780,15 @@
                     return link = arguments[1];
                   };
                 })(),
-                lineno: 307
+                lineno: 301
               }));
               __iced_deferrals._fulfill();
             })(function() {
               existingLinkData = link.serialize();
-              console.log("__EXISTING__");
-              console.log(existingLinkData);
-              console.log("__END__");
+              Logger.debug("EXISTING linkdata:  " + existingLinkData);
               linkData = _und.extend(existingLinkData, linkData);
-              console.log("__MERGED__");
-              console.log(linkData);
-              console.log("__END__");
-              console.log("ME OK so far");
+              Logger.debug("MERGED linkdata: " + linkData);
               Link.put(relId, linkData, function() {});
-              console.log("ME OK so far");
               return __iced_k(rel = path.relationships[0]);
             });
           } else {
@@ -808,7 +796,7 @@
             (function(__iced_k) {
               __iced_deferrals = new iced.Deferrals(__iced_k, {
                 parent: ___iced_passed_deferral,
-                filename: "routes/entity.coffee",
+                filename: "entity.coffee",
                 funcname: "_addAttribute"
               });
               CypherLinkUtil.createLink(attr._node, entity._node, Constants.REL_ATTRIBUTE, linkData, __iced_deferrals.defer({
@@ -818,7 +806,7 @@
                     return rel = arguments[1];
                   };
                 })(),
-                lineno: 331
+                lineno: 319
               }));
               __iced_deferrals._fulfill();
             })(function() {
@@ -829,12 +817,11 @@
             });
           }
         })(function() {
-          console.log("INDEXING LINK...");
           Link.index(rel, linkData);
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
               parent: ___iced_passed_deferral,
-              filename: "routes/entity.coffee",
+              filename: "entity.coffee",
               funcname: "_addAttribute"
             });
             attr.serialize(__iced_deferrals.defer({
@@ -843,7 +830,7 @@
                   return blob = arguments[0];
                 };
               })(),
-              lineno: 338
+              lineno: 325
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -867,7 +854,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_delAttribute"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -877,7 +864,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 348
+        lineno: 335
       }));
       Attribute.get(req.params.aId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -886,7 +873,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 349
+        lineno: 336
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -897,7 +884,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_delAttribute"
         });
         Link.find('startend', startendVal, __iced_deferrals.defer({
@@ -907,7 +894,7 @@
               return link = arguments[1];
             };
           })(),
-          lineno: 357
+          lineno: 344
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -935,7 +922,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_getAttribute"
       });
       Link.find('startend', startendVal, __iced_deferrals.defer({
@@ -945,7 +932,7 @@
             return rel = arguments[1];
           };
         })(),
-        lineno: 380
+        lineno: 367
       }));
       Attribute.get(attrId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -954,7 +941,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 381
+        lineno: 368
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -965,7 +952,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_getAttribute"
         });
         attr.serialize(__iced_deferrals.defer({
@@ -974,7 +961,7 @@
               return blob = arguments[0];
             };
           })(),
-          lineno: 386
+          lineno: 373
         }), entityId);
         __iced_deferrals._fulfill();
       })(function() {
@@ -1003,7 +990,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_updateAttributeLink"
       });
       Attribute.get(attrId, __iced_deferrals.defer({
@@ -1013,7 +1000,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 404
+        lineno: 391
       }));
       Link.put(linkData['id'], linkData, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1022,7 +1009,7 @@
             return rel = arguments[1];
           };
         })(),
-        lineno: 405
+        lineno: 392
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1048,7 +1035,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "voteAttribute"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -1058,7 +1045,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 420
+        lineno: 407
       }));
       Attribute.get(req.params.aId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1067,7 +1054,7 @@
             return attr = arguments[1];
           };
         })(),
-        lineno: 421
+        lineno: 408
       }));
       Permission.getUser(req, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1076,7 +1063,7 @@
             return user = arguments[1];
           };
         })(),
-        lineno: 422
+        lineno: 409
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1128,7 +1115,7 @@
                 (function(__iced_k) {
                   __iced_deferrals = new iced.Deferrals(__iced_k, {
                     parent: ___iced_passed_deferral,
-                    filename: "routes/entity.coffee",
+                    filename: "entity.coffee",
                     funcname: "_addData"
                   });
                   Remote.getJSONData(input.srcUrl, __iced_deferrals.defer({
@@ -1138,7 +1125,7 @@
                         return value = arguments[1];
                       };
                     })(),
-                    lineno: 455
+                    lineno: 442
                   }));
                   __iced_deferrals._fulfill();
                 })(__iced_k);
@@ -1148,7 +1135,7 @@
                     (function(__iced_k) {
                       __iced_deferrals = new iced.Deferrals(__iced_k, {
                         parent: ___iced_passed_deferral,
-                        filename: "routes/entity.coffee",
+                        filename: "entity.coffee",
                         funcname: "_addData"
                       });
                       Remote.getDOMData(input.srcUrl, input.selector, __iced_deferrals.defer({
@@ -1158,7 +1145,7 @@
                             return value = arguments[1];
                           };
                         })(),
-                        lineno: 457
+                        lineno: 444
                       }));
                       __iced_deferrals._fulfill();
                     })(__iced_k);
@@ -1180,7 +1167,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_addData"
         });
         Entity.get(req.params.id, __iced_deferrals.defer({
@@ -1190,7 +1177,7 @@
               return entity = arguments[1];
             };
           })(),
-          lineno: 462
+          lineno: 449
         }));
         Data.create(input, __iced_deferrals.defer({
           assign_fn: (function() {
@@ -1199,19 +1186,17 @@
               return data = arguments[1];
             };
           })(),
-          lineno: 463
+          lineno: 450
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        console.log("HI THERE");
         if (err) {
           return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue());
         }
-        console.log("HI THERE");
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "routes/entity.coffee",
+            filename: "entity.coffee",
             funcname: "_addData"
           });
           CypherLinkUtil.createLink(data._node, entity._node, Constants.REL_DATA, {}, __iced_deferrals.defer({
@@ -1221,7 +1206,7 @@
                 return rel = arguments[1];
               };
             })(),
-            lineno: 473
+            lineno: 458
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -1251,7 +1236,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "_listData"
       });
       Entity.get(req.params.id, __iced_deferrals.defer({
@@ -1261,18 +1246,17 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 488
+        lineno: 473
       }));
       __iced_deferrals._fulfill();
     })(function() {
       if (err) {
         return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue());
       }
-      console.log("WHAT");
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "_listData"
         });
         EntityUtil.getEntityData(entity, __iced_deferrals.defer({
@@ -1281,7 +1265,7 @@
               return blobs = arguments[0];
             };
           })(),
-          lineno: 493
+          lineno: 477
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -1312,7 +1296,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "listRelation"
       });
       Neo.query(Link, query, {}, __iced_deferrals.defer({
@@ -1322,7 +1306,7 @@
             return rels = arguments[1];
           };
         })(),
-        lineno: 514
+        lineno: 498
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1331,7 +1315,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "routes/entity.coffee",
+          filename: "entity.coffee",
           funcname: "listRelation"
         });
         for (ind = _i = 0, _len = rels.length; _i < _len; ind = ++_i) {
@@ -1352,7 +1336,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(blobs, ind),
-            lineno: 533
+            lineno: 517
           }), extraData);
         }
         __iced_deferrals._fulfill();
@@ -1378,7 +1362,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/entity.coffee",
+        filename: "entity.coffee",
         funcname: "linkEntity"
       });
       Entity.get(req.params.srcId, __iced_deferrals.defer({
@@ -1388,7 +1372,7 @@
             return srcEntity = arguments[1];
           };
         })(),
-        lineno: 541
+        lineno: 525
       }));
       Entity.get(req.params.dstId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1397,7 +1381,7 @@
             return dstEntity = arguments[1];
           };
         })(),
-        lineno: 542
+        lineno: 526
       }));
       __iced_deferrals._fulfill();
     })(function() {

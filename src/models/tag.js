@@ -10,7 +10,7 @@
 
   redis = require('./setup').db.redis;
 
-  Logger = require('util');
+  Logger = require('../util/logger');
 
   Slug = require('../util/slug');
 

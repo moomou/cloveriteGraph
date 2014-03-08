@@ -14,6 +14,7 @@ Vote            = require('../models/vote')
 Attribute       = require('../models/attribute')
 Tag             = require('../models/tag')
 
+Logger          = require '../util/logger'
 Constants       = require('../config').Constants
 
 Fields          = require('./util/fields')
@@ -41,10 +42,10 @@ queryAnalyzer = (searchClass, query) ->
     query     = decodeURI query
     mainQuery = relQuery = contributorQuery = ''
 
-    console.log "query: #{query}"
+    Logger.debug "Incoming raw query: #{query}"
 
     [query, contributorQuery] = query.split '@'
-    console.log "Searching Contributor #{contributorQuery}"
+    Logger.debug "Searching Contributor #{contributorQuery}"
 
     if (query.trim().indexOf(' ') > 0)
         mainQuery = query.substr 0, query.indexOf(' ')
@@ -63,15 +64,16 @@ queryAnalyzer = (searchClass, query) ->
             .map((item) -> encodeURIComponent _und.escape item.trim())
             .filter((item) -> item)
 
-    console.log "mainQuery: #{mainQuery}"
-    console.log "relQuery: #{relQuery}"
+    Logger.info "mainQuery: #{mainQuery}"
+    Logger.info "relQuery: #{relQuery}"
 
     cypherQueryConstructor searchClass, mainQuery, relQuery
 
 cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip = 0, limit = 1000) ->
-    console.log "mainMatches: #{mainMatches}"
-    console.log "relationMatches: #{relMatches}"
-    console.log "Skipping: #{skip}"
+    Logger.debug "mainMatches: #{mainMatches}"
+    Logger.debug "relationMatches: #{relMatches}"
+
+    Logger.info "Skipping: #{skip}"
 
     # potential injection attack
     startNodeQ = do () ->
@@ -132,7 +134,6 @@ serializeSearchResult = (user, searchResult, identified, cb) ->
             blobResults.push entitySerialized
             identified[entitySerialized.id] = true
 
-    console.log "ME OK?"
     cb([blobResults, identified])
 
 # GET /search/:type
@@ -170,8 +171,8 @@ exports.searchHandler = (req, res, next) ->
         else
             for searchClass, ind in searchClasses
                 query = queryAnalyzer searchClass, cleanedQuery
-                console.log "Query: \n #{query.replace('__indexName__', searchClass.INDEX_NAME)}"
-                console.log "=================="
+                Logger.debug "Query: \n #{query.replace('__indexName__', searchClass.INDEX_NAME)}"
+                Logger.debug "=================="
 
                 Neo.query searchClass,
                     query.replace('__indexName__', searchClass.INDEX_NAME),

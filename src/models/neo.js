@@ -6,9 +6,9 @@
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
 
-  Logger = require('util');
-
   _und = require('underscore');
+
+  Logger = require('../util/logger');
 
   Slug = require('../util/slug');
 
@@ -71,7 +71,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "neo.coffee",
+          filename: "models/neo.coffee",
           funcname: "Neo.update"
         });
         db.redis.hdel(RedisKey.slugToId, _this._node.data.slug, __iced_deferrals.defer({
@@ -98,7 +98,7 @@
         this._node.data.createdAt = new Date().getTime() / 1000;
       }
       this._node.data.version += 1;
-      Logger.debug("Saving: " + (Logger.inspect(this._node.data)));
+      Logger.debug("Saving: " + this._node.data);
       return this._node.save(function(err) {
         return cb(err);
       });
@@ -178,12 +178,12 @@
       cb = null;
     }
     Logger.debug("%%%~~~Indexing~~~%%%");
-    Logger.debug("Data: " + (Logger.inspect(reqBody)));
+    Logger.debug("Data: " + reqBody);
     _ref = Neo.fillIndex(indexes, reqBody);
     _results = [];
     for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
       index = _ref[i];
-      Logger.debug("Index: " + (Logger.inspect(index)));
+      Logger.debug("Index: " + index);
       _results.push(node.index(index.INDEX_NAME, index.INDEX_KEY, index.INDEX_VALUE, function(err, ind) {
         if (cb && err) {
           cb(err, null);
@@ -201,6 +201,7 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
+    Logger.debug("Creating " + Class + " using : " + reqBody);
     data = Neo.parseReqBody(Class, reqBody);
     _und.defaults(data, MetaSchema);
     node = db.neo.createNode(data);
@@ -208,7 +209,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "neo.coffee",
+        filename: "models/neo.coffee",
         funcname: "create"
       });
       obj.save(__iced_deferrals.defer({
@@ -217,7 +218,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 164
+        lineno: 166
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -229,7 +230,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "neo.coffee",
+          filename: "models/neo.coffee",
           funcname: "create"
         });
         db.redis.hset(RedisKey.slugToId, node.data.slug, node.id, __iced_deferrals.defer({
@@ -239,7 +240,7 @@
               return res = arguments[1];
             };
           })(),
-          lineno: 172
+          lineno: 174
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -259,7 +260,7 @@
 
   Neo.put = function(Class, nodeId, reqBody, cb) {
     var data;
-    Logger.debug("" + Class + " put: " + (Logger.inspect(reqBody)));
+    Logger.debug("" + Class + " put: " + reqBody);
     data = Neo.parseReqBody(Class, reqBody);
     data.version = reqBody.version;
     return Class.get(nodeId, function(err, obj) {
@@ -277,7 +278,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "neo.coffee"
+            filename: "models/neo.coffee"
           });
           obj.save(__iced_deferrals.defer({
             assign_fn: (function() {
@@ -285,7 +286,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 192
+            lineno: 194
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -329,7 +330,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "neo.coffee",
+        filename: "models/neo.coffee",
         funcname: "getOrCreate"
       });
       Neo.find(Class, Class.INDEX_NAME, 'slug', Class.getSlugTitle(reqBody), __iced_deferrals.defer({
@@ -339,7 +340,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 227
+        lineno: 229
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -377,7 +378,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "neo.coffee"
+          filename: "models/neo.coffee"
         });
         obj._node.save(__iced_deferrals.defer({
           assign_fn: (function() {
@@ -385,7 +386,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 251
+          lineno: 252
         }));
         __iced_deferrals._fulfill();
       })(function() {

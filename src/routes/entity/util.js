@@ -5,7 +5,7 @@
 */
 
 (function() {
-  var Attribute, Constants, Data, Entity, Link, Neo, THRESHOLD, Tag, User, getStartEndIndex, iced, __iced_k, __iced_k_noop, _und;
+  var Attribute, Constants, Data, Entity, Link, Logger, Neo, THRESHOLD, Tag, User, getStartEndIndex, iced, __iced_k, __iced_k_noop, _und;
 
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
@@ -13,6 +13,8 @@
   _und = require('underscore');
 
   Constants = require('../../config').Constants;
+
+  Logger = require('../../util/logger');
 
   Neo = require('../../models/neo');
 
@@ -55,7 +57,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 27
+        lineno: 28
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -79,7 +81,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rels, ind),
-            lineno: 37
+            lineno: 38
           }));
           (new Attribute(node)).serialize(__iced_deferrals.defer({
             assign_fn: (function(__slot_1, __slot_2) {
@@ -87,7 +89,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(attrBlobs, ind),
-            lineno: 38
+            lineno: 39
           }), entity._node.id);
         }
         __iced_deferrals._fulfill();
@@ -131,7 +133,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 51
+        lineno: 52
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -183,7 +185,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 69
+        lineno: 70
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -211,7 +213,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(votesPerAttribute, ind),
-            lineno: 82
+            lineno: 83
           }));
         }
         __iced_deferrals._fulfill();
@@ -222,7 +224,7 @@
         # The logic here should be if an attribute is over 10800 (3 days) old
         # and has no votes more than 2, remove link by marking as disabled
         */
-        console.log(votesPerAttribute);
+        Logger.debug("Votes per attribute: " + votesPerAttribute);
         rels = {};
         (function(__iced_k) {
           var _i, _len;
@@ -235,8 +237,6 @@
             vote = votesPerAttribute[ind];
             vote = vote[0];
             if (vote.count < THRESHOLD) {
-              console.log("examining...");
-              console.log(now - nodes[ind].data.createdAt);
               if (now - nodes[ind].data.createdAt >= 10800) {
                 startendVal = getStartEndIndex(nodes[ind].id, Constants.REL_ATTRIBUTE, entity._node.id);
                 Link.find('startend', startendVal, __iced_deferrals.defer({
@@ -257,9 +257,7 @@
           _ref = _und(rels).values();
           for (ind = _i = 0, _len = _ref.length; _i < _len; ind = ++_i) {
             rel = _ref[ind];
-            console.log(rel);
             rel._node.data.disabled = true;
-            console.log(rel);
             rel.save();
           }
           return cb();

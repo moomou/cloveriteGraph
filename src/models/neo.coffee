@@ -2,9 +2,9 @@
 #
 # The base model that other model derives from.
 
-Logger   = require 'util'
 _und     = require 'underscore'
 
+Logger   = require '../util/logger'
 Slug     = require '../util/slug'
 RedisKey = require('../config').RedisKey
 db       = require('./setup').db
@@ -76,7 +76,7 @@ module.exports = class Neo
 
         @_node.data.version += 1
 
-        Logger.debug "Saving: #{Logger.inspect @_node.data}"
+        Logger.debug "Saving: #{@_node.data}"
         @_node.save (err) -> cb err
 
     del: (cb) ->
@@ -143,10 +143,10 @@ Neo.parseReqBody = (Class, reqBody) ->
 
 Neo.index = (node, indexes, reqBody, cb = null) ->
     Logger.debug "%%%~~~Indexing~~~%%%"
-    Logger.debug "Data: #{Logger.inspect reqBody}"
+    Logger.debug "Data: #{reqBody}"
 
     for index, i in Neo.fillIndex(indexes, reqBody)
-        Logger.debug "Index: #{Logger.inspect index}"
+        Logger.debug "Index: #{index}"
 
         node.index index.INDEX_NAME,
             index.INDEX_KEY,
@@ -156,6 +156,8 @@ Neo.index = (node, indexes, reqBody, cb = null) ->
                 cb(null, ind) if cb
 
 Neo.create = (Class, reqBody, indexes, cb) ->
+    Logger.debug "Creating #{Class} using : #{reqBody}"
+
     data = Neo.parseReqBody Class, reqBody
     _und.defaults data, MetaSchema
 
@@ -180,7 +182,7 @@ Neo.get = (Class, id, cb) ->
             cb(null, new Class node)
 
 Neo.put = (Class, nodeId, reqBody, cb) ->
-    Logger.debug "#{Class} put: #{Logger.inspect reqBody}"
+    Logger.debug "#{Class} put: #{reqBody}"
 
     data         = Neo.parseReqBody Class, reqBody
     data.version = reqBody.version
@@ -236,7 +238,6 @@ Neo.getOrCreate = (Class, reqBody, cb) ->
 
 # Relation DB functions
 ##
-
 Neo.getRel = (Class, id, cb) ->
     db.neo.getRelationshipById id,
         (err, rel) ->

@@ -5,11 +5,11 @@
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
 
-  Logger = require('util');
-
   _und = require('underscore');
 
   redis = require('./setup').db.redis;
+
+  Logger = require('../util/logger');
 
   Neo = require('./neo');
 
@@ -36,7 +36,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/redisModel.coffee",
+          filename: "redisModel.coffee",
           funcname: "RedisModel._save"
         });
         redis.set("" + prefix + ":" + id, jsonString, __iced_deferrals.defer({
@@ -66,7 +66,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/redisModel.coffee",
+          filename: "redisModel.coffee",
           funcname: "RedisModel._load"
         });
         redis.get("" + prefix + ":" + id, __iced_deferrals.defer({
@@ -121,7 +121,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/redisModel.coffee",
+          filename: "redisModel.coffee",
           funcname: "RedisModel.update"
         });
         _this.show(id, __iced_deferrals.defer({

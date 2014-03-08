@@ -2,30 +2,29 @@
 # 
 
 _und            = require('underscore')
-
 redis           = require('../models/setup').db.redis
 
-Logger          = require('util')
-Neo             = require('../models/neo')
+Logger          = require '../util/logger'
+Neo             = require '../models/neo'
 
-User            = require('../models/user')
-Entity          = require('../models/entity')
-Attribute       = require('../models/attribute')
-Tag             = require('../models/tag')
+User            = require '../models/user'
+Entity          = require '../models/entity'
+Attribute       = require '../models/attribute'
+Tag             = require '../models/tag'
 
-Ranking         = require('../models/ranking')
-Rank            = require('../models/rank')
+Ranking         = require '../models/ranking'
+Rank            = require '../models/rank'
 
-Permission      = require('./permission')
+Permission      = require './permission'
 Constants       = require('../config').Constants
+Security        = require('../config').Security
 
-EntityUtil      = require('./entity/util')
-
-Cypher          = require('./util/cypher')
+EntityUtil      = require './entity/util'
+Cypher          = require './util/cypher'
 CypherBuilder   = Cypher.CypherBuilder
 CypherLinkUtil  = Cypher.CypherLinkUtil
 
-Response        = require('./util/response')
+Response        = require './util/response'
 ErrorDevMessage = Response.ErrorDevMessage
 
 hasPermission = (req, res, next, cb) ->
@@ -61,14 +60,15 @@ basicAuthentication = Permission.authCurry hasPermission
 
 # create a new ranking
 _create = (req, res, next) ->
+    # Steps
     # create a new ranking node
     # get user node
     # connect the two using ranking link
+    
     if not req.body.name or not req.body.ranks
         return Response.ErrorResponse(res)(400, ErrorDevMessage.missingParam("name or rank"))
 
-    req.body.createdBy = req.user._node.data.username
-
+    req.body.user = req.user
     await Ranking.create req.body, defer(err, ranking)
 
     # TODO: Make a generic relationship model class
@@ -77,7 +77,7 @@ _create = (req, res, next) ->
             {},
             (err, rel) ->
 
-    errs = []
+    errs     = []
     entities = []
 
     await
@@ -94,12 +94,15 @@ _create = (req, res, next) ->
                 {rank: rank + 1, rankingName: ranking.serialize().name},
                 defer(errs[rank], rankLinks[rank])
 
-    shareToken = SchemaUtil.Security.hashids.encrypt ranking._node.id
+    Logger.debug "Finished creating links"
+
+    shareToken =
+        Security.hashids.encrypt ranking._node.id
+
     ranking._node.data.shareToken = shareToken
+    publicUser                    = null
 
-    publicUser = null
-
-    console.log "Ranking is #{ranking._node.data.private}"
+    Logger.debug "Ranking is #{ranking._node.data.private}"
     await
         if not ranking._node.data.private
             User.get "public", defer(err, publicUser)
@@ -109,9 +112,8 @@ _create = (req, res, next) ->
             defer(err, ok)
         ranking.save defer(err)
 
-    console.log publicUser
     if publicUser
-        console.log "LINKING TO PUBLIC USER"
+        Logger.debug "LINKING TO PUBLIC USER"
         CypherLinkUtil.createLink publicUser._node, ranking._node,
             Constants.REL_RANKING, {}, (err, rel) ->
 
@@ -169,22 +171,17 @@ _edit = (req, res, next) ->
 
     newRanking = _und.clone ranking.serialize()
 
-    console.log "Old Ranking"
-    console.log oldRanking
-
-    console.log "New Ranking"
-    console.log newRanking
+    Logger.debug "Old Ranking: #{oldRanking}"
+    Logger.debug "New Ranking #{newRanking}"
 
     rankMap = _und.object newRanking.ranks, [1..newRanking.ranks.length]
 
-    console.log "RankMap"
-    console.log rankMap
+    Logger.debug "RankMap: #{rankMap}"
 
     # remove inactive links
     removedRankIds = _und.difference oldRanking.ranks, newRanking.ranks
 
-    console.log "To Remove"
-    console.log removedRankIds
+    Logger.debug "To Remove #{removedRankIds}"
 
     entities = []
 
@@ -199,8 +196,7 @@ _edit = (req, res, next) ->
     # add links to new ones
     newRankIds = _und.difference newRanking.ranks, oldRanking.ranks
 
-    console.log "To Add"
-    console.log newRankIds
+    Logger.debug "To Add #{newRankIds}"
 
     entities = []
     await
@@ -216,8 +212,8 @@ _edit = (req, res, next) ->
 
     # Update Existing ones
     updateRankIds = _und.intersection newRanking.ranks, oldRanking.ranks
-    console.log "To Update"
-    console.log updateRankIds
+
+    Logger.debug "To Update #{updateRankIds}"
 
     entities = []
     await
@@ -228,9 +224,7 @@ _edit = (req, res, next) ->
     rels = []
     await
         for entity, ind in entities
-            console.log "for entity " +
-                entity._node.id + "@" + rankMap[entity._node.id.toString()]
-
+            Logger.debug "for entity #{entity._node.id}@#{rankMap[entity._node.id.toString()]}"
             CypherLinkUtil.updateLink Rank, ranking._node, entity._node,
                 Constants.REL_RANK,
                 {rank: rankMap[entity._node.id.toString()], rankingName: newRanking.name},
@@ -284,10 +278,9 @@ exports.hashTagView = (req, res, next) ->
     for entity, ind in entities
         sEntities[ind] = entity.serialize(null, attributes: attrBlobs[ind])
 
-    sRanking = {
-        name: req.params.hashTag,
-        ranks: _und(results).map (r) -> r.id,
-        ranksDetail: sEntities
-    }
+    sRanking =
+        name        : req.params.hashTag
+        ranks       : _und(results).map (r) -> r.id
+        ranksDetail : sEntities
 
     Response.OKResponse(res)(200, sRanking)

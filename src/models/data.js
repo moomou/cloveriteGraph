@@ -8,7 +8,7 @@
 
   _und = require('underscore');
 
-  Logger = require('util');
+  Logger = require('../util/logger');
 
   Slug = require('../util/slug');
 

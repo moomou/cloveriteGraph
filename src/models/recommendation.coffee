@@ -3,8 +3,8 @@
 #
 
 _und       = require 'underscore'
-Logger     = require 'util'
 
+Logger     = require '../util/logger'
 Neo        = require './neo'
 SchemaUtil = require './stdSchema'
 
