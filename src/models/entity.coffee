@@ -28,10 +28,11 @@ Indexes = [
 
 EntitySchema =
     # Cconfigured Values
-    name                 : 'Name of entity'
-    description          : ''
-    type                 : ''
-    tags                 : ['']
+    name        : 'Name of entity'
+    description : ''
+    type        : ''
+    tags        : ['']
+    imgURL      : ''
 
 SchemaValidation =
     name        : SchemaUtil.required('string')

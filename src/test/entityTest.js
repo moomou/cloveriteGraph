@@ -75,6 +75,7 @@
           var response;
           response = JSON.parse(res.text);
           response.payload.should.have.property('id');
+          response.payload.should.have.property('imgURL');
           response.success.should.equal(true);
           newEntityId = response.payload.id;
           return done();

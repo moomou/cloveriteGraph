@@ -39,7 +39,8 @@
     name: 'Name of entity',
     description: '',
     type: '',
-    tags: ['']
+    tags: [''],
+    imgURL: ''
   };
 
   SchemaValidation = {
@@ -94,7 +95,7 @@
               return results = arguments[1];
             };
           })(),
-          lineno: 60
+          lineno: 61
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -129,7 +130,7 @@
               return upVote = arguments[1];
             };
           })(),
-          lineno: 70
+          lineno: 71
         }));
         redis.get(entityAttrNegVoteRedisKey(_this._node.id, attr._node.id), __iced_deferrals.defer({
           assign_fn: (function() {
@@ -138,7 +139,7 @@
               return downVote = arguments[1];
             };
           })(),
-          lineno: 72
+          lineno: 73
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -171,7 +172,7 @@
               return rel = arguments[1];
             };
           })(),
-          lineno: 89
+          lineno: 90
         }));
         if (user) {
           voteLink.data.attribute = attr.serialize().name;
@@ -182,7 +183,7 @@
                 return rel = arguments[1];
               };
             })(),
-            lineno: 96
+            lineno: 97
           }));
         }
         __iced_deferrals._fulfill();
@@ -204,7 +205,7 @@
                 return upVote = arguments[1];
               };
             })(),
-            lineno: 104
+            lineno: 105
           }));
           redis.get(entityAttrNegVoteRedisKey(_this._node.id, attr._node.id), __iced_deferrals.defer({
             assign_fn: (function() {
@@ -213,7 +214,7 @@
                 return downVote = arguments[1];
               };
             })(),
-            lineno: 106
+            lineno: 107
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -287,7 +288,6 @@
   };
 
   Entity.create = function(reqBody, cb) {
-    Logger.debug("Creating with Input: " + reqBody);
     return Neo.create(Entity, reqBody, Indexes, cb);
   };
 
