@@ -6,7 +6,7 @@
 
   http = require('http');
 
-  app = require('./app').app;
+  app = require('./src/app').app;
 
   server = http.createServer(app);
 

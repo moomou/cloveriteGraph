@@ -1,33 +1,36 @@
 {
-  "name": "Cloverite-API",
-  "description": "Node.js + Neo4j app.",
-  "version": "0.0.1",
-  "author": "Me",
-  "private": true,
+  "name"        : "Cloverite-API",
+  "description" : "Node.js + Neo4j app.",
+  "version"     : "0.0.1",
+  "author"      : "Me",
+  "private"     : true,
   "dependencies": {
-    "express": "~3.2.0",
-    "express-useragent": "~0.0.7",
-    "express-namespace": "~0.1.1",
-    "iced-coffee-script": "~1.6.2",
-    "restler": "~2.0.1",
-    "underscore": "~1.4.4",
-    "redis": "~0.8.3",
-    "neo4j": "~1.0.0",
-    "coffee-script": "1.6.3",
-    "coffee-script-mapped": "~0.1.4",
-    "source-map-support": "~0.1.6",
-    "socket.io": "~0.9",
-    "mocha": "~1.12",
-    "supertest": "~0.7",
-    "chai": "~1.7.2",
-    "hashids": "0.3.1"
+    "cheerio"              : "~0.12.4",
+    "express"              : "~3.2.0",
+    "express-useragent"    : "~0.0.7",
+    "express-namespace"    : "~0.1.1",
+    "iced-coffee-script"   : "~1.6.2",
+    "restler"              : "~2.0.1",
+    "underscore"           : "~1.4.4",
+    "redis"                : "~0.8.3",
+    "neo4j"                : "~1.0.0",
+    "coffee-script"        : "1.6.3",
+    "coffee-script-mapped" : "~0.1.4",
+    "source-map-support"   : "~0.1.6",
+    "socket.io"            : "~0.9",
+    "mocha"                : "~1.12",
+    "supertest"            : "~0.7",
+    "chai"                 : "~1.7.2",
+    "hashids"              : "0.3.1",
+    "slug"                 : "0.4.2",
+    "winston"              : "0.7.2"
   },
   "devDependencies": {
     "node-dev": "~2.0.1"
   },
   "engines": {
-    "node": "0.10.x",
-    "npm": "1.2.x"
+    "node" : "0.10.x",
+    "npm"  : "1.2.x"
   },
   "scripts": {
     "start": "node-dev app.js"

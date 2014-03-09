@@ -1,0 +1,16 @@
+{
+    "nodeIndex": [
+        "nTag",
+        "nEntity",
+        "nAttribute",
+        "nData",
+        "nUser",
+        "nRanking",
+        "nComposed"
+    ],
+    "relIndex": [
+        "rVote",
+        "rLink",
+        "rRank"
+    ]
+}
