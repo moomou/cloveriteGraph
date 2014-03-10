@@ -86,11 +86,21 @@ describe 'Entity', () ->
 
         it 'should return 200 when updating existing entity', (done) ->
             api.put("#{apiVersion}/entity/#{newEntityId}")
-                .send({name: entityName + "1", version: 1})
+                .send({name: entityName + "1", version: 1, description: "what"})
                 .end (err, res) ->
+
                     response = JSON.parse(res.text)
-                    assert.equal response.payload.version, 1
-                    done()
+                    response.payload.should.have.property "version", 2
+
+                    api.get("#{apiVersion}/entity/#{newEntityId}")
+                        .end (err, res) ->
+                            response = JSON.parse(res.text)
+                            response.payload.should.have.property "name", "#{entityName}1"
+                            done()
+
+        it 'should return 200 when getting existing entity', (done) ->
+            api.get("#{apiVersion}/entity/#{newEntityId}")
+                .expect(200, done)
 
         it 'should return 200 when adding new attribute to entity', (done) ->
             api.post("#{apiVersion}/entity/#{newEntityId}/attribute")

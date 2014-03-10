@@ -57,14 +57,16 @@ module.exports = class Neo
         if newData.version != @_node.data.version
             return "Version number incorrect"
 
+        Logger.debug "newData: #{JSON.stringify newData}"
+
         # Cannot take a public entity and set it to private
         if not @_node.data.private and newData.private
             return "Cannot take a public entity and set it to private"
 
-        # Remove old redis key
-        await db.redis.hdel RedisKey.slugToId, @_node.data.slug, defer(err)
-        _und.extend @_node.data, newData
+        @_node.data = _und.extend @_node.data, newData
 
+        # Remove old redis key
+        db.redis.hdel RedisKey.slugToId, @_node.data.slug, (err) ->
         return false
 
     save: (cb) ->
@@ -76,7 +78,7 @@ module.exports = class Neo
 
         @_node.data.version += 1
 
-        Logger.debug "Saving: #{@_node.data}"
+        Logger.debug "Saving: #{JSON.stringify @_node.data}"
         @_node.save (err) -> cb err
 
     del: (cb) ->
@@ -182,7 +184,7 @@ Neo.get = (Class, id, cb) ->
             cb(null, new Class node)
 
 Neo.put = (Class, nodeId, reqBody, cb) ->
-    Logger.debug "#{Class} put: #{reqBody}"
+    Logger.debug "#{Class.name} put: #{JSON.stringify reqBody}"
 
     data         = Neo.parseReqBody Class, reqBody
     data.version = reqBody.version

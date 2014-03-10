@@ -87,13 +87,21 @@
       it('should return 200 when updating existing entity', function(done) {
         return api.put("" + apiVersion + "/entity/" + newEntityId).send({
           name: entityName + "1",
-          version: 1
+          version: 1,
+          description: "what"
         }).end(function(err, res) {
           var response;
           response = JSON.parse(res.text);
-          assert.equal(response.payload.version, 1);
-          return done();
+          response.payload.should.have.property("version", 2);
+          return api.get("" + apiVersion + "/entity/" + newEntityId).end(function(err, res) {
+            response = JSON.parse(res.text);
+            response.payload.should.have.property("name", "" + entityName + "1");
+            return done();
+          });
         });
+      });
+      it('should return 200 when getting existing entity', function(done) {
+        return api.get("" + apiVersion + "/entity/" + newEntityId).expect(200, done);
       });
       it('should return 200 when adding new attribute to entity', function(done) {
         return api.post("" + apiVersion + "/entity/" + newEntityId + "/attribute").send({
