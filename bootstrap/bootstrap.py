@@ -14,21 +14,23 @@ baseReq = {
   }
 }
 
+def createIndex(url, indexName):
+    newReq = baseReq.copy()
+    newReq['name'] = index
+    res = requests.post(url, data=json.dumps(newReq))
+    print index, res.status_code
+    if res.status_code != 201:
+        print res.text
+
 with open('index.json', 'r') as f:
     print "setting up neo4j index..."
     indexConfig = json.loads(f.read())
 
     for index in indexConfig['relIndex']:
-        newReq = baseReq.copy()
-        newReq['name'] = index
-        res = requests.post(relIndex, data=json.dumps(newReq))
-        print res.status_code
-
+        createIndex(relIndex, index)
+        
     for index in indexConfig['nodeIndex']:
-        newReq = baseReq.copy()
-        newReq['name'] = index
-        res = requests.post(nodeIndex, data=json.dumps(newReq))
-        print res.status_code
+        createIndex(nodeIndex, index)
 
 print "setting up redis..."
 rClient = redis.Redis()
