@@ -68,6 +68,7 @@ getLinkType =
             await
                 user._node.getRelationshipNodes {type: linkType, direction:'out'},
                     defer(errGetRelationship, nodes)
+
             return next(errGetRelationship) if errGetRelationship
 
             blobs = []
@@ -144,29 +145,11 @@ exports.createUser = (req, res, next) ->
             Logger.info "Non admin tried to create user!"
             ErrorResponse 403, ErrorDevMessage.permissionIssue("Not admin")
 
-# GET /user/:id/discussion
-exports.getDiscussion = basicAuthentication basicFeedGetter "discussionFeed"
-
-# GET /user/:id/recommendation
-exports.getRecommendation = basicAuthentication basicFeedGetter "recommendationFeed"
-
-# GET /user/:id/request
-exports.getRequest = basicAuthentication basicFeedGetter "requestFeed"
-
-# POST  /user/:id/recommendation
-exports.sendRecommendation = basicAuthentication basicFeedSetter Recommendation
-
-# POST /user/:id/request
-exports.sendRequest = basicAuthentication basicFeedSetter Request
-
 # GET /user/:id/created
 exports.getCreated = basicAuthentication getLinkType Constants.REL_CREATED
 
 # GET /user/:id/voted
 exports.getVoted = basicAuthentication getLinkType Constants.REL_VOTED
-
-# GET /user/:id/commented
-exports.getCommented = basicAuthentication getLinkType Constants.REL_COMMENTED
 
 # GET /user/:id/ranking
 exports.getRanked = basicAuthentication getLinkType Constants.REL_RANKING, Ranking

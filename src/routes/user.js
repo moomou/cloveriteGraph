@@ -164,7 +164,7 @@
             return feeds = arguments[1];
           };
         })(),
-        lineno: 83
+        lineno: 84
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -196,7 +196,7 @@
             return result = arguments[1];
           };
         })(),
-        lineno: 89
+        lineno: 90
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -225,7 +225,7 @@
               return feed = arguments[1];
             };
           })(),
-          lineno: 96
+          lineno: 97
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -258,7 +258,7 @@
               return receiver = arguments[1];
             };
           })(),
-          lineno: 105
+          lineno: 106
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -280,7 +280,7 @@
                 return result = arguments[1];
               };
             })(),
-            lineno: 110
+            lineno: 111
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -325,7 +325,7 @@
             return buf = arguments[1];
           };
         })(),
-        lineno: 129
+        lineno: 130
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -349,7 +349,7 @@
                   return user = arguments[1];
                 };
               })(),
-              lineno: 137
+              lineno: 138
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -365,21 +365,9 @@
     });
   };
 
-  exports.getDiscussion = basicAuthentication(basicFeedGetter("discussionFeed"));
-
-  exports.getRecommendation = basicAuthentication(basicFeedGetter("recommendationFeed"));
-
-  exports.getRequest = basicAuthentication(basicFeedGetter("requestFeed"));
-
-  exports.sendRecommendation = basicAuthentication(basicFeedSetter(Recommendation));
-
-  exports.sendRequest = basicAuthentication(basicFeedSetter(Request));
-
   exports.getCreated = basicAuthentication(getLinkType(Constants.REL_CREATED));
 
   exports.getVoted = basicAuthentication(getLinkType(Constants.REL_VOTED));
-
-  exports.getCommented = basicAuthentication(getLinkType(Constants.REL_COMMENTED));
 
   exports.getRanked = basicAuthentication(getLinkType(Constants.REL_RANKING, Ranking));
 

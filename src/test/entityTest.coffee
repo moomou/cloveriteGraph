@@ -58,14 +58,23 @@ describe 'Entity', () ->
                 .set("x-access-token", userToken)
                 .expect(200, done)
 
-        it 'private entity is hidden from others.', (done) ->
-            api.get("#{apiVersion}/entity/#{privateEntityId}")
-                .expect(401, done)
+        it 'can retrieve created', (done) ->
+            assert.isNull true
+
+        it 'can retrieve modified', (done) ->
+            assert.isNull true
+
+        it 'can retrieve subscription', (done) ->
+            assert.isNull true
 
     describe 'with guest', () ->
         it 'should return 400 when entity does not exist', (done) ->
             api.get("#{apiVersion}/entity/xyz")
                 .expect(400, done)
+
+        it 'should hide private entity.', (done) ->
+            api.get("#{apiVersion}/entity/#{privateEntityId}")
+                .expect(401, done)
 
         it 'should return 201 when adding new entity', (done) ->
             api.post("#{apiVersion}/entity/")

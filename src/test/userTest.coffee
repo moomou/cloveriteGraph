@@ -4,14 +4,12 @@ chai   = require('chai')
 should = chai.should()
 assert = chai.assert
 
-app = require('../app').app
-
-api = supertest(app)
+app        = require('../app').app
+api        = supertest(app)
 apiVersion = app.version
-randomId = '#'+(Math.random()*0xFFFFFF<<0).toString(16)
+randomId   = '#'+(Math.random()*0xFFFFFF<<0).toString(16)
 
 describe 'User', () ->
-
     it 'creation should return 201 when creating user with privileged token', (done) ->
         api.post("#{apiVersion}/user")
             .set("x-access-token", "superman")

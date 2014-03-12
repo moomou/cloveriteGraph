@@ -60,13 +60,22 @@
       it('private entity is accessible.', function(done) {
         return api.get("" + apiVersion + "/entity/" + privateEntityId).set("x-access-token", userToken).expect(200, done);
       });
-      return it('private entity is hidden from others.', function(done) {
-        return api.get("" + apiVersion + "/entity/" + privateEntityId).expect(401, done);
+      it('can retrieve created', function(done) {
+        return assert.isNull(true);
+      });
+      it('can retrieve modified', function(done) {
+        return assert.isNull(true);
+      });
+      return it('can retrieve subscription', function(done) {
+        return assert.isNull(true);
       });
     });
     return describe('with guest', function() {
       it('should return 400 when entity does not exist', function(done) {
         return api.get("" + apiVersion + "/entity/xyz").expect(400, done);
+      });
+      it('should hide private entity.', function(done) {
+        return api.get("" + apiVersion + "/entity/" + privateEntityId).expect(401, done);
       });
       it('should return 201 when adding new entity', function(done) {
         return api.post("" + apiVersion + "/entity/").send({
