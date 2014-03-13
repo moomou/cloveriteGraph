@@ -112,6 +112,7 @@ exports.create = (req, res, next) ->
 
     # link user
     if user
+        Logger.debug "User logged !"
         await CypherLinkUtil.createMultipleLinks user._node,
             entity._node,
             [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
@@ -120,6 +121,7 @@ exports.create = (req, res, next) ->
 
     # "tag" entity
     for tagObj, ind in tagObjs
+        Logger.debug "User logged !"
         CypherLinkUtil.createLink tagObj._node, entity._node,
             Constants.REL_TAG,
             linkData,

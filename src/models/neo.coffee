@@ -3,6 +3,7 @@
 # The base model that other model derives from.
 
 _und     = require 'underscore'
+crypto   = require 'crypto'
 
 Logger   = require '../util/logger'
 Slug     = require '../util/slug'
@@ -127,7 +128,9 @@ Neo.parseReqBody = (Class, reqBody) ->
     if reqBody.user
         user = reqBody.user.serialize()
     else
-        user = username: "anonymous"
+        user =
+            username: "anonymous"
+            email: "anonymous"
 
     data = Class.deserialize reqBody
     data = _und.omit data, ToOmitKeys
@@ -135,9 +138,15 @@ Neo.parseReqBody = (Class, reqBody) ->
     data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
     data.contributors ?= []
 
-    if user and user not in data.contributors
-        data.contributors.push user.username
+    if user
+        md5sum = crypto.createHash 'md5'
+        md5sum.update user.email.trim()
+        hash = md5sum.digest 'hex'
+        Logger.debug "Email: #{user.email}"
+        Logger.debug "Hash: #{hash}"
 
+        if hash not in data.contributors
+            data.contributors.push hash
     data
 
 # Data DB functions.

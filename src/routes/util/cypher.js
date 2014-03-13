@@ -74,11 +74,12 @@
       Logger.debug("OtherNode: " + otherNode.id);
       Logger.debug("LinkType: " + linkType);
       return startNode.createRelationshipTo(otherNode, linkType, linkData, function(err, link) {
-        Logger.debug("Finished with err: " + err);
         if (err) {
+          Logger.debug("Finished with err: " + err);
           return cb(new Error("Unable to create link"), null);
+        } else {
+          return cb(null, link);
         }
-        return cb(null, link);
       });
     };
 
@@ -90,7 +91,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "util/cypher.coffee",
+          filename: "routes/util/cypher.coffee",
           funcname: "CypherLinkUtil.getOrCreateLink"
         });
         _this.hasLink(startNode, otherNode, linkType, "out", __iced_deferrals.defer({
@@ -100,7 +101,7 @@
               return path = arguments[1];
             };
           })(),
-          lineno: 58
+          lineno: 60
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -121,7 +122,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "util/cypher.coffee",
+          filename: "routes/util/cypher.coffee",
           funcname: "CypherLinkUtil.updateLink"
         });
         _this.hasLink(startNode, otherNode, linkType, "all", __iced_deferrals.defer({
@@ -131,7 +132,7 @@
               return path = arguments[1];
             };
           })(),
-          lineno: 76
+          lineno: 78
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -155,7 +156,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "util/cypher.coffee",
+          filename: "routes/util/cypher.coffee",
           funcname: "CypherLinkUtil.deleteLink"
         });
         _this.hasLink(startNode, otherNode, linkType, "out", __iced_deferrals.defer({
@@ -165,7 +166,7 @@
               return path = arguments[1];
             };
           })(),
-          lineno: 93
+          lineno: 95
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -178,7 +179,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "util/cypher.coffee",
+            filename: "routes/util/cypher.coffee",
             funcname: "CypherLinkUtil.deleteLink"
           });
           Class.get(relId, __iced_deferrals.defer({
@@ -188,7 +189,7 @@
                 return link = arguments[1];
               };
             })(),
-            lineno: 103
+            lineno: 105
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -208,7 +209,7 @@
         var _i, _len;
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "util/cypher.coffee",
+          filename: "routes/util/cypher.coffee",
           funcname: "CypherLinkUtil.createMultipleLinks"
         });
         for (ind = _i = 0, _len = links.length; _i < _len; ind = ++_i) {
@@ -220,7 +221,7 @@
                 return __slot_3[__slot_4] = arguments[1];
               };
             })(errs, ind, rels, ind),
-            lineno: 117
+            lineno: 119
           }));
         }
         __iced_deferrals._fulfill();

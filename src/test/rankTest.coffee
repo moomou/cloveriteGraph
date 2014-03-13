@@ -62,6 +62,6 @@ describe 'Rank', () ->
 
                 response.payload.should.have.id
                 response.payload.ranks.should.eql entityIds
-                response.payload.contributors.should.eql [username]
+                response.payload.contributors.should.eql ['38d692b2f557313d1e548b59d0feb915']
 
                 done()

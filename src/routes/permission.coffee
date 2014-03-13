@@ -28,7 +28,8 @@ exports.getUser = getUser = (req, cb) ->
 
     # Access token, after user logs in
     # points to the neo4j userNode Id
-    await redis.hget accessToken, "id", defer(err, neoUserId)
+    await
+        redis.hget accessToken, "id", defer(err, neoUserId)
     err = user = null
 
     if not neoUserId # Anonymous users

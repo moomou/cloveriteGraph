@@ -47,7 +47,7 @@ describe 'Entity', () ->
 
                     response.payload.should.have.property 'id'
                     response.payload.should.have.property 'private', true
-                    response.payload.contributors.should.eql [username]
+                    response.payload.contributors.should.eql ['7a98f7f5a429f6cf385547495d84107f']
                     response.success.should.equal true
 
                     privateEntityId = response.payload.id
