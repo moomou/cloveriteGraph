@@ -64,6 +64,12 @@ module.exports = class Neo
         if not @_node.data.private and newData.private
             return "Cannot take a public entity and set it to private"
 
+        existingContributors = @_node.data.contributors
+
+        if newData.contributors[0] not in existingContributors
+            @_node.data.contributors.push newData.contributors[0]
+            delete newData.contributors
+
         @_node.data = _und.extend @_node.data, newData
 
         # Remove old redis key
@@ -129,24 +135,22 @@ Neo.parseReqBody = (Class, reqBody) ->
         user = reqBody.user.serialize()
     else
         user =
-            username: "anonymous"
-            email: "anonymous"
+            username : "anonymous"
+            email    : "anonymous"
 
     data = Class.deserialize reqBody
     data = _und.omit data, ToOmitKeys
 
     data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
-    data.contributors ?= []
+    data.contributors = []
 
     if user
         md5sum = crypto.createHash 'md5'
         md5sum.update user.email.trim()
         hash = md5sum.digest 'hex'
+        data.contributors.push hash
         Logger.debug "Email: #{user.email}"
         Logger.debug "Hash: #{hash}"
-
-        if hash not in data.contributors
-            data.contributors.push hash
     data
 
 # Data DB functions.

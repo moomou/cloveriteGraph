@@ -41,6 +41,8 @@ Permission      = require './permission'
 _show = (req, res, next) ->
     entityId = req.query.entity
     data     = req.query.data
+    data     = req.query.data
+
     Response.OKResponse(res)(200)
 
 exports.show = _show

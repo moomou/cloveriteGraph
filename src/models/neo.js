@@ -58,6 +58,7 @@
     };
 
     Neo.prototype.update = function(newData) {
+      var existingContributors, _ref;
       Logger.debug("Existing VER: " + this._node.data.version);
       Logger.debug("Modifying VER: " + newData.version);
       if (newData.version !== this._node.data.version) {
@@ -66,6 +67,11 @@
       Logger.debug("newData: " + (JSON.stringify(newData)));
       if (!this._node.data["private"] && newData["private"]) {
         return "Cannot take a public entity and set it to private";
+      }
+      existingContributors = this._node.data.contributors;
+      if (_ref = newData.contributors[0], __indexOf.call(existingContributors, _ref) < 0) {
+        this._node.data.contributors.push(newData.contributors[0]);
+        delete newData.contributors;
       }
       this._node.data = _und.extend(this._node.data, newData);
       db.redis.hdel(RedisKey.slugToId, this._node.data.slug, function(err) {});
@@ -147,18 +153,14 @@
     if (Class.getSlugTitle) {
       data.slug = Class.getSlugTitle(reqBody);
     }
-    if (data.contributors == null) {
-      data.contributors = [];
-    }
+    data.contributors = [];
     if (user) {
       md5sum = crypto.createHash('md5');
       md5sum.update(user.email.trim());
       hash = md5sum.digest('hex');
+      data.contributors.push(hash);
       Logger.debug("Email: " + user.email);
       Logger.debug("Hash: " + hash);
-      if (__indexOf.call(data.contributors, hash) < 0) {
-        data.contributors.push(hash);
-      }
     }
     return data;
   };
@@ -209,7 +211,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 177
+        lineno: 181
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -231,7 +233,7 @@
               return res = arguments[1];
             };
           })(),
-          lineno: 185
+          lineno: 189
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -277,7 +279,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 205
+            lineno: 209
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -331,7 +333,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 240
+        lineno: 244
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -377,7 +379,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 263
+          lineno: 267
         }));
         __iced_deferrals._fulfill();
       })(function() {

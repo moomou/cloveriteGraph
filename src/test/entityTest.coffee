@@ -95,6 +95,7 @@ describe 'Entity', () ->
 
         it 'should return 200 when updating existing entity', (done) ->
             api.put("#{apiVersion}/entity/#{newEntityId}")
+                .set("x-access-token", userToken)
                 .send({name: entityName + "1", version: 1, description: "what"})
                 .end (err, res) ->
 
@@ -105,6 +106,7 @@ describe 'Entity', () ->
                         .end (err, res) ->
                             response = JSON.parse(res.text)
                             response.payload.should.have.property "name", "#{entityName}1"
+                            response.payload.contributors.should.have.length.above 1
                             done()
 
         it 'should return 200 when getting existing entity', (done) ->

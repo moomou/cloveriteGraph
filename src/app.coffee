@@ -38,11 +38,10 @@ app.namespace app.version, () ->
 # Search Handler for multiple resource
     app.get '/search/:type?', routes.search.searchHandler
 
-    ###
-
-    # Embed API
+# Embed API
     app.get 'embed/?', routes.embed.show
 
+    ###
     # Composed Content Method
     app.post 'composed'     , routes.composed.create
     app.get  'composed/:id' , routes.composed.show

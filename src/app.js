@@ -44,12 +44,9 @@
     app.put('/*', addCORSHeaders);
     app["delete"]('/*', addCORSHeaders);
     app.get('/search/:type?', routes.search.searchHandler);
+    app.get('embed/?', routes.embed.show);
 
     /*
-    
-    # Embed API
-    app.get 'embed/?', routes.embed.show
-    
     # Composed Content Method
     app.post 'composed'     , routes.composed.create
     app.get  'composed/:id' , routes.composed.show

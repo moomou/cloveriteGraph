@@ -50,6 +50,7 @@
     var data, entityId;
     entityId = req.query.entity;
     data = req.query.data;
+    data = req.query.data;
     return Response.OKResponse(res)(200);
   };
 
