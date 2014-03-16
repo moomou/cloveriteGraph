@@ -20,6 +20,6 @@
     div.className = 'cloverite-container cleanslate';
     div.innerHTML = '{{{RENDERED}}}';
 
-    scriptTag = document.getElementsById(_scripTagId);
+    scriptTag = document.getElementById(_scripTagId);
     scriptTag.parentNode.insertBefore(div, scriptTag);
 })(this);
