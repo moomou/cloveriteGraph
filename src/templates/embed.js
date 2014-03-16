@@ -4,7 +4,7 @@
 
     styleTag.rel   = 'stylesheet';
     styleTag.type  = 'text/css';
-    styleTag.href  = 'http://cloverite.com:9000/static/css/embed.css';
+    styleTag.href  = 'http://cloverite.com:9000/static/embed/style.css';
     styleTag.media = 'all';
     document.getElementsByTagName('head')[0].appendChild(styleTag);
 
