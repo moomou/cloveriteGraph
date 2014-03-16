@@ -159,6 +159,7 @@ describe 'Entity', () ->
                     response.payload.should.have.property 'srcUrl', 'http://random.org'
                     response.payload.should.have.property 'selector', ''
                     newDataId = response.payload.id
+                    console.log "DataId: #{newDataId}"
                     done()
 
         it 'should return 200 when searching with #attribute', (done) ->

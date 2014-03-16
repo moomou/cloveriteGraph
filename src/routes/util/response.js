@@ -86,4 +86,11 @@
     };
   };
 
+  exports.JSResponse = function(res) {
+    return function(httpCode, payload, next, prev) {
+      res.setHeader("Content-Type", "text/javascript");
+      return res.status(httpCode).end(payload);
+    };
+  };
+
 }).call(this);

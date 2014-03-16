@@ -58,6 +58,7 @@
         _this = this;
       __iced_k = __iced_k_noop;
       ___iced_passed_deferral = iced.findDeferral(arguments);
+      Logger.debug("Serialize attr: " + entityId);
       if (!entityId) {
         return Attribute.__super__.serialize.call(this, cb, null);
       }
@@ -74,7 +75,7 @@
               return upVote = arguments[1];
             };
           })(),
-          lineno: 46
+          lineno: 47
         }));
         redis.get("entity:" + entityId + "::attr:" + _this._node.id + "::negative", __iced_deferrals.defer({
           assign_fn: (function() {
@@ -83,7 +84,7 @@
               return downVote = arguments[1];
             };
           })(),
-          lineno: 47
+          lineno: 48
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -91,6 +92,7 @@
           upVote: parseInt(upVote) || 0,
           downVote: parseInt(downVote) || 0
         };
+        Logger.debug("VoteTally: " + voteTally.upVote);
         return Attribute.__super__.serialize.call(_this, cb, voteTally);
       });
     };

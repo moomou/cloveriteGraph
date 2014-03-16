@@ -20,14 +20,13 @@ MessageGen = {
     '403': "Permission denied"
 }
 
-DevMessageGenerator = {
-    customMsg: (msg) -> msg,
-    missingParam: (paramName) -> "Missing required field: #{paramName}.",
-    dbIssue: -> "Connection problems with internal db. Please try again later.",
-    permissionIssue: -> "The user does not have permission.",
-    dataValidationIssue: (msg)-> "Data issue: #{msg}",
-    notImplemented: -> "Not Implemented.",
-}
+DevMessageGenerator =
+    customMsg: (msg) -> msg
+    missingParam: (paramName) -> "Missing required field: #{paramName}."
+    dbIssue: -> "Connection problems with internal db. Please try again later."
+    permissionIssue: -> "The user does not have permission."
+    dataValidationIssue: (msg)-> "Data issue: #{msg}"
+    notImplemented: -> "Not Implemented."
 
 DOC_LINK = {
 }
@@ -44,16 +43,20 @@ errorMessage = (httpCode) ->
 exports.ErrorDevMessage = DevMessageGenerator
 
 exports.ErrorResponse = (res) -> (httpCode, devMsg, docLink) ->
-    response = _und.clone DEFAULT_RESPONSE
-    response.success = false
+    response          = _und.clone DEFAULT_RESPONSE
+    response.success  = false
     response.httpCode = httpCode
-    response.error = createErrorDetailObj devMsg, errorMessage(httpCode), docLink
+    response.error    = createErrorDetailObj devMsg, errorMessage(httpCode), docLink
     res.status(httpCode).json(response)
 
 exports.OKResponse = (res) -> (httpCode, payload, next, prev) ->
-    response = _und.clone DEFAULT_RESPONSE
-    response.payload = payload
+    response          = _und.clone DEFAULT_RESPONSE
+    response.payload  = payload
     response.httpCode = httpCode
-    response.next = next
-    response.prev = prev
+    response.next     = next
+    response.prev     = prev
     res.status(httpCode).json(response)
+
+exports.JSResponse = (res) -> (httpCode, payload, next, prev) ->
+    res.setHeader "Content-Type", "text/javascript"
+    res.status(httpCode).end(payload)

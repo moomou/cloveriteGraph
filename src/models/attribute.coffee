@@ -40,6 +40,7 @@ module.exports = class Attribute extends Neo
 
     # Takes an entity id to retrieve vote in redis
     serialize: (cb, entityId) ->
+        Logger.debug "Serialize attr: #{entityId}"
         if not entityId
             return super(cb, null)
 
@@ -48,9 +49,10 @@ module.exports = class Attribute extends Neo
             redis.get "entity:#{entityId}::attr:#{@_node.id}::negative", defer(err, downVote)
 
         voteTally =
-            upVote: parseInt(upVote) or 0
-            downVote: parseInt(downVote) or 0
+            upVote   : parseInt(upVote) or 0
+            downVote : parseInt(downVote) or 0
 
+        Logger.debug "VoteTally: #{voteTally.upVote}"
         super cb, voteTally
 
 ###

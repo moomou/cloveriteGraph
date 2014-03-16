@@ -160,6 +160,7 @@
           response.payload.should.have.property('srcUrl', 'http://random.org');
           response.payload.should.have.property('selector', '');
           newDataId = response.payload.id;
+          console.log("DataId: " + newDataId);
           return done();
         });
       });
