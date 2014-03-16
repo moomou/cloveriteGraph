@@ -238,7 +238,7 @@
         console.log(templateValues);
         renderedCard = cardTemplate(templateValues);
         jsFile = embedJSTemplate({
-          SCRIPTE_ID: scriptTagId,
+          SCRIPT_ID: scriptTagId,
           DIV_ID: "" + Math.floor(Math.random() * 167772159999999).toString(16),
           RENDERED: renderedCard.replace(/(\r\n|\n|\r)/gm, "")
         });
