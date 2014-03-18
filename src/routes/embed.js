@@ -100,11 +100,11 @@
   };
 
   renderContributorIcon = function(contributor) {
-    return "<li>" + '<div class="profile-mini profile-rounded pull-left" style=\'background-image: url("' + ("https://secure.gravatar.com/avatar/" + contributor + "?s=240") + '\')>' + "</li>";
+    return "<li>" + '<div class="profile-mini profile-rounded pull-left" style=\'background-image: url("' + ("https://secure.gravatar.com/avatar/" + contributor + "?s=240") + '")\'>' + "</li>";
   };
 
   renderTags = function(tag) {
-    return "<li>" + tag + "</li>";
+    return "" + tag;
   };
 
   _show = function(req, res, next) {
