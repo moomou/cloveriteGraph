@@ -100,7 +100,7 @@
   };
 
   renderContributorIcon = function(contributor) {
-    return "<li>" + '<div class="profile-mini profile-rounded pull-left" style=\\\'background-image: url("' + ("https://secure.gravatar.com/avatar/" + contributor + "?s=240") + '")\\\'>' + "</li>";
+    return "<li>" + '<div class="profile profile-mini profile-rounded pull-left" style=\\\'background-image: url("' + ("https://secure.gravatar.com/avatar/" + contributor + "?s=240") + '")\\\'>' + "</li>";
   };
 
   renderTags = function(tag) {

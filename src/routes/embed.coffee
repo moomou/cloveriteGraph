@@ -87,7 +87,7 @@ renderStarRating = (upVote, downVote) ->
 
 renderContributorIcon = (contributor) ->
     "<li>" +
-        '<div class="profile-mini profile-rounded pull-left" style=\\\'background-image: url("' +
+        '<div class="profile profile-mini profile-rounded pull-left" style=\\\'background-image: url("' +
             "https://secure.gravatar.com/avatar/#{contributor}?s=240" +
         '")\\\'>' +
     "</li>"
