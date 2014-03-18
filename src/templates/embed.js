@@ -17,7 +17,7 @@
 
     var div       = document.createElement('div');
     div.id        = '{{DIV_ID}}';
-    div.className = 'cloverite-container cleanslate';
+    div.className = 'cleanslate cloverite-container';
     div.innerHTML = '{{{RENDERED}}}';
 
     scriptTag = document.getElementById(_scripTagId);
