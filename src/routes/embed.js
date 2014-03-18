@@ -100,7 +100,7 @@
   };
 
   renderContributorIcon = function(contributor) {
-    return "<li>" + '<div class="profile profile-rounded pull-left js-profile" style="background-image: url("' + ("https://secure.gravatar.com/avatar/" + contributor + "?s=240") + '")>' + "</li>";
+    return "<li>" + '<div class="profile-mini profile-rounded pull-left" style=\'background-image: url("' + ("https://secure.gravatar.com/avatar/" + contributor + "?s=240") + '\')>' + "</li>";
   };
 
   renderTags = function(tag) {
@@ -132,7 +132,7 @@
       var _i, _j, _k, _len, _len1, _len2;
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "routes/embed.coffee",
+        filename: "embed.coffee",
         funcname: "_show"
       });
       for (ind = _i = 0, _len = entityIds.length; _i < _len; ind = ++_i) {
@@ -203,7 +203,7 @@
             (function(__iced_k) {
               __iced_deferrals = new iced.Deferrals(__iced_k, {
                 parent: ___iced_passed_deferral,
-                filename: "routes/embed.coffee",
+                filename: "embed.coffee",
                 funcname: "_show"
               });
               attr.serialize(__iced_deferrals.defer({
