@@ -51,7 +51,7 @@
       }
       data = this._node.data;
       data.tags = _und(data.tags).filter(function(tag) {
-        return tag !== ("" + Constants.TAG_GLOBAL) && !tag;
+        return tag !== ("" + Constants.TAG_GLOBAL) && tag;
       });
       _und.extend(data, {
         id: this._node.id

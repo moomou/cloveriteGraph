@@ -79,14 +79,15 @@
       });
       it('should return 201 when adding new entity', function(done) {
         return api.post("" + apiVersion + "/entity/").send({
-          name: entityName
+          name: entityName,
+          tags: ["abc"]
         }).end(function(err, res) {
           var response;
           response = JSON.parse(res.text);
           response.payload.should.have.property('id');
           response.payload.should.have.property('imgURL');
           response.success.should.equal(true);
-          response.payload.tags.should.eql([]);
+          response.payload.tags.should.eql(["abc"]);
           newEntityId = response.payload.id;
           return done();
         });

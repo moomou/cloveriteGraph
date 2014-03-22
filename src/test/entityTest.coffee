@@ -78,7 +78,7 @@ describe 'Entity', () ->
 
         it 'should return 201 when adding new entity', (done) ->
             api.post("#{apiVersion}/entity/")
-                .send(name: entityName)
+                .send(name: entityName, tags: ["abc"])
                 .end (err, res) ->
                     response = JSON.parse(res.text)
 
@@ -86,7 +86,7 @@ describe 'Entity', () ->
                     response.payload.should.have.property 'imgURL'
                     response.success.should.equal true
 
-                    response.payload.tags.should.eql []
+                    response.payload.tags.should.eql ["abc"]
 
                     newEntityId = response.payload.id
 
