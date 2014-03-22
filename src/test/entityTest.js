@@ -86,6 +86,7 @@
           response.payload.should.have.property('id');
           response.payload.should.have.property('imgURL');
           response.success.should.equal(true);
+          response.payload.tags.should.eql([]);
           newEntityId = response.payload.id;
           return done();
         });

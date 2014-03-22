@@ -2,13 +2,15 @@
 #
 # The base model that other model derives from.
 
-_und     = require 'underscore'
-crypto   = require 'crypto'
+_und      = require 'underscore'
+crypto    = require 'crypto'
 
-Logger   = require '../util/logger'
-Slug     = require '../util/slug'
-RedisKey = require('../config').RedisKey
-db       = require('./setup').db
+db        = require('./setup').db
+
+Logger    = require '../util/logger'
+Slug      = require '../util/slug'
+RedisKey  = require('../config').RedisKey
+Constants = require('../config').Constants
 
 ###
 # Normal values related to transaction;
@@ -45,7 +47,11 @@ module.exports = class Neo
         extraData ?= {}
         data = @_node.data
 
+        data.tags = _und(data.tags).filter (tag) ->
+            tag != "#{Constants.TAG_GLOBAL}" and not tag
+
         _und.extend data, id: @_node.id, extraData
+        console.log data
 
         return cb(data) if cb
         return data
