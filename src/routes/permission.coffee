@@ -83,9 +83,8 @@ exports.hasPermission = (user, other, cb) ->
             cb null, false
 
 exports.authCurry =
-    (hasPermission) ->
-        (cb) ->
-            (req, res, next) ->
-                await hasPermission req, res, next, defer(err, errRes, augReq)
-                return errRes if err
-                cb augReq, res, next
+    (hasPermission) -> (cb) ->
+        (req, res, next) ->
+            await hasPermission req, res, next, defer(err, errRes, augReq)
+            return errRes if err
+            cb augReq, res, next

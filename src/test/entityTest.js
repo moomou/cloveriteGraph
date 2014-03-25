@@ -57,17 +57,8 @@
           return done();
         });
       });
-      it('private entity is accessible.', function(done) {
+      return it('private entity is accessible.', function(done) {
         return api.get("" + apiVersion + "/entity/" + privateEntityId).set("x-access-token", userToken).expect(200, done);
-      });
-      it('can retrieve created', function(done) {
-        return assert.isNull(true);
-      });
-      it('can retrieve modified', function(done) {
-        return assert.isNull(true);
-      });
-      return it('can retrieve subscription', function(done) {
-        return assert.isNull(true);
       });
     });
     return describe('with guest', function() {

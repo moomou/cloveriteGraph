@@ -58,15 +58,6 @@ describe 'Entity', () ->
                 .set("x-access-token", userToken)
                 .expect(200, done)
 
-        it 'can retrieve created', (done) ->
-            assert.isNull true
-
-        it 'can retrieve modified', (done) ->
-            assert.isNull true
-
-        it 'can retrieve subscription', (done) ->
-            assert.isNull true
-
     describe 'with guest', () ->
         it 'should return 400 when entity does not exist', (done) ->
             api.get("#{apiVersion}/entity/xyz")

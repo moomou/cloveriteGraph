@@ -56,7 +56,7 @@
     app.get 'composed/:id/related', routes.composed.getRelated
     */
     app.post('/user/', routes.user.createUser);
-    app.get('/user/:id', routes.user.getSelf);
+    app.get('/user/:id', routes.user.getUser);
 
     /*
     app.get('/user/:id/request', routes.user.getRequest)

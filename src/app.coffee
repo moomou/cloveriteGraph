@@ -53,7 +53,7 @@ app.namespace app.version, () ->
 
 # User API
     app.post '/user/'    , routes.user.createUser
-    app.get  '/user/:id' , routes.user.getSelf
+    app.get  '/user/:id' , routes.user.getUser
 
     # External Channels
     #app.get('/user/:id/discussion', routes.user.getDiscussion)
@@ -87,7 +87,7 @@ app.namespace app.version, () ->
     app.del  '/entity/:id' , routes.entity.del
 
     # Entity User Method
-    app.get('/entity/:id/user', routes.entity.showUsers)
+    app.get '/entity/:id/user', routes.entity.showUsers
     #app.get('/entity/:id/user/:username', routes.entity.showUserVoteDetail)
 
     # Entity Attribute Method
@@ -103,7 +103,7 @@ app.namespace app.version, () ->
     app.post '/entity/:id/data'     , routes.entity.addData
     app.get '/entity/:id/data'      , routes.entity.listData
     app.get '/entity/:id/data/:dId' , routes.entity.getData
-    #app.del '/entity/:id/data/:dId', routes.entity.delData
+    # app.del '/entity/:id/data/:dId', routes.entity.delData
 
     # Entity Relation
     ###
