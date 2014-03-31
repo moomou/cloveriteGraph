@@ -124,7 +124,6 @@ describe 'User', () ->
                     response = JSON.parse res.text
                     response.success.should.equal true
 
-                    console.log response
                     returnedIds = response.payload.map (obj) -> obj.id
                     returnedIds.should.eql [publicEntityId]
 
@@ -137,7 +136,6 @@ describe 'User', () ->
                     response = JSON.parse res.text
                     response.success.should.equal true
 
-                    console.log otherToken
                     returnedIds = response.payload.map (obj) -> obj.id
                     returnedIds.should.eql [privateEntityId, publicEntityId]
                     done()

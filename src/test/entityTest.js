@@ -83,6 +83,21 @@
           return done();
         });
       });
+      it('should return 201 when adding new entity with content section', function(done) {
+        return api.post("" + apiVersion + "/entity/").send({
+          name: entityName,
+          tags: ["abc"],
+          content: [
+            {
+              name: "HELL"
+            }
+          ]
+        }).end(function(err, res) {
+          var response;
+          response = JSON.parse(res.text);
+          return done();
+        });
+      });
       it('should return 200 when getting existing entity', function(done) {
         return api.get("" + apiVersion + "/entity/" + newEntityId).expect(200, done);
       });
@@ -153,7 +168,6 @@
           response.payload.should.have.property('srcUrl', 'http://random.org');
           response.payload.should.have.property('selector', '');
           newDataId = response.payload.id;
-          console.log("DataId: " + newDataId);
           return done();
         });
       });

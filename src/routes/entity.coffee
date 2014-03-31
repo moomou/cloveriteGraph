@@ -132,7 +132,11 @@ exports.create = (req, res, next) ->
                 Constants.REL_TAG,
                 linkData,
                 (err, rel) ->
-    
+
+    # if contains content section, add those here
+    if req.body.content
+        await EntityUtil.addData entity, req.body.content, defer errs, datas
+
     Response.OKResponse(res)(201, entity.serialize())
 
 # GET /entity/:id
@@ -433,35 +437,25 @@ exports.voteAttribute = (req, res, next) ->
 # Entity Data Section
 ###
 _addData = (req, res, next) ->
-    input = _und.clone req.body
-    value = null
-    delete input['id']
+    console.log ">X_X<"
+    console.log ">X_X<"
+    await Entity.get req.params.id, defer err, entity
+    console.log ">X_X<"
+    console.log err
+    console.log ">X_X<"
 
-    # Query remote src to get data, if applicable
-    if input.dataType == Data.DataType.TIME_SERIES
-        "" # Empty for now
-    else if input.dataType == Data.DataType.NUMBER
-        if input.srcType == Data.SrcType.JSON
-            await Remote.getJSONData input.srcUrl, defer(err, value)
-        else if input.srcType == Data.SrcType.DOM
-            await Remote.getDOMData input.srcUrl, input.selector, defer(err, value)
+    #return errResponse if err
 
-    input.value = value if value and not err
+    dataInput = [req.body]
 
-    await
-        Entity.get req.params.id, defer err, entity
-        Data.create input, defer err, data
+    EntityUtil.addData entity, dataInput, (errs, datas) ->
+        data = datas[0]
 
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
-
-    await CypherLinkUtil.createLink data._node,
-        entity._node,
-        Constants.REL_DATA,
-        {},
-        defer(err, rel)
-
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
-    Response.OKResponse(res)(200, data.serialize())
+        if not errs
+            Response.OKResponse(res)(200, data.serialize())
+        else
+            Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue())
+            errResponse
 
 exports.addData = basicAuthentication _addData
 

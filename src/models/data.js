@@ -70,9 +70,10 @@
   Data.DataType = {
     IMAGE: 'image',
     VIDEO: 'video',
-    NUMBER: 'number',
-    TIME_SERIES: 'timeseries',
-    FILE: 'file'
+    FILE: 'file',
+    FIELD: 'field',
+    TEXT: 'text',
+    TIME_SERIES: 'timeseries'
   };
 
   Data.getSlugTitle = function(data) {

@@ -118,7 +118,6 @@
           var response, returnedIds;
           response = JSON.parse(res.text);
           response.success.should.equal(true);
-          console.log(response);
           returnedIds = response.payload.map(function(obj) {
             return obj.id;
           });
@@ -131,7 +130,6 @@
           var response, returnedIds;
           response = JSON.parse(res.text);
           response.success.should.equal(true);
-          console.log(otherToken);
           returnedIds = response.payload.map(function(obj) {
             return obj.id;
           });

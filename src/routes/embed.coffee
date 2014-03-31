@@ -135,7 +135,6 @@ _show = (req, res, next) ->
     templateValues.tags         = templateValues.tags.map renderTags
     templateValues.content      = attrTemplates.join("")  + dataTemplates.join("")
     templateValues.contributors = templateValues.contributors.map renderContributorIcon
-    console.log templateValues
 
     renderedCard = cardTemplate templateValues
 

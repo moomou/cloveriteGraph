@@ -83,6 +83,13 @@ describe 'Entity', () ->
 
                     done()
 
+        it 'should return 201 when adding new entity with content section', (done) ->
+            api.post("#{apiVersion}/entity/")
+                .send(name: entityName, tags: ["abc"], content: [name: "HELL"])
+                .end (err, res) ->
+                    response = JSON.parse(res.text)
+                    done()
+
         it 'should return 200 when getting existing entity', (done) ->
             api.get("#{apiVersion}/entity/#{newEntityId}")
                 .expect(200, done)
@@ -153,7 +160,6 @@ describe 'Entity', () ->
                     response.payload.should.have.property 'srcUrl', 'http://random.org'
                     response.payload.should.have.property 'selector', ''
                     newDataId = response.payload.id
-                    console.log "DataId: #{newDataId}"
                     done()
 
         it 'should return 200 when searching with #attribute', (done) ->

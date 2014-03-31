@@ -51,7 +51,6 @@ module.exports = class Neo
             tag != "#{Constants.TAG_GLOBAL}" and tag
 
         _und.extend data, id: @_node.id, extraData
-        console.log data
 
         return cb(data) if cb
         return data

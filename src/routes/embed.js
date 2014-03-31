@@ -132,7 +132,7 @@
       var _i, _j, _k, _len, _len1, _len2;
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "embed.coffee",
+        filename: "routes/embed.coffee",
         funcname: "_show"
       });
       for (ind = _i = 0, _len = entityIds.length; _i < _len; ind = ++_i) {
@@ -203,7 +203,7 @@
             (function(__iced_k) {
               __iced_deferrals = new iced.Deferrals(__iced_k, {
                 parent: ___iced_passed_deferral,
-                filename: "embed.coffee",
+                filename: "routes/embed.coffee",
                 funcname: "_show"
               });
               attr.serialize(__iced_deferrals.defer({
@@ -235,7 +235,6 @@
         templateValues.tags = templateValues.tags.map(renderTags);
         templateValues.content = attrTemplates.join("") + dataTemplates.join("");
         templateValues.contributors = templateValues.contributors.map(renderContributorIcon);
-        console.log(templateValues);
         renderedCard = cardTemplate(templateValues);
         jsFile = embedJSTemplate({
           SCRIPT_ID: scriptTagId,
