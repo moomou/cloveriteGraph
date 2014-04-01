@@ -72,7 +72,7 @@
     app.put('/user/:id/ranking/:rankingId', routes.ranking.edit);
     app["delete"]('/user/:id/ranking/:rankingId', routes.ranking["delete"]);
     app.get('/ranking/share/:shareToken', routes.ranking.shareView);
-    app.get('/ranking/:hashTag', routes.ranking.hashTagView);
+    app.get('/ranking/:shareToken', routes.ranking.shareView);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
     app.get('/entity/:id', routes.entity.show);

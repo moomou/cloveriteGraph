@@ -50,16 +50,19 @@
         extraData = {};
       }
       data = this._node.data;
-      data.tags = _und(data.tags).filter(function(tag) {
-        return tag !== ("" + Constants.TAG_GLOBAL) && tag;
-      });
+      if (data.tag) {
+        data.tags = _und(data.tags).filter(function(tag) {
+          return tag !== ("" + Constants.TAG_GLOBAL) && tag;
+        });
+      }
       _und.extend(data, {
         id: this._node.id
       }, extraData);
       if (cb) {
         return cb(data);
+      } else {
+        return data;
       }
-      return data;
     };
 
     Neo.prototype.update = function(newData) {
@@ -207,7 +210,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "models/neo.coffee",
+        filename: "neo.coffee",
         funcname: "create"
       });
       obj.save(__iced_deferrals.defer({
@@ -216,7 +219,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 186
+        lineno: 189
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -228,7 +231,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/neo.coffee",
+          filename: "neo.coffee",
           funcname: "create"
         });
         db.redis.hset(RedisKey.slugToId, node.data.slug, node.id, __iced_deferrals.defer({
@@ -238,7 +241,7 @@
               return res = arguments[1];
             };
           })(),
-          lineno: 194
+          lineno: 197
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -276,7 +279,7 @@
         (function(__iced_k) {
           __iced_deferrals = new iced.Deferrals(__iced_k, {
             parent: ___iced_passed_deferral,
-            filename: "models/neo.coffee"
+            filename: "neo.coffee"
           });
           obj.save(__iced_deferrals.defer({
             assign_fn: (function() {
@@ -284,7 +287,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 214
+            lineno: 217
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -328,7 +331,7 @@
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "models/neo.coffee",
+        filename: "neo.coffee",
         funcname: "getOrCreate"
       });
       Neo.find(Class, Class.INDEX_NAME, 'slug', Class.getSlugTitle(reqBody), __iced_deferrals.defer({
@@ -338,7 +341,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 249
+        lineno: 252
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -376,7 +379,7 @@
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "models/neo.coffee"
+          filename: "neo.coffee"
         });
         obj._node.save(__iced_deferrals.defer({
           assign_fn: (function() {
@@ -384,7 +387,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 272
+          lineno: 275
         }));
         __iced_deferrals._fulfill();
       })(function() {

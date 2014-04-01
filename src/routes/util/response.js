@@ -36,6 +36,9 @@
     dbIssue: function() {
       return "Connection problems with internal db. Please try again later.";
     },
+    notFound: function() {
+      return "Requested resource does not exist.";
+    },
     permissionIssue: function() {
       return "The user does not have permission.";
     },

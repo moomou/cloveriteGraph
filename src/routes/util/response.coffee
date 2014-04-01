@@ -24,6 +24,7 @@ DevMessageGenerator =
     customMsg: (msg) -> msg
     missingParam: (paramName) -> "Missing required field: #{paramName}."
     dbIssue: -> "Connection problems with internal db. Please try again later."
+    notFound: -> "Requested resource does not exist."
     permissionIssue: -> "The user does not have permission."
     dataValidationIssue: (msg)-> "Data issue: #{msg}"
     notImplemented: -> "Not Implemented."

@@ -102,6 +102,7 @@ exports.create = (req, res, next) ->
 
     await
         Entity.create reqBody, defer err, entity
+
         for tagName, ind in reqBody.tags
             Tag.getOrCreate tagName, defer errs[ind], tagObjs[ind]
 

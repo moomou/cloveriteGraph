@@ -1,5 +1,5 @@
 # ranking.coffee
-# 
+#
 
 _und            = require('underscore')
 redis           = require('../models/setup').db.redis
@@ -64,7 +64,7 @@ _create = (req, res, next) ->
     # create a new ranking node
     # get user node
     # connect the two using ranking link
-    
+
     if not req.body.name or not req.body.ranks
         return Response.ErrorResponse(res)(400, ErrorDevMessage.missingParam("name or rank"))
 
@@ -84,7 +84,7 @@ _create = (req, res, next) ->
         for id, ind in ranking.serialize().ranks
             Entity.get id, defer(errs[ind], entities[ind])
 
-    errs = []
+    errs      = []
     rankLinks = []
 
     await
@@ -96,11 +96,9 @@ _create = (req, res, next) ->
 
     Logger.debug "Finished creating links"
 
-    shareToken =
-        Security.hashids.encrypt ranking._node.id
-
-    ranking._node.data.shareToken = shareToken
+    shareToken                    = Security.hashids.encrypt ranking._node.id
     publicUser                    = null
+    ranking._node.data.shareToken = shareToken
 
     Logger.debug "Ranking is #{ranking._node.data.private}"
     await
@@ -110,6 +108,7 @@ _create = (req, res, next) ->
         redis.set "ranking:#{ranking._node.id}:shareToken",
             shareToken,
             defer(err, ok)
+
         ranking.save defer(err)
 
     if publicUser
@@ -117,7 +116,7 @@ _create = (req, res, next) ->
         CypherLinkUtil.createLink publicUser._node, ranking._node,
             Constants.REL_RANKING, {}, (err, rel) ->
 
-    Response.OKResponse(res)(201, ranking.serialize(null, shareToken: shareToken))
+    Response.OKResponse(res)(201, ranking.serialize(null))
 
 # POST /user/:id/ranking
 exports.create = basicAuthentication _create
@@ -127,15 +126,16 @@ _show = (req, res, next) ->
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
     Response.OKResponse(res)(200,ranking.serialize())
 
-# Get a particular ranking
+# Resolve specific ranking and deref all content
 _showDetail = (req, res, next) ->
     await Ranking.get req.params.rankingId, defer(err, ranking)
     return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
 
-    rankedEntities = []
-    attrBlobs = []
+    rankedEntities  = []
+    attrBlobs       = []
+    dataBlobs       = []
     sRankedEntities = []
-    sRanking = ranking.serialize()
+    sRanking        = ranking.serialize()
 
     await
         for entityId, ind in sRanking.ranks
@@ -144,10 +144,11 @@ _showDetail = (req, res, next) ->
     await
         for entity, ind in rankedEntities
             EntityUtil.getEntityAttributes(entity, defer(attrBlobs[ind]))
+            EntityUtil.getEntityData(entity, defer(dataBlobs[ind]))
 
     for entity, ind in rankedEntities
         sRankedEntities[ind] =
-            entity.serialize(null, attributes: attrBlobs[ind])
+            entity.serialize(null, attributes: attrBlobs[ind], data: dataBlobs[ind])
 
     sRanking.ranksDetail = sRankedEntities
     Response.OKResponse(res)(200, sRanking)
@@ -245,42 +246,10 @@ exports.delete = basicAuthentication _delete
 
 # GET /ranking/share/:shareToken
 exports.shareView = (req, res, next) ->
-    rankingId = SchemaUtil.Security.hashids.decrypt(req.params.shareToken)
+    rankingId = Security.hashids.decrypt(req.params.shareToken)
+
     if parseInt(rankingId)
         req.params.rankingId = rankingId
         _showDetail(req, res, next)
     else
-        res.status(404).json error: "Not Found"
-
-exports.hashTagView = (req, res, next) ->
-    hashTag = req.params.hashTag
-    cypherQuery = ["START n=node:{tagIndex}('name:{tagName}')",
-        "MATCH (n)-[:#{Constants.REL_FORK}]-()-[r:#{Constants.REL_RANK}]-(e)",
-        "RETURN DISTINCT ID(e) AS entityId, SUM(r.rank) AS rank, SORT BY rank"]
-
-    await
-        Neo.query null,
-            cypherQuery.join("\n"),
-            {tagIndex: Tag.INDEX_NAME, tagName: hashTag},
-            defer(err, results)
-
-    entities = []
-    await
-        for res, ind in results
-            Entity.get res.entityId, defer(err, entities[ind])
-
-    attrBlobs = []
-    await
-        for entity, ind in rankedEntities
-            EntityUtil.getEntityAttributes(entity, defer(attrBlobs[ind]))
-
-    sEntities = []
-    for entity, ind in entities
-        sEntities[ind] = entity.serialize(null, attributes: attrBlobs[ind])
-
-    sRanking =
-        name        : req.params.hashTag
-        ranks       : _und(results).map (r) -> r.id
-        ranksDetail : sEntities
-
-    Response.OKResponse(res)(200, sRanking)
+        Response.ErrorResponse(res)(404, ErrorDevMessage.notFound())

@@ -78,7 +78,7 @@ cypherQueryConstructor = (searchClass, mainMatches = [], relMatches = [], skip =
     # potential injection attack
     startNodeQ = do () ->
         startingNodes = _und(mainMatches.concat(relMatches)).reduce((start, name) ->
-            start + "\"#{name}\"~0.65,"
+            start + "\"#{name}\"~0.45,"
         , "")
         "START n=node:__indexName__('name:(#{startingNodes})')"
 

@@ -106,7 +106,7 @@
     startNodeQ = (function() {
       var startingNodes;
       startingNodes = _und(mainMatches.concat(relMatches)).reduce(function(start, name) {
-        return start + ("\"" + name + "\"~0.65,");
+        return start + ("\"" + name + "\"~0.45,");
       }, "");
       return "START n=node:__indexName__('name:(" + startingNodes + ")')";
     })();

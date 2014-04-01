@@ -179,8 +179,8 @@
         })(function() {
           Logger.debug("Finished creating links");
           shareToken = Security.hashids.encrypt(ranking._node.id);
-          ranking._node.data.shareToken = shareToken;
           publicUser = null;
+          ranking._node.data.shareToken = shareToken;
           Logger.debug("Ranking is " + ranking._node.data["private"]);
           (function(__iced_k) {
             __iced_deferrals = new iced.Deferrals(__iced_k, {
@@ -196,7 +196,7 @@
                     return publicUser = arguments[1];
                   };
                 })(),
-                lineno: 107
+                lineno: 105
               }));
             }
             redis.set("ranking:" + ranking._node.id + ":shareToken", shareToken, __iced_deferrals.defer({
@@ -206,7 +206,7 @@
                   return ok = arguments[1];
                 };
               })(),
-              lineno: 111
+              lineno: 109
             }));
             ranking.save(__iced_deferrals.defer({
               assign_fn: (function() {
@@ -214,7 +214,7 @@
                   return err = arguments[0];
                 };
               })(),
-              lineno: 112
+              lineno: 111
             }));
             __iced_deferrals._fulfill();
           })(function() {
@@ -222,9 +222,7 @@
               Logger.debug("LINKING TO PUBLIC USER");
               CypherLinkUtil.createLink(publicUser._node, ranking._node, Constants.REL_RANKING, {}, function(err, rel) {});
             }
-            return Response.OKResponse(res)(201, ranking.serialize(null, {
-              shareToken: shareToken
-            }));
+            return Response.OKResponse(res)(201, ranking.serialize(null));
           });
         });
       });
@@ -251,7 +249,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 125
+        lineno: 124
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -263,7 +261,7 @@
   };
 
   _showDetail = function(req, res, next) {
-    var attrBlobs, entity, entityId, err, ind, rankedEntities, ranking, sRankedEntities, sRanking, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var attrBlobs, dataBlobs, entity, entityId, err, ind, rankedEntities, ranking, sRankedEntities, sRanking, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -280,7 +278,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 131
+        lineno: 130
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -289,6 +287,7 @@
       }
       rankedEntities = [];
       attrBlobs = [];
+      dataBlobs = [];
       sRankedEntities = [];
       sRanking = ranking.serialize();
       (function(__iced_k) {
@@ -330,6 +329,14 @@
               })(attrBlobs, ind),
               lineno: 145
             }));
+            EntityUtil.getEntityData(entity, __iced_deferrals.defer({
+              assign_fn: (function(__slot_1, __slot_2) {
+                return function() {
+                  return __slot_1[__slot_2] = arguments[0];
+                };
+              })(dataBlobs, ind),
+              lineno: 146
+            }));
           }
           __iced_deferrals._fulfill();
         })(function() {
@@ -337,7 +344,8 @@
           for (ind = _i = 0, _len = rankedEntities.length; _i < _len; ind = ++_i) {
             entity = rankedEntities[ind];
             sRankedEntities[ind] = entity.serialize(null, {
-              attributes: attrBlobs[ind]
+              attributes: attrBlobs[ind],
+              data: dataBlobs[ind]
             });
           }
           sRanking.ranksDetail = sRankedEntities;
@@ -370,7 +378,7 @@
             return ranking = arguments[1];
           };
         })(),
-        lineno: 162
+        lineno: 163
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -392,7 +400,7 @@
               return ranking = arguments[1];
             };
           })(),
-          lineno: 168
+          lineno: 169
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -428,7 +436,7 @@
                   return __slot_1[__slot_2] = arguments[1];
                 };
               })(entities, ind),
-              lineno: 189
+              lineno: 190
             }));
           }
           __iced_deferrals._fulfill();
@@ -465,7 +473,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(entities, ind),
-                  lineno: 203
+                  lineno: 204
                 }));
               }
               __iced_deferrals._fulfill();
@@ -505,7 +513,7 @@
                           return __slot_1[__slot_2] = arguments[1];
                         };
                       })(entities, ind),
-                      lineno: 220
+                      lineno: 221
                     }));
                   }
                   __iced_deferrals._fulfill();
@@ -532,7 +540,7 @@
                             return rel = arguments[1];
                           };
                         })(),
-                        lineno: 230
+                        lineno: 231
                       }));
                     }
                     __iced_deferrals._fulfill();
@@ -566,106 +574,13 @@
 
   exports.shareView = function(req, res, next) {
     var rankingId;
-    rankingId = SchemaUtil.Security.hashids.decrypt(req.params.shareToken);
+    rankingId = Security.hashids.decrypt(req.params.shareToken);
     if (parseInt(rankingId)) {
       req.params.rankingId = rankingId;
       return _showDetail(req, res, next);
     } else {
-      return res.status(404).json({
-        error: "Not Found"
-      });
+      return Response.ErrorResponse(res)(404, ErrorDevMessage.notFound());
     }
-  };
-
-  exports.hashTagView = function(req, res, next) {
-    var attrBlobs, cypherQuery, entities, entity, err, hashTag, ind, results, sEntities, sRanking, ___iced_passed_deferral, __iced_deferrals, __iced_k,
-      _this = this;
-    __iced_k = __iced_k_noop;
-    ___iced_passed_deferral = iced.findDeferral(arguments);
-    hashTag = req.params.hashTag;
-    cypherQuery = ["START n=node:{tagIndex}('name:{tagName}')", "MATCH (n)-[:" + Constants.REL_FORK + "]-()-[r:" + Constants.REL_RANK + "]-(e)", "RETURN DISTINCT ID(e) AS entityId, SUM(r.rank) AS rank, SORT BY rank"];
-    (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        filename: "ranking.coffee",
-        funcname: "hashTagView"
-      });
-      Neo.query(null, cypherQuery.join("\n"), {
-        tagIndex: Tag.INDEX_NAME,
-        tagName: hashTag
-      }, __iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            err = arguments[0];
-            return results = arguments[1];
-          };
-        })(),
-        lineno: 264
-      }));
-      __iced_deferrals._fulfill();
-    })(function() {
-      entities = [];
-      (function(__iced_k) {
-        var _i, _len;
-        __iced_deferrals = new iced.Deferrals(__iced_k, {
-          parent: ___iced_passed_deferral,
-          filename: "ranking.coffee",
-          funcname: "hashTagView"
-        });
-        for (ind = _i = 0, _len = results.length; _i < _len; ind = ++_i) {
-          res = results[ind];
-          Entity.get(res.entityId, __iced_deferrals.defer({
-            assign_fn: (function(__slot_1, __slot_2) {
-              return function() {
-                err = arguments[0];
-                return __slot_1[__slot_2] = arguments[1];
-              };
-            })(entities, ind),
-            lineno: 269
-          }));
-        }
-        __iced_deferrals._fulfill();
-      })(function() {
-        attrBlobs = [];
-        (function(__iced_k) {
-          var _i, _len;
-          __iced_deferrals = new iced.Deferrals(__iced_k, {
-            parent: ___iced_passed_deferral,
-            filename: "ranking.coffee",
-            funcname: "hashTagView"
-          });
-          for (ind = _i = 0, _len = rankedEntities.length; _i < _len; ind = ++_i) {
-            entity = rankedEntities[ind];
-            EntityUtil.getEntityAttributes(entity, __iced_deferrals.defer({
-              assign_fn: (function(__slot_1, __slot_2) {
-                return function() {
-                  return __slot_1[__slot_2] = arguments[0];
-                };
-              })(attrBlobs, ind),
-              lineno: 274
-            }));
-          }
-          __iced_deferrals._fulfill();
-        })(function() {
-          var _i, _len;
-          sEntities = [];
-          for (ind = _i = 0, _len = entities.length; _i < _len; ind = ++_i) {
-            entity = entities[ind];
-            sEntities[ind] = entity.serialize(null, {
-              attributes: attrBlobs[ind]
-            });
-          }
-          sRanking = {
-            name: req.params.hashTag,
-            ranks: _und(results).map(function(r) {
-              return r.id;
-            }),
-            ranksDetail: sEntities
-          };
-          return Response.OKResponse(res)(200, sRanking);
-        });
-      });
-    });
   };
 
 }).call(this);

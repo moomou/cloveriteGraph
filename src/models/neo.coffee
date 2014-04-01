@@ -47,13 +47,16 @@ module.exports = class Neo
         extraData ?= {}
         data = @_node.data
 
-        data.tags = _und(data.tags).filter (tag) ->
-            tag != "#{Constants.TAG_GLOBAL}" and tag
+        if data.tag
+            data.tags = _und(data.tags).filter (tag) ->
+                tag != "#{Constants.TAG_GLOBAL}" and tag
 
         _und.extend data, id: @_node.id, extraData
 
-        return cb(data) if cb
-        return data
+        if cb
+            cb(data)
+        else
+            data
 
     # Returns error message if unsuccessful
     update: (newData) ->

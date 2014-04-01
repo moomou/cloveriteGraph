@@ -76,7 +76,7 @@ app.namespace app.version, () ->
     app.delete '/user/:id/ranking/:rankingId' , routes.ranking.delete
 
     app.get '/ranking/share/:shareToken' , routes.ranking.shareView
-    app.get '/ranking/:hashTag' , routes.ranking.hashTagView
+    app.get '/ranking/:shareToken' , routes.ranking.shareView
 
 # Entity Method
     app.get  '/entity/search' , routes.entity.search
