@@ -89,6 +89,7 @@ exports.create = (req, res, next) ->
     Logger.debug "Creating Entity"
 
     reqBody         = _und.clone req.body
+    console.log reqBody
     reqBody.user    = user
     reqBody.private = false if not user
 
@@ -135,8 +136,11 @@ exports.create = (req, res, next) ->
                 (err, rel) ->
 
     # if contains content section, add those here
-    if req.body.content
-        await EntityUtil.addData entity, req.body.content, defer errs, datas
+    if req.body.contents
+        console.log "++++++"
+        console.log req.body.contents
+        console.log "++++++"
+        await EntityUtil.addData entity, req.body.contents, defer errs, datas
 
     Response.OKResponse(res)(201, entity.serialize())
 
