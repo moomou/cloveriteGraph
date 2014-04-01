@@ -51,33 +51,50 @@
           response = JSON.parse(res.text);
           response.payload.should.have.property('id');
           response.payload.should.have.property('private', true);
-          response.payload.contributors.should.eql([username]);
+          response.payload.contributors.should.eql(['7a98f7f5a429f6cf385547495d84107f']);
           response.success.should.equal(true);
           privateEntityId = response.payload.id;
           return done();
         });
       });
-      it('private entity is accessible.', function(done) {
+      return it('private entity is accessible.', function(done) {
         return api.get("" + apiVersion + "/entity/" + privateEntityId).set("x-access-token", userToken).expect(200, done);
-      });
-      return it('private entity is hidden from others.', function(done) {
-        return api.get("" + apiVersion + "/entity/" + privateEntityId).expect(401, done);
       });
     });
     return describe('with guest', function() {
       it('should return 400 when entity does not exist', function(done) {
         return api.get("" + apiVersion + "/entity/xyz").expect(400, done);
       });
+      it('should hide private entity.', function(done) {
+        return api.get("" + apiVersion + "/entity/" + privateEntityId).expect(401, done);
+      });
       it('should return 201 when adding new entity', function(done) {
         return api.post("" + apiVersion + "/entity/").send({
-          name: entityName
+          name: entityName,
+          tags: ["abc"]
         }).end(function(err, res) {
           var response;
           response = JSON.parse(res.text);
           response.payload.should.have.property('id');
           response.payload.should.have.property('imgURL');
           response.success.should.equal(true);
+          response.payload.tags.should.eql(["abc"]);
           newEntityId = response.payload.id;
+          return done();
+        });
+      });
+      it('should return 201 when adding new entity with content section', function(done) {
+        return api.post("" + apiVersion + "/entity/").send({
+          name: entityName,
+          tags: ["abc"],
+          content: [
+            {
+              name: "HELL"
+            }
+          ]
+        }).end(function(err, res) {
+          var response;
+          response = JSON.parse(res.text);
           return done();
         });
       });
@@ -85,7 +102,7 @@
         return api.get("" + apiVersion + "/entity/" + newEntityId).expect(200, done);
       });
       it('should return 200 when updating existing entity', function(done) {
-        return api.put("" + apiVersion + "/entity/" + newEntityId).send({
+        return api.put("" + apiVersion + "/entity/" + newEntityId).set("x-access-token", userToken).send({
           name: entityName + "1",
           version: 1,
           description: "what"
@@ -96,6 +113,7 @@
           return api.get("" + apiVersion + "/entity/" + newEntityId).end(function(err, res) {
             response = JSON.parse(res.text);
             response.payload.should.have.property("name", "" + entityName + "1");
+            response.payload.contributors.should.have.length.above(1);
             return done();
           });
         });

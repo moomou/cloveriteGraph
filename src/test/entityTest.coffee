@@ -47,7 +47,7 @@ describe 'Entity', () ->
 
                     response.payload.should.have.property 'id'
                     response.payload.should.have.property 'private', true
-                    response.payload.contributors.should.eql [username]
+                    response.payload.contributors.should.eql ['7a98f7f5a429f6cf385547495d84107f']
                     response.success.should.equal true
 
                     privateEntityId = response.payload.id
@@ -58,26 +58,36 @@ describe 'Entity', () ->
                 .set("x-access-token", userToken)
                 .expect(200, done)
 
-        it 'private entity is hidden from others.', (done) ->
-            api.get("#{apiVersion}/entity/#{privateEntityId}")
-                .expect(401, done)
-
     describe 'with guest', () ->
         it 'should return 400 when entity does not exist', (done) ->
             api.get("#{apiVersion}/entity/xyz")
                 .expect(400, done)
 
+        it 'should hide private entity.', (done) ->
+            api.get("#{apiVersion}/entity/#{privateEntityId}")
+                .expect(401, done)
+
         it 'should return 201 when adding new entity', (done) ->
             api.post("#{apiVersion}/entity/")
-                .send(name: entityName)
+                .send(name: entityName, tags: ["abc"])
                 .end (err, res) ->
                     response = JSON.parse(res.text)
 
                     response.payload.should.have.property 'id'
                     response.payload.should.have.property 'imgURL'
                     response.success.should.equal true
+
+                    response.payload.tags.should.eql ["abc"]
+
                     newEntityId = response.payload.id
 
+                    done()
+
+        it 'should return 201 when adding new entity with content section', (done) ->
+            api.post("#{apiVersion}/entity/")
+                .send(name: entityName, tags: ["abc"], content: [name: "HELL"])
+                .end (err, res) ->
+                    response = JSON.parse(res.text)
                     done()
 
         it 'should return 200 when getting existing entity', (done) ->
@@ -86,6 +96,7 @@ describe 'Entity', () ->
 
         it 'should return 200 when updating existing entity', (done) ->
             api.put("#{apiVersion}/entity/#{newEntityId}")
+                .set("x-access-token", userToken)
                 .send({name: entityName + "1", version: 1, description: "what"})
                 .end (err, res) ->
 
@@ -96,6 +107,7 @@ describe 'Entity', () ->
                         .end (err, res) ->
                             response = JSON.parse(res.text)
                             response.payload.should.have.property "name", "#{entityName}1"
+                            response.payload.contributors.should.have.length.above 1
                             done()
 
         it 'should return 200 when getting existing entity', (done) ->

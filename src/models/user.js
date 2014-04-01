@@ -39,6 +39,7 @@
   UserSchema = {
     email: '',
     username: '',
+    emailHash: '',
     accessToken: '',
     reputation: 'Z',
     createdCount: 0,

@@ -44,12 +44,9 @@
     app.put('/*', addCORSHeaders);
     app["delete"]('/*', addCORSHeaders);
     app.get('/search/:type?', routes.search.searchHandler);
+    app.get('embed/?', routes.embed.show);
 
     /*
-    
-    # Embed API
-    app.get 'embed/?', routes.embed.show
-    
     # Composed Content Method
     app.post 'composed'     , routes.composed.create
     app.get  'composed/:id' , routes.composed.show
@@ -59,7 +56,7 @@
     app.get 'composed/:id/related', routes.composed.getRelated
     */
     app.post('/user/', routes.user.createUser);
-    app.get('/user/:id', routes.user.getSelf);
+    app.get('/user/:id', routes.user.getUser);
 
     /*
     app.get('/user/:id/request', routes.user.getRequest)
@@ -69,13 +66,13 @@
     */
     app.get('/user/:id/created', routes.user.getCreated);
     app.get('/user/:id/voted', routes.user.getVoted);
-    app.get('/user/:id/ranked', routes.user.getRanked);
-    app.get('/user/:id/ranking/:rankingId', routes.ranking.show);
-    app.post('/user/:id/ranking', routes.ranking.create);
-    app.put('/user/:id/ranking/:rankingId', routes.ranking.edit);
-    app["delete"]('/user/:id/ranking/:rankingId', routes.ranking["delete"]);
-    app.get('/ranking/share/:shareToken', routes.ranking.shareView);
-    app.get('/ranking/:hashTag', routes.ranking.hashTagView);
+    app.get('/user/:id/collection', routes.user.getCollection);
+    app.post('/user/:id/collection', routes.collection.create);
+    app.get('/user/:id/collection/:collectionId', routes.collection.show);
+    app.put('/user/:id/collection/:collectionId', routes.collection.edit);
+    app["delete"]('/user/:id/collection/:collectionId', routes.collection["delete"]);
+    app.get('/collection/share/:shareToken', routes.collection.shareView);
+    app.get('/collection/:shareToken', routes.collection.shareView);
     app.get('/entity/search', routes.entity.search);
     app.post('/entity', routes.entity.create);
     app.get('/entity/:id', routes.entity.show);

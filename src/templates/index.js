@@ -1,0 +1,1 @@
+exports.templates = require('./templates');

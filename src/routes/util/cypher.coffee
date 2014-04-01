@@ -46,9 +46,11 @@ class CypherLinkUtil
             linkType,
             linkData,
             (err, link) ->
-                Logger.debug "Finished with err: #{err}"
-                return cb(new Error("Unable to create link"), null) if err
-                return cb(null, link)
+                if err
+                    Logger.debug "Finished with err: #{err}"
+                    cb new Error("Unable to create link"), null
+                else
+                    cb null, link
 
     @getOrCreateLink: (Class, startNode, otherNode, linkType, linkData, cb) ->
         await

@@ -15,7 +15,7 @@ Tag             = require '../models/tag'
 
 Request         = require '../models/request'
 Recommendation  = require '../models/recommendation'
-Ranking         = require '../models/ranking'
+Collection      = require '../models/collection'
 
 Constants       = require('../config').Constants
 
@@ -30,6 +30,7 @@ hasPermission = (req, res, next, cb) ->
         Permission.getUser req, defer(errUser, user)
 
     isPublic = req.params.id == "public"
+
     if errUser or errOther
         return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null
 
@@ -37,24 +38,20 @@ hasPermission = (req, res, next, cb) ->
     if not other
         return cb true,
             ErrorResponse(400,
-                ErrorDevMessage.customMsg("user #{req.params.id} does not exist")), null
+                ErrorDevMessage.customMsg("Requested user #{req.params.id} does not exist.")), null
 
-    # If the user are the same, of course grant permission
-    # Returns a new shallow copy of req with user if authenticated
+    reqWithUsers = _und.extend _und.clone(req),
+        requestedUser: other
+        self: user
 
-    if isPublic or not user
-        reqWithUser = _und.extend _und.clone(req), user: other
-    else
-        reqWithUser = _und.extend _und.clone(req), user: user
-
-    # The user if public or the user is the owner of the account
+    # user is the owner of the account
     if user and other and other._node.id == user._node.id
-        return cb false, null, reqWithUser, unauthenticated: false
-
+        Logger.info "Private View"
+        cb false, null, _und.extend reqWithUsers, authenticated: true
     # Grant permission only for public assets under the user
-    Logger.info "Public View"
-
-    return cb false, null, _und.extend reqWithUser, unauthenticated: true
+    else
+        Logger.info "Public View"
+        cb false, null, _und.extend reqWithUsers, authenticated: false
 
 basicAuthentication = Permission.authCurry hasPermission
 
@@ -62,18 +59,23 @@ getLinkType =
     (linkType, NodeClass = Entity) ->
         (req, res, next) ->
             Logger.debug "Getting linkType: #{linkType}"
+            Logger.debug "req.authenticated: #{req.authenticated}"
 
-            user = req.user
+            user = req.requestedUser
 
             await
                 user._node.getRelationshipNodes {type: linkType, direction:'out'},
                     defer(errGetRelationship, nodes)
+
             return next(errGetRelationship) if errGetRelationship
 
             blobs = []
             for node, ind in nodes
                 nodeObj = new NodeClass node
-                continue if req.unauthenticated and nodeObj._node.data.private
+
+                if not req.authenticated and nodeObj._node.data.private
+                    continue
+
                 blobs.push nodeObj.serialize()
 
             Response.OKResponse(res)(200, blobs)
@@ -144,36 +146,26 @@ exports.createUser = (req, res, next) ->
             Logger.info "Non admin tried to create user!"
             ErrorResponse 403, ErrorDevMessage.permissionIssue("Not admin")
 
-# GET /user/:id/discussion
-exports.getDiscussion = basicAuthentication basicFeedGetter "discussionFeed"
-
-# GET /user/:id/recommendation
-exports.getRecommendation = basicAuthentication basicFeedGetter "recommendationFeed"
-
-# GET /user/:id/request
-exports.getRequest = basicAuthentication basicFeedGetter "requestFeed"
-
-# POST  /user/:id/recommendation
-exports.sendRecommendation = basicAuthentication basicFeedSetter Recommendation
-
-# POST /user/:id/request
-exports.sendRequest = basicAuthentication basicFeedSetter Request
-
 # GET /user/:id/created
-exports.getCreated = basicAuthentication getLinkType Constants.REL_CREATED
+exports.getCreated         = basicAuthentication getLinkType Constants.REL_CREATED
 
 # GET /user/:id/voted
-exports.getVoted = basicAuthentication getLinkType Constants.REL_VOTED
+exports.getVoted           = basicAuthentication getLinkType Constants.REL_VOTED
 
-# GET /user/:id/commented
-exports.getCommented = basicAuthentication getLinkType Constants.REL_COMMENTED
+# GET /user/:id/collection
+exports.getCollection      = basicAuthentication getLinkType Constants.REL_COLLECTION, Collection
 
-# GET /user/:id/ranking
-exports.getRanked = basicAuthentication getLinkType Constants.REL_RANKING, Ranking
+_getUser = (req, res, next) ->
+    if req.authenticated
+        # return everything
+        Response.OKResponse(res)(200, req.requestedUser.serialize())
+    else
+        # TODO return only public assets
+        Response.OKResponse(res)(200, req.requestedUser.serialize())
 
 # GET /user/
-exports.getSelf = basicAuthentication (req, res, next) ->
-    if not req.unauthenticated
-        Response.OKResponse(res)(200, req.user.serialize())
+exports.getUser = basicAuthentication (req, res, next) ->
+    if req.params.id == "self"
+        Response.OKResponse(res)(200, req.self.serialize())
     else
-        Response.ErrorResponse(res)(401, ErrorDevMessage.permissionIssue())
+        _getUser req, res, next

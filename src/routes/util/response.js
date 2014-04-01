@@ -36,6 +36,9 @@
     dbIssue: function() {
       return "Connection problems with internal db. Please try again later.";
     },
+    notFound: function() {
+      return "Requested resource does not exist.";
+    },
     permissionIssue: function() {
       return "The user does not have permission.";
     },
@@ -83,6 +86,13 @@
       response.next = next;
       response.prev = prev;
       return res.status(httpCode).json(response);
+    };
+  };
+
+  exports.JSResponse = function(res) {
+    return function(httpCode, payload, next, prev) {
+      res.setHeader("Content-Type", "text/javascript");
+      return res.status(httpCode).end(payload);
     };
   };
 

@@ -43,7 +43,7 @@ Tag.getSlugTitle = (data) ->
 
 Tag.deserialize = (data) ->
     Neo.deserialize TagSchema, data
- 
+
 Tag.create = (reqBody, cb) ->
     Neo.create Tag, reqBody, Indexes, cb
 

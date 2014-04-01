@@ -38,11 +38,10 @@ app.namespace app.version, () ->
 # Search Handler for multiple resource
     app.get '/search/:type?', routes.search.searchHandler
 
-    ###
-
-    # Embed API
+# Embed API
     app.get 'embed/?', routes.embed.show
 
+    ###
     # Composed Content Method
     app.post 'composed'     , routes.composed.create
     app.get  'composed/:id' , routes.composed.show
@@ -54,7 +53,7 @@ app.namespace app.version, () ->
 
 # User API
     app.post '/user/'    , routes.user.createUser
-    app.get  '/user/:id' , routes.user.getSelf
+    app.get  '/user/:id' , routes.user.getUser
 
     # External Channels
     #app.get('/user/:id/discussion', routes.user.getDiscussion)
@@ -68,16 +67,16 @@ app.namespace app.version, () ->
     # User Stats
     app.get '/user/:id/created'   , routes.user.getCreated
     app.get '/user/:id/voted'     , routes.user.getVoted
-    app.get '/user/:id/ranked'    , routes.user.getRanked
+    app.get '/user/:id/collection'    , routes.user.getCollection
 
-    # Ranking API
-    app.get    '/user/:id/ranking/:rankingId' , routes.ranking.show
-    app.post   '/user/:id/ranking'            , routes.ranking.create
-    app.put    '/user/:id/ranking/:rankingId' , routes.ranking.edit
-    app.delete '/user/:id/ranking/:rankingId' , routes.ranking.delete
+    # Collection API
+    app.post   '/user/:id/collection', routes.collection.create
+    app.get    '/user/:id/collection/:collectionId', routes.collection.show
+    app.put    '/user/:id/collection/:collectionId', routes.collection.edit
+    app.delete '/user/:id/collection/:collectionId', routes.collection.delete
 
-    app.get '/ranking/share/:shareToken' , routes.ranking.shareView
-    app.get '/ranking/:hashTag' , routes.ranking.hashTagView
+    app.get '/collection/share/:shareToken' , routes.collection.shareView
+    app.get '/collection/:shareToken' , routes.collection.shareView
 
 # Entity Method
     app.get  '/entity/search' , routes.entity.search
@@ -88,7 +87,7 @@ app.namespace app.version, () ->
     app.del  '/entity/:id' , routes.entity.del
 
     # Entity User Method
-    app.get('/entity/:id/user', routes.entity.showUsers)
+    app.get '/entity/:id/user', routes.entity.showUsers
     #app.get('/entity/:id/user/:username', routes.entity.showUserVoteDetail)
 
     # Entity Attribute Method
@@ -104,7 +103,7 @@ app.namespace app.version, () ->
     app.post '/entity/:id/data'     , routes.entity.addData
     app.get '/entity/:id/data'      , routes.entity.listData
     app.get '/entity/:id/data/:dId' , routes.entity.getData
-    #app.del '/entity/:id/data/:dId', routes.entity.delData
+    # app.del '/entity/:id/data/:dId', routes.entity.delData
 
     # Entity Relation
     ###

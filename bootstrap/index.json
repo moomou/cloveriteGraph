@@ -5,11 +5,12 @@
         "nAttribute",
         "nData",
         "nUser",
-        "nRanking",
+        "nCollection",
         "nComposed"
     ],
     "relIndex": [
         "rVote",
+        "rCollect",
         "rLink",
         "rRank"
     ]

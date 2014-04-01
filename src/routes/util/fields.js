@@ -12,10 +12,10 @@
   _und = require('underscore');
 
   DEFAULT_CONFIG = {
+    sortBy: '',
     fields: ["*"],
-    limit: 1000,
     offset: 0,
-    expand: {}
+    limit: 1000
   };
 
   exports.parseQuery = function(req) {

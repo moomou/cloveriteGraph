@@ -53,9 +53,10 @@ Data.SrcType =
 Data.DataType =
     IMAGE       : 'image'
     VIDEO       : 'video'
-    NUMBER      : 'number'
-    TIME_SERIES : 'timeseries'
     FILE        : 'file'
+    FIELD       : 'field'
+    TEXT        : 'text'
+    TIME_SERIES : 'timeseries'
 
 Data.getSlugTitle = (data) ->
     Slug.slugify data.name

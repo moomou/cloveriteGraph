@@ -5,17 +5,21 @@
 
 _und = require('underscore')
 
-Constants = require('../../config').Constants
-Logger    = require '../../util/logger'
+Constants      = require('../../config').Constants
+Logger         = require '../../util/logger'
 
-Neo       = require '../../models/neo'
+Neo            = require '../../models/neo'
 
-User      = require '../../models/user'
-Entity    = require '../../models/entity'
-Data      = require '../../models/data'
-Attribute = require '../../models/attribute'
-Tag       = require '../../models/tag'
-Link      = require '../../models/link'
+User           = require '../../models/user'
+Entity         = require '../../models/entity'
+Data           = require '../../models/data'
+Attribute      = require '../../models/attribute'
+Tag            = require '../../models/tag'
+Link           = require '../../models/link'
+
+Cypher         = require '../util/cypher'
+CypherBuilder  = Cypher.CypherBuilder
+CypherLinkUtil = Cypher.CypherLinkUtil
 
 exports.getStartEndIndex = getStartEndIndex = (start, rel, end) ->
     "#{start}_#{rel}_#{end}"
@@ -63,6 +67,46 @@ exports.getEntityData = (entity, cb) ->
     cb sDataBlob
 
 exports.getEntityRanking = (entity, cb) ->
+
+exports.addData = (entity, dataInputs, cb) ->
+    errs  = []
+    rels  = []
+    datas = []
+
+    for input, ind in dataInputs
+        delete input.id
+
+        value = null
+        if input.dataType is Data.DataType.TIME_SERIES
+            "" # Empty for now
+        else if input.dataType is Data.DataType.FIELD
+            if input.srcType is Data.SrcType.JSON
+                await Remote.getJSONData input.srcUrl, defer(err, value)
+            else if input.srcType is Data.SrcType.DOM
+                await Remote.getDOMData input.srcUrl,
+                    input.selector,
+                    defer(err, value)
+
+        if not input.value and value and not err
+            input.value = value
+
+        await Data.create input, defer err, datas[ind]
+        data = datas[ind]
+
+        continue if err
+
+        await CypherLinkUtil.createLink data._node,
+            entity._node,
+            Constants.REL_DATA,
+            {},
+            defer(errs[ind], rels[ind])
+
+    err = _und(errs).filter (err) -> err
+
+    if _und(err).isEmpty()
+        cb null, datas
+    else
+        cb errs, datas
 
 THRESHOLD = 10
 exports.cleanAttributes = (entity, cb) ->

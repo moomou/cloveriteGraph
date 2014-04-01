@@ -4,8 +4,8 @@ exports.composed  = require('./composed');
 exports.entity    = require('./entity');
 exports.attribute = require('./attribute');
 
-exports.user      = require('./user');
-exports.ranking   = require('./ranking');
+exports.user       = require('./user');
+exports.collection = require('./collection');
 
-exports.search    = require('./search');
+exports.search     = require('./search');
 

@@ -32,7 +32,7 @@
 
   RankSchema = {
     rank: -1,
-    rankingName: 'New Ranking'
+    collectionName: 'New Ranking'
   };
 
   module.exports = Rank = (function(_super) {

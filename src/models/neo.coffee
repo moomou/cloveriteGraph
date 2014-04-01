@@ -2,12 +2,15 @@
 #
 # The base model that other model derives from.
 
-_und     = require 'underscore'
+_und      = require 'underscore'
+crypto    = require 'crypto'
 
-Logger   = require '../util/logger'
-Slug     = require '../util/slug'
-RedisKey = require('../config').RedisKey
-db       = require('./setup').db
+db        = require('./setup').db
+
+Logger    = require '../util/logger'
+Slug      = require '../util/slug'
+RedisKey  = require('../config').RedisKey
+Constants = require('../config').Constants
 
 ###
 # Normal values related to transaction;
@@ -44,10 +47,15 @@ module.exports = class Neo
         extraData ?= {}
         data = @_node.data
 
+        if data.tags
+            data.tags = _und(data.tags).filter (tag) -> tag != "#{Constants.TAG_GLOBAL}" and tag
+
         _und.extend data, id: @_node.id, extraData
 
-        return cb(data) if cb
-        return data
+        if cb
+            cb(data)
+        else
+            data
 
     # Returns error message if unsuccessful
     update: (newData) ->
@@ -62,6 +70,12 @@ module.exports = class Neo
         # Cannot take a public entity and set it to private
         if not @_node.data.private and newData.private
             return "Cannot take a public entity and set it to private"
+
+        existingContributors = @_node.data.contributors
+
+        if newData.contributors[0] not in existingContributors
+            @_node.data.contributors.push newData.contributors[0]
+            delete newData.contributors
 
         @_node.data = _und.extend @_node.data, newData
 
@@ -127,17 +141,23 @@ Neo.parseReqBody = (Class, reqBody) ->
     if reqBody.user
         user = reqBody.user.serialize()
     else
-        user = username: "anonymous"
+        user =
+            username : "anonymous"
+            email    : "anonymous"
 
     data = Class.deserialize reqBody
     data = _und.omit data, ToOmitKeys
 
     data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
-    data.contributors ?= []
+    data.contributors = []
 
-    if user and user not in data.contributors
-        data.contributors.push user.username
-
+    if user
+        md5sum = crypto.createHash 'md5'
+        md5sum.update user.email.trim()
+        hash = md5sum.digest 'hex'
+        data.contributors.push hash
+        Logger.debug "Email: #{user.email}"
+        Logger.debug "Hash: #{hash}"
     data
 
 # Data DB functions.

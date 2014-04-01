@@ -89,6 +89,7 @@ exports.create = (req, res, next) ->
     Logger.debug "Creating Entity"
 
     reqBody         = _und.clone req.body
+    console.log reqBody
     reqBody.user    = user
     reqBody.private = false if not user
 
@@ -102,6 +103,7 @@ exports.create = (req, res, next) ->
 
     await
         Entity.create reqBody, defer err, entity
+
         for tagName, ind in reqBody.tags
             Tag.getOrCreate tagName, defer errs[ind], tagObjs[ind]
 
@@ -112,6 +114,7 @@ exports.create = (req, res, next) ->
 
     # link user
     if user
+        Logger.debug "User logged !"
         await CypherLinkUtil.createMultipleLinks user._node,
             entity._node,
             [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
@@ -120,6 +123,7 @@ exports.create = (req, res, next) ->
 
     # "tag" entity
     for tagObj, ind in tagObjs
+        Logger.debug "User logged !"
         CypherLinkUtil.createLink tagObj._node, entity._node,
             Constants.REL_TAG,
             linkData,
@@ -130,7 +134,14 @@ exports.create = (req, res, next) ->
                 Constants.REL_TAG,
                 linkData,
                 (err, rel) ->
-    
+
+    # if contains content section, add those here
+    if req.body.contents
+        console.log "++++++"
+        console.log req.body.contents
+        console.log "++++++"
+        await EntityUtil.addData entity, req.body.contents, defer errs, datas
+
     Response.OKResponse(res)(201, entity.serialize())
 
 # GET /entity/:id
@@ -431,35 +442,18 @@ exports.voteAttribute = (req, res, next) ->
 # Entity Data Section
 ###
 _addData = (req, res, next) ->
-    input = _und.clone req.body
-    value = null
-    delete input['id']
+    await Entity.get req.params.id, defer err, entity
+    return errResponse if err
 
-    # Query remote src to get data, if applicable
-    if input.dataType == Data.DataType.TIME_SERIES
-        "" # Empty for now
-    else if input.dataType == Data.DataType.NUMBER
-        if input.srcType == Data.SrcType.JSON
-            await Remote.getJSONData input.srcUrl, defer(err, value)
-        else if input.srcType == Data.SrcType.DOM
-            await Remote.getDOMData input.srcUrl, input.selector, defer(err, value)
+    dataInput = [req.body]
+    EntityUtil.addData entity, dataInput, (errs, datas) ->
+        data = datas[0]
 
-    input.value = value if value and not err
-
-    await
-        Entity.get req.params.id, defer err, entity
-        Data.create input, defer err, data
-
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
-
-    await CypherLinkUtil.createLink data._node,
-        entity._node,
-        Constants.REL_DATA,
-        {},
-        defer(err, rel)
-
-    return Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue()) if err
-    Response.OKResponse(res)(200, data.serialize())
+        if not errs
+            Response.OKResponse(res)(200, data.serialize())
+        else
+            Response.ErrorResponse(res)(500, ErrorDevMessage.dbIssue())
+            errResponse
 
 exports.addData = basicAuthentication _addData
 

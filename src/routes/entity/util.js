@@ -5,7 +5,7 @@
 */
 
 (function() {
-  var Attribute, Constants, Data, Entity, Link, Logger, Neo, THRESHOLD, Tag, User, getStartEndIndex, iced, __iced_k, __iced_k_noop, _und;
+  var Attribute, Constants, Cypher, CypherBuilder, CypherLinkUtil, Data, Entity, Link, Logger, Neo, THRESHOLD, Tag, User, getStartEndIndex, iced, __iced_k, __iced_k_noop, _und;
 
   iced = require('iced-coffee-script').iced;
   __iced_k = __iced_k_noop = function() {};
@@ -29,6 +29,12 @@
   Tag = require('../../models/tag');
 
   Link = require('../../models/link');
+
+  Cypher = require('../util/cypher');
+
+  CypherBuilder = Cypher.CypherBuilder;
+
+  CypherLinkUtil = Cypher.CypherLinkUtil;
 
   exports.getStartEndIndex = getStartEndIndex = function(start, rel, end) {
     return "" + start + "_" + rel + "_" + end;
@@ -57,7 +63,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 28
+        lineno: 32
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -81,7 +87,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(rels, ind),
-            lineno: 38
+            lineno: 42
           }));
           (new Attribute(node)).serialize(__iced_deferrals.defer({
             assign_fn: (function(__slot_1, __slot_2) {
@@ -89,7 +95,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(attrBlobs, ind),
-            lineno: 39
+            lineno: 43
           }), entity._node.id);
         }
         __iced_deferrals._fulfill();
@@ -133,7 +139,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 52
+        lineno: 56
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -162,6 +168,163 @@
 
   exports.getEntityRanking = function(entity, cb) {};
 
+  exports.addData = function(entity, dataInputs, cb) {
+    var data, datas, err, errs, ind, input, rels, value, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    errs = [];
+    rels = [];
+    datas = [];
+    (function(__iced_k) {
+      var _i, _len, _ref, _results, _while;
+      _ref = dataInputs;
+      _len = _ref.length;
+      ind = 0;
+      _results = [];
+      _while = function(__iced_k) {
+        var _break, _continue, _next;
+        _break = function() {
+          return __iced_k(_results);
+        };
+        _continue = function() {
+          return iced.trampoline(function() {
+            ++ind;
+            return _while(__iced_k);
+          });
+        };
+        _next = function(__iced_next_arg) {
+          _results.push(__iced_next_arg);
+          return _continue();
+        };
+        if (!(ind < _len)) {
+          return _break();
+        } else {
+          input = _ref[ind];
+          delete input.id;
+          value = null;
+          (function(__iced_k) {
+            if (input.dataType === Data.DataType.TIME_SERIES) {
+              return __iced_k("");
+            } else {
+              (function(__iced_k) {
+                if (input.dataType === Data.DataType.FIELD) {
+                  (function(__iced_k) {
+                    if (input.srcType === Data.SrcType.JSON) {
+                      (function(__iced_k) {
+                        __iced_deferrals = new iced.Deferrals(__iced_k, {
+                          parent: ___iced_passed_deferral,
+                          filename: "entity/util.coffee",
+                          funcname: "addData"
+                        });
+                        Remote.getJSONData(input.srcUrl, __iced_deferrals.defer({
+                          assign_fn: (function() {
+                            return function() {
+                              err = arguments[0];
+                              return value = arguments[1];
+                            };
+                          })(),
+                          lineno: 83
+                        }));
+                        __iced_deferrals._fulfill();
+                      })(__iced_k);
+                    } else {
+                      (function(__iced_k) {
+                        if (input.srcType === Data.SrcType.DOM) {
+                          (function(__iced_k) {
+                            __iced_deferrals = new iced.Deferrals(__iced_k, {
+                              parent: ___iced_passed_deferral,
+                              filename: "entity/util.coffee",
+                              funcname: "addData"
+                            });
+                            Remote.getDOMData(input.srcUrl, input.selector, __iced_deferrals.defer({
+                              assign_fn: (function() {
+                                return function() {
+                                  err = arguments[0];
+                                  return value = arguments[1];
+                                };
+                              })(),
+                              lineno: 87
+                            }));
+                            __iced_deferrals._fulfill();
+                          })(__iced_k);
+                        } else {
+                          return __iced_k();
+                        }
+                      })(__iced_k);
+                    }
+                  })(__iced_k);
+                } else {
+                  return __iced_k();
+                }
+              })(__iced_k);
+            }
+          })(function() {
+            if (!input.value && value && !err) {
+              input.value = value;
+            }
+            (function(__iced_k) {
+              __iced_deferrals = new iced.Deferrals(__iced_k, {
+                parent: ___iced_passed_deferral,
+                filename: "entity/util.coffee",
+                funcname: "addData"
+              });
+              Data.create(input, __iced_deferrals.defer({
+                assign_fn: (function(__slot_1, __slot_2) {
+                  return function() {
+                    err = arguments[0];
+                    return __slot_1[__slot_2] = arguments[1];
+                  };
+                })(datas, ind),
+                lineno: 92
+              }));
+              __iced_deferrals._fulfill();
+            })(function() {
+              data = datas[ind];
+              (function(__iced_k) {
+                if (err) {
+                  (function(__iced_k) {
+_continue()
+                  })(__iced_k);
+                } else {
+                  return __iced_k();
+                }
+              })(function() {
+                (function(__iced_k) {
+                  __iced_deferrals = new iced.Deferrals(__iced_k, {
+                    parent: ___iced_passed_deferral,
+                    filename: "entity/util.coffee",
+                    funcname: "addData"
+                  });
+                  CypherLinkUtil.createLink(data._node, entity._node, Constants.REL_DATA, {}, __iced_deferrals.defer({
+                    assign_fn: (function(__slot_1, __slot_2, __slot_3, __slot_4) {
+                      return function() {
+                        __slot_1[__slot_2] = arguments[0];
+                        return __slot_3[__slot_4] = arguments[1];
+                      };
+                    })(errs, ind, rels, ind),
+                    lineno: 101
+                  }));
+                  __iced_deferrals._fulfill();
+                })(_next);
+              });
+            });
+          });
+        }
+      };
+      _while(__iced_k);
+    })(function() {
+      err = _und(errs).filter(function(err) {
+        return err;
+      });
+      if (_und(err).isEmpty()) {
+        return cb(null, datas);
+      } else {
+        return cb(errs, datas);
+      }
+    });
+  };
+
   THRESHOLD = 10;
 
   exports.cleanAttributes = function(entity, cb) {
@@ -185,7 +348,7 @@
             return nodes = arguments[1];
           };
         })(),
-        lineno: 70
+        lineno: 114
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -213,7 +376,7 @@
                 return __slot_1[__slot_2] = arguments[1];
               };
             })(votesPerAttribute, ind),
-            lineno: 83
+            lineno: 127
           }));
         }
         __iced_deferrals._fulfill();
@@ -246,7 +409,7 @@
                       return __slot_1[__slot_2] = arguments[1];
                     };
                   })(rels, ind),
-                  lineno: 103
+                  lineno: 147
                 }));
               }
             }
