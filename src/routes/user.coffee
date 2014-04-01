@@ -15,7 +15,7 @@ Tag             = require '../models/tag'
 
 Request         = require '../models/request'
 Recommendation  = require '../models/recommendation'
-Ranking         = require '../models/ranking'
+Collection      = require '../models/collection'
 
 Constants       = require('../config').Constants
 
@@ -147,13 +147,13 @@ exports.createUser = (req, res, next) ->
             ErrorResponse 403, ErrorDevMessage.permissionIssue("Not admin")
 
 # GET /user/:id/created
-exports.getCreated = basicAuthentication getLinkType Constants.REL_CREATED
+exports.getCreated         = basicAuthentication getLinkType Constants.REL_CREATED
 
 # GET /user/:id/voted
-exports.getVoted = basicAuthentication getLinkType Constants.REL_VOTED
+exports.getVoted           = basicAuthentication getLinkType Constants.REL_VOTED
 
-# GET /user/:id/ranking
-exports.getRanked = basicAuthentication getLinkType Constants.REL_RANKING, Ranking
+# GET /user/:id/collection
+exports.getCollection      = basicAuthentication getLinkType Constants.REL_COLLECTION, Collection
 
 _getUser = (req, res, next) ->
     if req.authenticated

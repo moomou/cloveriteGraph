@@ -1127,8 +1127,6 @@
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
-    console.log(">X_X<");
-    console.log(">X_X<");
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -1142,13 +1140,13 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 442
+        lineno: 440
       }));
       __iced_deferrals._fulfill();
     })(function() {
-      console.log(">X_X<");
-      console.log(err);
-      console.log(">X_X<");
+      if (err) {
+        return errResponse;
+      }
       dataInput = [req.body];
       return EntityUtil.addData(entity, dataInput, function(errs, datas) {
         var data;
@@ -1190,7 +1188,7 @@
             return entity = arguments[1];
           };
         })(),
-        lineno: 470
+        lineno: 463
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1209,7 +1207,7 @@
               return blobs = arguments[0];
             };
           })(),
-          lineno: 474
+          lineno: 467
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -1250,7 +1248,7 @@
             return rels = arguments[1];
           };
         })(),
-        lineno: 495
+        lineno: 488
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -1280,7 +1278,7 @@
                 return __slot_1[__slot_2] = arguments[0];
               };
             })(blobs, ind),
-            lineno: 514
+            lineno: 507
           }), extraData);
         }
         __iced_deferrals._fulfill();
@@ -1316,7 +1314,7 @@
             return srcEntity = arguments[1];
           };
         })(),
-        lineno: 522
+        lineno: 515
       }));
       Entity.get(req.params.dstId, __iced_deferrals.defer({
         assign_fn: (function() {
@@ -1325,7 +1323,7 @@
             return dstEntity = arguments[1];
           };
         })(),
-        lineno: 523
+        lineno: 516
       }));
       __iced_deferrals._fulfill();
     })(function() {

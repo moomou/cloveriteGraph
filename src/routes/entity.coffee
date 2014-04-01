@@ -438,17 +438,10 @@ exports.voteAttribute = (req, res, next) ->
 # Entity Data Section
 ###
 _addData = (req, res, next) ->
-    console.log ">X_X<"
-    console.log ">X_X<"
     await Entity.get req.params.id, defer err, entity
-    console.log ">X_X<"
-    console.log err
-    console.log ">X_X<"
-
-    #return errResponse if err
+    return errResponse if err
 
     dataInput = [req.body]
-
     EntityUtil.addData entity, dataInput, (errs, datas) ->
         data = datas[0]
 

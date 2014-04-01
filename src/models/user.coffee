@@ -37,6 +37,7 @@ UserSchema =
     username            : ''
 
     # Calculated Values
+    emailHash           : ''
     accessToken         : ''
     reputation          : 'Z'
     createdCount        : 0

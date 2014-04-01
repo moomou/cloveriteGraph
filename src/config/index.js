@@ -33,13 +33,16 @@
   exports.RedisKey = {
     shareToken: "_sharetoken_",
     slugToId: "_slug_to_id_",
-    superToken: "_supertoken_"
+    superToken: "_supertoken_",
+    collectionShareToken: function(id) {
+      return "collection:" + id + ":shareToken";
+    }
   };
 
   exports.Constants = Constants = {
     API_VERSION: 'v0',
     AUTO_COMPLETE: '__auto__complete__',
-    TAG_GLOBAL: '#__global__',
+    TAG_GLOBAL: '__global__',
     REL_LOCATION: '_LOCATION',
     REL_AWARD: '_AWARD',
     REL_ATTRIBUTE: '_ATTRIBUTE',
@@ -52,8 +55,9 @@
     REL_RESOURCE: '_RESOURCE',
     REL_TAG: '_TAG',
     REL_ACCESS: '_ACCESS',
+    REL_COLLECT: '_COLLECT',
     REL_RANK: '_RANK',
-    REL_RANKING: '_RANKING',
+    REL_COLLECTION: '_RANKING',
     REL_VOTED: '_VOTED',
     REL_COMMENTED: '_COMMENTED',
     REL_CREATED: '_CREATED',

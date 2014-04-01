@@ -50,7 +50,7 @@
         extraData = {};
       }
       data = this._node.data;
-      if (data.tag) {
+      if (data.tags) {
         data.tags = _und(data.tags).filter(function(tag) {
           return tag !== ("" + Constants.TAG_GLOBAL) && tag;
         });
@@ -219,7 +219,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 189
+        lineno: 188
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -241,7 +241,7 @@
               return res = arguments[1];
             };
           })(),
-          lineno: 197
+          lineno: 196
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -287,7 +287,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 217
+            lineno: 216
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -341,7 +341,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 252
+        lineno: 251
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -387,7 +387,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 275
+          lineno: 274
         }));
         __iced_deferrals._fulfill();
       })(function() {

@@ -1,6 +1,6 @@
 # rank.coffee
 #
-# For managing rank 
+# For managing rank
 
 _und      = require 'underscore'
 
@@ -25,7 +25,7 @@ Indexes = [
 
 RankSchema =
     rank: -1
-    rankingName: 'New Ranking'
+    collectionName: 'New Ranking'
 
 module.exports = class Rank extends Neo
     constructor: (@_node) ->

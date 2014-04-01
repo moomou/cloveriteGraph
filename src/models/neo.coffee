@@ -47,9 +47,8 @@ module.exports = class Neo
         extraData ?= {}
         data = @_node.data
 
-        if data.tag
-            data.tags = _und(data.tags).filter (tag) ->
-                tag != "#{Constants.TAG_GLOBAL}" and tag
+        if data.tags
+            data.tags = _und(data.tags).filter (tag) -> tag != "#{Constants.TAG_GLOBAL}" and tag
 
         _und.extend data, id: @_node.id, extraData
 

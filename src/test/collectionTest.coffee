@@ -8,17 +8,16 @@ app    = require('../app').app
 api        = supertest(app)
 apiVersion = app.version
 
-describe 'Rank', () ->
-    entityIds = []
-    rankId    = null
-    userToken = null
-    username  = null
-    userId    = null
+describe 'Collection', () ->
+    entityIds    = []
+    collectionId = null
+    userToken    = null
+    username     = null
+    userId       = null
 
     # Populating entity in db
     before (done) ->
         randomId = '#'+(Math.random()*0xFFFFFF<<0).toString(16)
-
         api.post("#{apiVersion}/entity/")
             .send(name: randomId)
             .end (err, res) ->
@@ -29,7 +28,6 @@ describe 'Rank', () ->
     # Populating entity 2 in db
     before (done) ->
         randomId = '#'+(Math.random()*0xFFFFFF<<0).toString(16)
-
         api.post("#{apiVersion}/entity/")
             .send(name: randomId)
             .end (err, res) ->
@@ -53,15 +51,15 @@ describe 'Rank', () ->
                 done()
 
     it 'should return 201 when creating new ranking', (done) ->
-        api.post("#{apiVersion}/user/#{userId}/ranking")
-            .send({name: "TEST_ranking", ranks: entityIds})
+        api.post("#{apiVersion}/user/#{userId}/collection")
+            .send({name: "TEST_ranking", collection: entityIds, collectionType: "list"})
             .set('x-access-token', userToken)
             .expect(201)
             .end (err, res) ->
                 response = JSON.parse(res.text)
 
                 response.payload.should.have.id
-                response.payload.ranks.should.eql entityIds
+                response.payload.collection.should.eql entityIds
                 response.payload.contributors.should.eql ['38d692b2f557313d1e548b59d0feb915']
                 response.payload.shareToken.should.not.eq ''
                 console.log response.payload

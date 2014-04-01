@@ -9,7 +9,7 @@ _und            = require('underscore')
 Neo             = require('../models/neo')
 Entity          = require('../models/entity')
 Data            = require('../models/data')
-Ranking         = require('../models/ranking')
+Collection      = require('../models/collection')
 Vote            = require('../models/vote')
 Attribute       = require('../models/attribute')
 Tag             = require('../models/tag')
@@ -151,20 +151,20 @@ exports.searchHandler = (req, res, next) ->
     results = []
     errs    = []
 
-    rankingQuery = cleanedQuery.indexOf("ranking:") >= 0
+    collectionQuery = cleanedQuery.indexOf("collection:") >= 0
 
     # Serial searches, continue only if no result
     await
         Permission.getUser req, defer(errU, user)
 
         # TODO Don't want if else, should be functional;
-        if rankingQuery
+        if collectionQuery
             rankingName = encodeURIComponent _und.escape cleanedQuery.substr(8).trim()
             cQuery =
-                "START n=node:nRanking('name:#{rankingName}~0.25') MATCH (n)-[r:_RANK]->(x)
+                "START n=node:nCollection('name:#{rankingName}~0.25') MATCH (n)-[r:_RANK]->(x)
                 RETURN DISTINCT n AS ranking, r.rank AS rank, x AS entity ORDER BY ID(n), r.rank;"
 
-            Neo.query Ranking,
+            Neo.query Collection,
                 cQuery,
                 {},
                 defer errs, result
@@ -186,7 +186,7 @@ exports.searchHandler = (req, res, next) ->
     identified  = []
 
     # TODO Add next, & prev
-    if rankingQuery
+    if collectionQuery
         entities = _und(results).map (result) -> result.entity
         await serializeSearchResult user, entities, identified, defer serialized
         [blobResults, identified] = serialized
