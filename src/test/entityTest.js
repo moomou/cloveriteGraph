@@ -123,11 +123,15 @@
       });
       it('should return 200 when adding new attribute to entity', function(done) {
         return api.post("" + apiVersion + "/entity/" + newEntityId + "/attribute").send({
-          name: attributeName
+          name: attributeName,
+          upVote: 5,
+          downVote: 5
         }).end(function(err, res) {
           var response;
           response = JSON.parse(res.text);
           assert.isNumber(response.payload.id);
+          response.payload.upVote.should.eq(5);
+          response.payload.downVote.should.eq(5);
           newAttributeId = response.payload.id;
           return done();
         });

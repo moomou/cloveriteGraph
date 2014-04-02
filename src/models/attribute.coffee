@@ -28,6 +28,8 @@ AttributeSchema =
     name        : 'Attribute Name'
     description : ''
     tone        : 'positive' #defaults to positive
+    upVote      : 0
+    downVote    : 0
 
 SchemaValidation =
     name: SchemaUtil.required 'string',
@@ -40,6 +42,7 @@ module.exports = class Attribute extends Neo
 
     # Takes an entity id to retrieve vote in redis
     serialize: (cb, entityId) ->
+        ###
         Logger.debug "Serialize attr: #{entityId}"
         if not entityId
             return super(cb, null)
@@ -53,7 +56,8 @@ module.exports = class Attribute extends Neo
             downVote : parseInt(downVote) or 0
 
         Logger.debug "VoteTally: #{voteTally.upVote}"
-        super cb, voteTally
+        ###
+        super cb
 
 ###
 # Static Method
