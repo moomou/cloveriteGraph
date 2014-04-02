@@ -69,7 +69,7 @@
         return api.get("" + apiVersion + "/entity/" + privateEntityId).expect(401, done);
       });
       it('should return 201 when adding new entity', function(done) {
-        return api.post("" + apiVersion + "/entity/").send({
+        return api.post("" + apiVersion + "/entity/").set("x-access-token", userToken).send({
           name: entityName,
           tags: ["abc"]
         }).end(function(err, res) {
@@ -113,7 +113,7 @@
           return api.get("" + apiVersion + "/entity/" + newEntityId).end(function(err, res) {
             response = JSON.parse(res.text);
             response.payload.should.have.property("name", "" + entityName + "1");
-            response.payload.contributors.should.have.length.above(1);
+            response.payload.contributors.should.have.length(1);
             return done();
           });
         });

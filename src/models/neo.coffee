@@ -138,27 +138,33 @@ Neo.deserialize = (ClassSchema, data) ->
     _und.pick data, validKeys
 
 Neo.parseReqBody = (Class, reqBody) ->
-    if reqBody.user
-        user = reqBody.user.serialize()
+    md5sum = crypto.createHash 'md5'
+
+    if Class.Name is 'nUser'
+        md5sum.update reqBody.email.trim()
+        reqBody.emailHash = md5sum.digest 'hex'
+        reqBody
     else
-        user =
-            username : "anonymous"
-            email    : "anonymous"
+        if reqBody.user
+            user = reqBody.user.serialize()
+        else
+            user =
+                username : "anonymous"
+                email    : "anonymous"
 
-    data = Class.deserialize reqBody
-    data = _und.omit data, ToOmitKeys
+        data = Class.deserialize reqBody
+        data = _und.omit data, ToOmitKeys
 
-    data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
-    data.contributors = []
+        data.slug = Class.getSlugTitle reqBody if Class.getSlugTitle
+        data.contributors = []
 
-    if user
-        md5sum = crypto.createHash 'md5'
-        md5sum.update user.email.trim()
-        hash = md5sum.digest 'hex'
-        data.contributors.push hash
-        Logger.debug "Email: #{user.email}"
-        Logger.debug "Hash: #{hash}"
-    data
+        if user
+            md5sum.update user.email.trim()
+            hash = md5sum.digest 'hex'
+            data.contributors.push hash
+            Logger.debug "Email: #{user.email}"
+            Logger.debug "Hash: #{hash}"
+        data
 
 # Data DB functions.
 ##

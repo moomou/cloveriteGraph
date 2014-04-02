@@ -114,6 +114,15 @@ describe 'User', () ->
                 .set("x-access-token", otherToken)
                 .end (err, res) ->
                     response = JSON.parse res.text
+                    response.payload.accessToken.should.not.be.null
+                    response.success.should.equal true
+                    done()
+
+        it 'should return 200 with public info when accessing', (done) ->
+            api.get("#{apiVersion}/user/#{otherId}")
+                .end (err, res) ->
+                    response = JSON.parse res.text
+                    assert.isUndefined response.payload.accessToken
                     response.success.should.equal true
                     done()
 
@@ -141,4 +150,5 @@ describe 'User', () ->
                     done()
 
         it 'should allow access to private info if shared', (done) ->
-            done()
+            assert.isNull "NOT DONE"
+

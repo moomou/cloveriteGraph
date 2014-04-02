@@ -4,6 +4,7 @@ _und           = require('underscore')
 redis          = require('../models/setup').db.redis
 
 Constants      = require('../config').Constants
+AccessLevel    = require('../config').AccessLevel
 Logger         = require '../util/logger'
 
 User           = require('../models/user')
@@ -47,7 +48,7 @@ exports.getUser = getUser = (req, cb) ->
 ###
 # Permission Related Stuff
 ###
-exports.isAdmin = isAdmin = (accessToken, cb) ->
+exports.isSuperAwesome = isSuperAwesome = (accessToken, cb) ->
     redis.sismember RedisKey.superToken,
         accessToken,
         (err, res) ->
@@ -63,24 +64,41 @@ exports.hasPermission = (user, other, cb) ->
 
     isPrivate = other._node.data.private
 
-    if not isPrivate
-        return cb(null, true)
-    if not user
-        return cb(null, false)
+    if not isPrivate and not user
+        return cb null, AccessLevel.READONLY
+    else if not user
+        return cb null, AccessLevel.NO_ACCESS
 
-    await CypherLinkUtil.hasLink user._node,
-        other._node,
-        Constants.REL_ACCESS,
-        "all",
-        defer err, path
+    await
+        CypherLinkUtil.hasLink user._node,
+            other._node,
+            Constants.REL_READONLY,
+            "all",
+            defer errR, readonly,
+        CypherLinkUtil.hasLink user._node,
+            other._node,
+            Constants.REL_MEMBER,
+            "all",
+            defer errM, isMember
+        CypherLinkUtil.hasLink user._node,
+            other._node,
+            Constants.REL_ADMIN,
+            "all",
+            defer errA, isAdmin
 
-    if err
-        cb err, null
-    else
-        if path
-            cb null, true
-        else
-            cb null, false
+    err = errR or errM or errA
+    return cb err, null if err
+
+    accessLevel = 0
+    if readonly
+        accessLevel += 1
+    if isMember
+        accessLevel += 2
+    if isAdmin
+        accessLevel += 3
+
+    accessLevel = Math.min accessLevel, 3
+    cb null, accessLevel
 
 exports.authCurry =
     (hasPermission) -> (cb) ->

@@ -48,6 +48,7 @@ hasPermission = (req, res, next, cb) ->
     if user and other and other._node.id == user._node.id
         Logger.info "Private View"
         cb false, null, _und.extend reqWithUsers, authenticated: true
+
     # Grant permission only for public assets under the user
     else
         Logger.info "Public View"
@@ -135,7 +136,7 @@ exports.createUser = (req, res, next) ->
 
     # Access token, after user logs in
     # points to the neo4j userNode Id.
-    Permission.isAdmin accessToken, (err, isSuperAwesome) ->
+    Permission.isSuperAwesome accessToken, (err, isSuperAwesome) ->
         if isSuperAwesome
             await User.create req.body, defer(err, user)
             userObj = user.serialize()
@@ -161,7 +162,8 @@ _getUser = (req, res, next) ->
         Response.OKResponse(res)(200, req.requestedUser.serialize())
     else
         # TODO return only public assets
-        Response.OKResponse(res)(200, req.requestedUser.serialize())
+        restricted = _und.omit req.requestedUser.serialize(), "accessToken", "reputation"
+        Response.OKResponse(res)(200, restricted)
 
 # GET /user/
 exports.getUser = basicAuthentication (req, res, next) ->

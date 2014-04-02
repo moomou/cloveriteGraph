@@ -46,8 +46,12 @@ exports.Constants = Constants =
     REL_CONTAINER                        : '_CONTAINER'
     REL_RESOURCE                         : '_RESOURCE'
 
+    # Access control
+    REL_READONLY                         : '_READONLY' # can only read
+    REL_MEMBER                           : '_MEMBER'    # can read, write
+    REL_ADMIN                            : '_ADMIN'    # original creator
+
     REL_TAG                              : '_TAG'
-    REL_ACCESS                           : '_ACCESS'
     REL_COLLECT                          : '_COLLECT'
     REL_RANK                             : '_RANK'
     REL_COLLECTION                       : '_RANKING'
@@ -70,3 +74,9 @@ exports.Constants = Constants =
     # Attr Type
     ATTR_NUMERIC                         : "attr_numeric"
     ATTR_REFERENCE                       : "attr_ref"
+
+exports.AccessLevel = AccessLevel =
+    NO_ACCESS : 0
+    READONLY  : 1
+    MEMBER    : 2
+    ADMIN     : 3

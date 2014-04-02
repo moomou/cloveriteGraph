@@ -20,6 +20,7 @@ Vote            = require '../models/vote'
 Link            = require '../models/link'
 
 Constants       = require('../config').Constants
+AccessLevel     = require('../config').AccessLevel
 Slug            = require '../util/slug'
 NumUtil         = require '../util/numUtil'
 
@@ -57,20 +58,23 @@ hasPermission = (req, res, next, cb) ->
     err = errUser or errEntity
     return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if err
 
-    req = _und.extend _und.clone(req), resolvedId: resolvedId
+    _und.extend req,
+        resolvedId: resolvedId
+        accessLevel: AccessLevel.READONLY
 
     # Return authorized if not private and user is anonymous
     return cb false, null, req if not entity._node.data.private and not user
 
-    await Permission.hasPermission user, entity, defer(err, authorized)
+    await Permission.hasPermission user, entity, defer(err, accessLevel)
     return cb true, ErrorResponse(500, ErrorDevMessage.dbIssue()), null if err
 
-    if not authorized
+    if not accessLevel
         return cb true, ErrorResponse(401, ErrorDevMessage.permissionIssue()), null
 
     # Returns a new shallow copy of req with user if authenticated
     reqWithUser = _und.extend _und.clone(req),
-        user: user
+        user        : user
+        accessLevel : accessLevel
 
     return cb false, null, reqWithUser
 
@@ -89,7 +93,6 @@ exports.create = (req, res, next) ->
     Logger.debug "Creating Entity"
 
     reqBody         = _und.clone req.body
-    console.log reqBody
     reqBody.user    = user
     reqBody.private = false if not user
 
@@ -117,7 +120,7 @@ exports.create = (req, res, next) ->
         Logger.debug "User logged !"
         await CypherLinkUtil.createMultipleLinks user._node,
             entity._node,
-            [Constants.REL_CREATED, Constants.REL_ACCESS, Constants.REL_MODIFIED],
+            [Constants.REL_CREATED, Constants.REL_ADMIN, Constants.REL_MODIFIED],
             linkData,
             defer(err, rels)
 
@@ -137,9 +140,6 @@ exports.create = (req, res, next) ->
 
     # if contains content section, add those here
     if req.body.contents
-        console.log "++++++"
-        console.log req.body.contents
-        console.log "++++++"
         await EntityUtil.addData entity, req.body.contents, defer errs, datas
 
     Response.OKResponse(res)(201, entity.serialize())
@@ -168,6 +168,9 @@ exports.show = basicAuthentication _show
 
 # PUT /entity/:id
 _edit = (req, res, next) ->
+    if req.accessLevel < AccessLevel.MEMBER
+        return Response.ErrorResponse(res)(403, "No write permission.")
+
     req.body.user = req.user
     await Entity.put req.resolvedId, req.body, defer(err, entity)
 

@@ -148,29 +148,35 @@
 
   Neo.parseReqBody = function(Class, reqBody) {
     var data, hash, md5sum, user;
-    if (reqBody.user) {
-      user = reqBody.user.serialize();
+    md5sum = crypto.createHash('md5');
+    if (Class.Name === 'nUser') {
+      md5sum.update(reqBody.email.trim());
+      reqBody.emailHash = md5sum.digest('hex');
+      return reqBody;
     } else {
-      user = {
-        username: "anonymous",
-        email: "anonymous"
-      };
+      if (reqBody.user) {
+        user = reqBody.user.serialize();
+      } else {
+        user = {
+          username: "anonymous",
+          email: "anonymous"
+        };
+      }
+      data = Class.deserialize(reqBody);
+      data = _und.omit(data, ToOmitKeys);
+      if (Class.getSlugTitle) {
+        data.slug = Class.getSlugTitle(reqBody);
+      }
+      data.contributors = [];
+      if (user) {
+        md5sum.update(user.email.trim());
+        hash = md5sum.digest('hex');
+        data.contributors.push(hash);
+        Logger.debug("Email: " + user.email);
+        Logger.debug("Hash: " + hash);
+      }
+      return data;
     }
-    data = Class.deserialize(reqBody);
-    data = _und.omit(data, ToOmitKeys);
-    if (Class.getSlugTitle) {
-      data.slug = Class.getSlugTitle(reqBody);
-    }
-    data.contributors = [];
-    if (user) {
-      md5sum = crypto.createHash('md5');
-      md5sum.update(user.email.trim());
-      hash = md5sum.digest('hex');
-      data.contributors.push(hash);
-      Logger.debug("Email: " + user.email);
-      Logger.debug("Hash: " + hash);
-    }
-    return data;
   };
 
   Neo.index = function(node, indexes, reqBody, cb) {
@@ -219,7 +225,7 @@
             return saveErr = arguments[0];
           };
         })(),
-        lineno: 188
+        lineno: 194
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -241,7 +247,7 @@
               return res = arguments[1];
             };
           })(),
-          lineno: 196
+          lineno: 202
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -287,7 +293,7 @@
                 return saveErr = arguments[0];
               };
             })(),
-            lineno: 216
+            lineno: 222
           }));
           __iced_deferrals._fulfill();
         })(function() {
@@ -341,7 +347,7 @@
             return obj = arguments[1];
           };
         })(),
-        lineno: 251
+        lineno: 257
       }));
       __iced_deferrals._fulfill();
     })(function() {
@@ -387,7 +393,7 @@
               return err = arguments[0];
             };
           })(),
-          lineno: 274
+          lineno: 280
         }));
         __iced_deferrals._fulfill();
       })(function() {

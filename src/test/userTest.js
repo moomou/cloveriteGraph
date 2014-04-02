@@ -109,6 +109,16 @@
         return api.get("" + apiVersion + "/user/" + otherId).set("x-access-token", otherToken).end(function(err, res) {
           var response;
           response = JSON.parse(res.text);
+          response.payload.accessToken.should.not.be["null"];
+          response.success.should.equal(true);
+          return done();
+        });
+      });
+      it('should return 200 with public info when accessing', function(done) {
+        return api.get("" + apiVersion + "/user/" + otherId).end(function(err, res) {
+          var response;
+          response = JSON.parse(res.text);
+          assert.isUndefined(response.payload.accessToken);
           response.success.should.equal(true);
           return done();
         });
@@ -138,7 +148,7 @@
         });
       });
       return it('should allow access to private info if shared', function(done) {
-        return done();
+        return assert.isNull("NOT DONE");
       });
     });
   });
